@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEOFlow — Business Setup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Cabinet+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-w: 300px;
+  --bg: #faf8f4;
+  --bg2: #f2efe8;
+  --surface: #ffffff;
+  --border: #e8e2d6;
+  --border2: #d4ccbb;
+  --ink: #1a1714;
+  --ink2: #3d3830;
+  --ink3: #6b6458;
+  --ink4: #9b9088;
+  --accent: #c4622d;
+  --accent2: #2d7dc4;
+  --accent3: #2d9e6b;
+  --accent-light: #f5e8df;
+  --accent2-light: #deedf7;
+  --accent3-light: #d6f0e5;
+  --yellow: #e8c84a;
+  --yellow-light: #fdf6d4;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'Cabinet Grotesk', Georgia, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* ── LAYOUT ── */
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 36px;
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.logo-wordmark {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.logo-wordmark span { color: var(--accent); }
+
+.onboard-headline {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+
+.onboard-sub {
+  font-size: 13px;
+  color: rgba(250,248,244,0.5);
+  line-height: 1.6;
+  margin-bottom: 32px;
+  flex-shrink: 0;
+}
+
+/* STEPS NAV */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 42px;
+  height: 14px;
+  width: 1px;
+  background: rgba(250,248,244,0.1);
+}
+
+.step-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(250,248,244,0.2);
+  color: rgba(250,248,244,0.4);
+  transition: all 0.2s;
+  margin-top: 1px;
+}
+
+.step-item.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.step-item.done .step-num {
+  background: var(--accent3);
+  border-color: var(--accent3);
+  color: white;
+}
+
+.step-text { flex: 1; }
+.step-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(250,248,244,0.45);
+  transition: color 0.2s;
+}
+
+.step-item.active .step-name { color: var(--bg); }
+.step-item.done .step-name { color: rgba(250,248,244,0.7); }
+
+.step-desc {
+  font-size: 11px;
+  color: rgba(250,248,244,0.3);
+  margin-top: 2px;
+}
+
+.step-item.active .step-desc { color: rgba(250,248,244,0.5); }
+
+.left-footer {
+  padding-top: 24px;
+  border-top: 1px solid rgba(250,248,244,0.1);
+  margin-top: 24px;
+  flex-shrink: 0;
+}
+
+.progress-label {
+  font-size: 11px;
+  color: rgba(250,248,244,0.4);
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar {
+  height: 3px;
+  background: rgba(250,248,244,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--yellow));
+  border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── RIGHT PANEL ── */
+.right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 56px 48px 80px;
+  overflow-y: auto;
+}
+
+.step-panel {
+  width: 100%;
+  max-width: 600px;
+  display: none;
+  animation: stepIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.step-panel.active { display: block; }
+
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-header { margin-bottom: 36px; }
+
+.step-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.step-title {
+  font-family: 'Fraunces', serif;
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.step-title em { font-style: italic; color: var(--accent); }
+
+.step-body {
+  font-size: 15px;
+  color: var(--ink3);
+  line-height: 1.65;
+}
+
+/* FORM ELEMENTS */
+.field { margin-bottom: 22px; }
+
+.field-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.field-label .optional {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink4);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.field-input, .field-textarea, .field-select {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 15px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  color: var(--ink);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.field-input:focus, .field-textarea:focus, .field-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.field-input::placeholder, .field-textarea::placeholder { color: var(--ink4); }
+.field-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+.field-select option { background: var(--surface); }
+
+.field-hint {
+  font-size: 12px;
+  color: var(--ink4);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* CHIP SELECTS */
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.chip {
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1.5px solid var(--border);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--surface);
+  color: var(--ink2);
+  user-select: none;
+}
+
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.selected {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.chip.selected-blue { background: var(--accent2); border-color: var(--accent2); color: white; }
+.chip.selected-green { background: var(--accent3); border-color: var(--accent3); color: white; }
+
+/* TONE SLIDER CARDS */
+.tone-pairs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 700px) {
+  .tone-pairs { grid-template-columns: repeat(2, 1fr); }
+  .field-row { grid-template-columns: 1fr; }
+  .right { padding: 32px 20px 60px; }
+}
+
+.tone-card {
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  text-align: center;
+}
+
+.tone-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.tone-card.selected { border-color: var(--accent); background: var(--accent-light); }
+
+.tone-emoji { font-size: 24px; margin-bottom: 6px; }
+.tone-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.tone-desc { font-size: 11px; color: var(--ink4); margin-top: 3px; line-height: 1.4; }
+
+/* KEYWORD INPUT */
+.keyword-input-wrap { position: relative; }
+
+.keyword-input-wrap .field-input { padding-right: 80px; }
+
+.add-kw-btn {
+  position: absolute;
+  right: 8px; top: 50%;
+  transform: translateY(-50%);
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: background 0.15s;
+}
+
+.add-kw-btn:hover { background: var(--accent); }
+
+.keyword-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+
+.kw-tag {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kw-remove { cursor: pointer; opacity: 0.5; font-size: 14px; line-height: 1; }
+.kw-remove:hover { opacity: 1; }
+
+.kw-tag.suggested {
+  background: var(--surface);
+  color: var(--ink2);
+  border: 1.5px dashed var(--border2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.kw-tag.suggested:hover { background: var(--ink); color: var(--bg); border-style: solid; }
+
+/* URL ANALYSIS CARD */
+.analysis-card {
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-top: 14px;
+  display: none;
+  animation: stepIn 0.3s ease;
+}
+
+.analysis-card.visible { display: block; }
+
+.analysis-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.analysis-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.analysis-fact {
+  font-size: 12px;
+  color: var(--ink2);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.4;
+}
+
+.analysis-fact::before { content: '✓'; color: var(--accent3); font-weight: 700; flex-shrink: 0; }
+
+/* AI INTERVIEWER SECTION (Step 5) */
+.ai-chat {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.ai-chat-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-avatar {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ai-name { font-size: 13px; font-weight: 700; }
+.ai-role { font-size: 11px; opacity: 0.5; }
+
+.chat-messages {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.msg {
+  display: flex;
+  gap: 10px;
+  animation: msgIn 0.3s ease;
+}
+
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user { flex-direction: row-reverse; }
+
+.msg-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.msg.ai .msg-avatar { background: var(--accent); color: white; }
+.msg.user .msg-avatar { background: var(--accent2); color: white; }
+
+.msg-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.msg.ai .msg-bubble { background: var(--bg2); color: var(--ink); border-bottom-left-radius: 3px; }
+.msg.user .msg-bubble { background: var(--accent2); color: white; border-bottom-right-radius: 3px; }
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border-radius: 12px;
+  width: fit-content;
+  border-bottom-left-radius: 3px;
+}
+
+.typing-dot {
+  width: 6px; height: 6px;
+  background: var(--ink4);
+  border-radius: 50%;
+  animation: typingBounce 1.2s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.chat-input-area {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input {
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--bg);
+}
+
+.chat-input:focus { border-color: var(--accent); }
+
+.chat-send {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.15s;
+}
+
+.chat-send:hover { background: #b3561f; }
+
+/* BRAND PREVIEW CARD */
+.brand-preview {
+  background: var(--ink);
+  color: var(--bg);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-preview::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: var(--accent);
+  border-radius: 50%;
+  opacity: 0.06;
+}
+
+.brand-preview-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(250,248,244,0.4);
+  margin-bottom: 16px;
+}
+
+.brand-name-preview {
+  font-family: 'Fraunces', serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.brand-tagline-preview {
+  font-size: 14px;
+  color: rgba(250,248,244,0.6);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.brand-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.brand-chip {
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bc-orange { background: var(--accent)33; color: var(--accent); border: 1px solid var(--accent)44; }
+.bc-blue { background: var(--accent2)33; color: #7db8e8; border: 1px solid var(--accent2)44; }
+.bc-green { background: var(--accent3)33; color: #7dcea0; border: 1px solid var(--accent3)44; }
+
+/* CONTENT SCHEDULE PREVIEW */
+.schedule-preview { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: border-color 0.15s;
+  flex-wrap: wrap;
+}
+
+.schedule-item:hover { border-color: var(--border2); }
+
+.schedule-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sd-orange { background: var(--accent); }
+.sd-blue { background: var(--accent2); }
+.sd-green { background: var(--accent3); }
+.sd-yellow { background: var(--yellow); }
+
+.schedule-item-info { flex: 1; min-width: 180px; }
+.schedule-item-title { font-size: 13px; font-weight: 600; }
+.schedule-item-meta { font-size: 11px; color: var(--ink4); margin-top: 2px; }
+
+.schedule-item-freq {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink3);
+  background: var(--bg2);
+  padding: 4px 10px;
+  border-radius: 50px;
+}
+
+.select-sm {
+  width: 120px;
+  flex-shrink: 0;
+  padding: 7px 10px !important;
+  font-size: 12px !important;
+}
+
+/* NAV BUTTONS */
+.step-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  gap: 12px;
+}
+
+.btn-back {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--ink3);
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-back:hover { border-color: var(--border2); color: var(--ink); }
+
+.btn-next {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 13px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-next:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,98,45,0.25); }
+.btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-finish {
+  background: var(--accent3);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(45,158,107,0.3);
+}
+
+.btn-finish:hover { background: #258a5c; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(45,158,107,0.35); }
+
+/* COMPLETION SCREEN */
+.complete-screen {
+  display: none;
+  text-align: center;
+  padding: 20px 0;
+  width: 100%;
+  max-width: 600px;
+  animation: stepIn 0.5s ease;
+}
+
+.complete-screen.active { display: block; }
+
+.complete-icon {
+  width: 80px; height: 80px;
+  background: var(--accent3-light);
+  border: 2px solid var(--accent3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 24px;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.complete-title {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+
+.complete-sub {
+  font-size: 16px;
+  color: var(--ink3);
+  max-width: 440px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+.profile-summary {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  text-align: left;
+  margin-bottom: 28px;
+  width: 100%;
+}
+
+.profile-summary-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink4);
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-summary-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.profile-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+  align-items: flex-start;
+}
+
+.profile-row:last-child { margin-bottom: 0; }
+
+.profile-key {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink4);
+  width: 110px;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.profile-val { font-size: 13px; color: var(--ink2); line-height: 1.5; flex: 1; }
+
+.complete-actions { display: flex; gap: 12px; justify-content: center; }
+
+.btn-launch {
+  background: var(--ink);
+  color: var(--bg);
+  border: none;
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  transition: all 0.2s;
+  box-shadow: 0 4px 16px rgba(26,23,20,0.2);
+}
+
+.btn-launch:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(196,98,45,0.3); }
+
+.spinner-sm {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* DECORATIVE */
+.step-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent)33;
+  color: var(--accent);
+  padding: 5px 12px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+
+/* SECTION DIVIDER */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0;
+  color: var(--ink4);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.section-divider::before, .section-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── LEFT ── -->
+  <aside class="left">
+    <div class="logo">
+      <div class="logo-mark">⚡</div>
+      <div class="logo-wordmark">SEO<span>Flow</span></div>
+    </div>
+
+    <div class="onboard-headline">Let's build your content engine</div>
+    <p class="onboard-sub">Answer a few questions and our AI will learn everything about your business — so it can create content that sounds exactly like you, automatically.</p>
+
+    <div class="steps" id="stepsNav">
+      <div class="step-item active" data-step="1">
+        <div class="step-num">1</div>
+        <div class="step-text">
+          <div class="step-name">Business Basics</div>
+          <div class="step-desc">Name, industry, website</div>
+        </div>
+      </div>
+      <div class="step-item" data-step="2">
+        <div class="step-num">2</div>
+        <div class="step-text">
+          <div class="step-name">Brand Voice</div>
+          <div class="step-desc">Tone, personality, style</div>
+        </div>
+      </div>
+      <div class="step-item" data-step="3">
+        <div class="step-num">3</div>
+        <div class="step-text">
+          <div class="step-name">Audience & Goals</div>
+          <div class="step-desc">Who you're targeting</div>
+        </div>
+      </div>
+      <div class="step-item" data-step="4">
+        <div class="step-num">4</div>
+        <div class="step-text">
+          <div class="step-name">SEO Keywords</div>
+          <div class="step-desc">Topics & keyword strategy</div>
+        </div>
+      </div>
+      <div class="step-item" data-step="5">
+        <div class="step-num">5</div>
+        <div class="step-text">
+          <div class="step-name">AI Interview</div>
+          <div class="step-desc">Deep-dive conversation</div>
+        </div>
+      </div>
+      <div class="step-item" data-step="6">
+        <div class="step-num">6</div>
+        <div class="step-text">
+          <div class="step-name">Content Strategy</div>
+          <div class="step-desc">Schedule & automation</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="left-footer">
+      <div class="progress-label">
+        <span>Profile completion</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── RIGHT ── -->
+  <div class="right">
+
+    <!-- STEP 1: BUSINESS BASICS -->
+    <div class="step-panel active" id="step1">
+      <div class="step-header">
+        <div class="step-count-badge">⚡ Step 1 of 6</div>
+        <h2 class="step-title">Tell us about your <em>business</em></h2>
+        <p class="step-body">This is the foundation. Our AI will use this to understand your industry, competition, and where you sit in the market.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Business Name</label>
+        <input class="field-input" id="bizName" type="text" placeholder="e.g. Apex Digital Marketing" oninput="updatePreview()" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-label">Industry</label>
+          <select class="field-select" id="bizIndustry" onchange="updatePreview()">
+            <option value="">Select industry...</option>
+            <option>Marketing & Advertising</option>
+            <option>E-commerce & Retail</option>
+            <option>Health & Wellness</option>
+            <option>Finance & Fintech</option>
+            <option>Legal Services</option>
+            <option>Real Estate</option>
+            <option>Technology & SaaS</option>
+            <option>Construction & Trades</option>
+            <option>Food & Hospitality</option>
+            <option>Education & Training</option>
+            <option>Creative & Design</option>
+            <option>Consulting & Professional Services</option>
+            <option>Non-Profit</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Business Type</label>
+          <select class="field-select" id="bizType">
+            <option>B2B (Business to Business)</option>
+            <option>B2C (Business to Consumer)</option>
+            <option>Both B2B & B2C</option>
+            <option>D2C (Direct to Consumer)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Website URL <span class="optional">optional — we'll analyse it</span></label>
+        <input class="field-input" id="bizWebsite" type="url" placeholder="https://yourwebsite.com" oninput="checkUrl()" />
+        <div class="analysis-card" id="analysisCard">
+          <div class="analysis-card-header">🔍 URL detected — AI will analyse your site</div>
+          <div class="analysis-facts">
+            <div class="analysis-fact">Extract existing content topics</div>
+            <div class="analysis-fact">Identify your brand voice</div>
+            <div class="analysis-fact">Find SEO gaps & opportunities</div>
+            <div class="analysis-fact">Learn your product/service offering</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">What do you do? <span class="optional">one sentence</span></label>
+        <input class="field-input" id="bizOneLiner" type="text" placeholder="e.g. We help small businesses get found online through SEO and content marketing" oninput="updatePreview()" />
+        <p class="field-hint">This becomes your brand's core message — keep it clear and specific.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Location / Market</label>
+        <div class="field-row">
+          <input class="field-input" id="bizCity" type="text" placeholder="City or Region" />
+          <select class="field-select" id="bizMarket">
+            <option>Local (single city/area)</option>
+            <option>Regional (multi-city)</option>
+            <option>National</option>
+            <option>International / Global</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <div></div>
+        <button class="btn-next" onclick="nextStep(1)">Continue → Brand Voice</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: BRAND VOICE -->
+    <div class="step-panel" id="step2">
+      <div class="step-header">
+        <div class="step-count-badge">✍️ Step 2 of 6</div>
+        <h2 class="step-title">What's your <em>voice</em>?</h2>
+        <p class="step-body">The AI will write in your exact voice. Choose what feels right — your content should sound like you, not like a robot.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Primary Tone</label>
+        <div class="tone-pairs">
+          <div class="tone-card" onclick="selectTone(this, 'professional')">
+            <div class="tone-emoji">👔</div>
+            <div class="tone-name">Professional</div>
+            <div class="tone-desc">Credible, polished, authoritative</div>
+          </div>
+          <div class="tone-card selected" onclick="selectTone(this, 'conversational')">
+            <div class="tone-emoji">💬</div>
+            <div class="tone-name">Conversational</div>
+            <div class="tone-desc">Friendly, approachable, real</div>
+          </div>
+          <div class="tone-card" onclick="selectTone(this, 'bold')">
+            <div class="tone-emoji">🔥</div>
+            <div class="tone-name">Bold & Direct</div>
+            <div class="tone-desc">Confident, no-nonsense, punchy</div>
+          </div>
+          <div class="tone-card" onclick="selectTone(this, 'educational')">
+            <div class="tone-emoji">📚</div>
+            <div class="tone-name">Educational</div>
+            <div class="tone-desc">Helpful, informative, clear</div>
+          </div>
+          <div class="tone-card" onclick="selectTone(this, 'inspirational')">
+            <div class="tone-emoji">✨</div>
+            <div class="tone-name">Inspirational</div>
+            <div class="tone-desc">Uplifting, motivating, vision-led</div>
+          </div>
+          <div class="tone-card" onclick="selectTone(this, 'witty')">
+            <div class="tone-emoji">😄</div>
+            <div class="tone-name">Witty & Fun</div>
+            <div class="tone-desc">Light, humourous, memorable</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Brand Personality (pick all that apply)</label>
+        <div class="chip-group" id="personalityChips">
+          <div class="chip" onclick="toggleChip(this)">Trustworthy</div>
+          <div class="chip" onclick="toggleChip(this)">Innovative</div>
+          <div class="chip" onclick="toggleChip(this)">Expert</div>
+          <div class="chip" onclick="toggleChip(this)">Approachable</div>
+          <div class="chip" onclick="toggleChip(this)">Premium</div>
+          <div class="chip" onclick="toggleChip(this)">Community-focused</div>
+          <div class="chip" onclick="toggleChip(this)">Results-driven</div>
+          <div class="chip" onclick="toggleChip(this)">Transparent</div>
+          <div class="chip" onclick="toggleChip(this)">Passionate</div>
+          <div class="chip" onclick="toggleChip(this)">Forward-thinking</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Core Values (what do you stand for?)</label>
+        <div class="chip-group" id="valuesChips">
+          <div class="chip" onclick="toggleChip(this)">Integrity</div>
+          <div class="chip" onclick="toggleChip(this)">Quality over quantity</div>
+          <div class="chip" onclick="toggleChip(this)">Customer first</div>
+          <div class="chip" onclick="toggleChip(this)">Continuous improvement</div>
+          <div class="chip" onclick="toggleChip(this)">Sustainability</div>
+          <div class="chip" onclick="toggleChip(this)">Diversity & inclusion</div>
+          <div class="chip" onclick="toggleChip(this)">Local community</div>
+          <div class="chip" onclick="toggleChip(this)">Education & empowerment</div>
+          <div class="chip" onclick="toggleChip(this)">Innovation</div>
+          <div class="chip" onclick="toggleChip(this)">Simplicity</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Topics you NEVER want to write about <span class="optional">optional</span></label>
+        <textarea class="field-textarea" id="avoidTopics" placeholder="e.g. Politics, competitor mentions, controversial subjects..." style="min-height:72px;"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Brand tagline or mission statement <span class="optional">optional</span></label>
+        <input class="field-input" id="bizTagline" type="text" placeholder="e.g. 'Grow smarter, not harder'" oninput="updatePreview()" />
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(2)">← Back</button>
+        <button class="btn-next" onclick="nextStep(2)">Continue → Audience</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: AUDIENCE & GOALS -->
+    <div class="step-panel" id="step3">
+      <div class="step-header">
+        <div class="step-count-badge">🎯 Step 3 of 6</div>
+        <h2 class="step-title">Who are you <em>talking to</em>?</h2>
+        <p class="step-body">Great content speaks directly to the reader. The more specific you are here, the more targeted and effective your AI content will be.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Primary Customer / Ideal Client</label>
+        <textarea class="field-textarea" id="idealCustomer" placeholder="e.g. Small business owners aged 30–55 who are overwhelmed by digital marketing and want to grow their online presence without hiring a full team..." style="min-height:90px;"></textarea>
+        <p class="field-hint">Be specific — job titles, age, situation, pain points. The AI uses this to write directly to them.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Biggest Customer Pain Points (pick all that apply)</label>
+        <div class="chip-group" id="painChips">
+          <div class="chip" onclick="toggleChip(this)">Not enough time</div>
+          <div class="chip" onclick="toggleChip(this)">Too expensive</div>
+          <div class="chip" onclick="toggleChip(this)">Lack of expertise</div>
+          <div class="chip" onclick="toggleChip(this)">Not getting results</div>
+          <div class="chip" onclick="toggleChip(this)">Overwhelmed by options</div>
+          <div class="chip" onclick="toggleChip(this)">Can't find what they need</div>
+          <div class="chip" onclick="toggleChip(this)">Don't trust providers</div>
+          <div class="chip" onclick="toggleChip(this)">Scaling challenges</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">What makes you different from competitors?</label>
+        <textarea class="field-textarea" id="differentiators" placeholder="e.g. We're the only agency in the Midlands that specialises in SEO for trades businesses, with a 90-day ranking guarantee..." style="min-height:90px;"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Primary Content Goals (pick up to 3)</label>
+        <div class="chip-group" id="goalChips">
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Generate leads</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Build brand awareness</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Drive website traffic</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Educate customers</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Build trust & authority</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Increase sales</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Retain existing clients</div>
+          <div class="chip" onclick="toggleChipLimit(this, 'goalChips', 3)">Recruit talent</div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(3)">← Back</button>
+        <button class="btn-next" onclick="nextStep(3)">Continue → Keywords</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: SEO KEYWORDS -->
+    <div class="step-panel" id="step4">
+      <div class="step-header">
+        <div class="step-count-badge">🔍 Step 4 of 6</div>
+        <h2 class="step-title">Your <em>keyword</em> strategy</h2>
+        <p class="step-body">These are the terms your customers search for. Every piece of content will be optimised around these — automatically.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Primary Keywords / Topics</label>
+        <div class="keyword-input-wrap">
+          <input class="field-input" id="kwInput" type="text" placeholder="Type a keyword and press Add..." onkeydown="if(event.key==='Enter') addKeyword()" />
+          <button class="add-kw-btn" onclick="addKeyword()">Add</button>
+        </div>
+        <div class="keyword-tags" id="kwTags"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Suggested keywords based on your industry</label>
+        <div class="keyword-tags" id="suggestedKws"></div>
+        <p class="field-hint">Click any to add them to your strategy.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Competitor websites to monitor <span class="optional">optional</span></label>
+        <input class="field-input" id="competitors" type="text" placeholder="e.g. competitor1.com, competitor2.com" />
+        <p class="field-hint">We'll track what content is ranking for them and identify gaps you can fill.</p>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Content Pillars — your 3–5 main topic areas</label>
+        <div class="chip-group" id="pillarChips">
+          <div class="chip" onclick="toggleChip(this)">How-to guides</div>
+          <div class="chip" onclick="toggleChip(this)">Industry news</div>
+          <div class="chip" onclick="toggleChip(this)">Case studies</div>
+          <div class="chip" onclick="toggleChip(this)">Tips & best practices</div>
+          <div class="chip" onclick="toggleChip(this)">Product spotlights</div>
+          <div class="chip" onclick="toggleChip(this)">Customer stories</div>
+          <div class="chip" onclick="toggleChip(this)">Thought leadership</div>
+          <div class="chip" onclick="toggleChip(this)">FAQs & explainers</div>
+          <div class="chip" onclick="toggleChip(this)">Comparisons & reviews</div>
+          <div class="chip" onclick="toggleChip(this)">Local SEO content</div>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(4)">← Back</button>
+        <button class="btn-next" onclick="nextStep(4)">Continue → AI Interview</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: AI INTERVIEW -->
+    <div class="step-panel" id="step5">
+      <div class="step-header">
+        <div class="step-count-badge">🤖 Step 5 of 6</div>
+        <h2 class="step-title">The <em>AI interview</em></h2>
+        <p class="step-body">Our AI will ask you a few tailored questions based on what you've told us so far. The more you share, the better your content will be.</p>
+      </div>
+
+      <div class="ai-chat" id="aiChat">
+        <div class="ai-chat-header">
+          <div class="ai-avatar">⚡</div>
+          <div>
+            <div class="ai-name">SEOFlow AI</div>
+            <div class="ai-role">Brand Intelligence Engine</div>
+          </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+          <input class="chat-input" id="chatInput" placeholder="Type your answer..." onkeydown="if(event.key==='Enter') sendChatMsg()" />
+          <button class="chat-send" onclick="sendChatMsg()">Send →</button>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(5)">← Back</button>
+        <button class="btn-next" id="step5Next" onclick="nextStep(5)">Continue → Strategy</button>
+      </div>
+    </div>
+
+    <!-- STEP 6: CONTENT STRATEGY -->
+    <div class="step-panel" id="step6">
+      <div class="step-header">
+        <div class="step-count-badge">📅 Step 6 of 6</div>
+        <h2 class="step-title">Your automated <em>content plan</em></h2>
+        <p class="step-body">Based on everything you've told us, here's what your AI content engine will produce automatically. You can adjust this anytime.</p>
+      </div>
+
+      <div class="brand-preview" id="brandPreviewCard">
+        <div class="brand-preview-label">✦ Your Brand Profile</div>
+        <div class="brand-name-preview" id="previewBizName">Your Business</div>
+        <div class="brand-tagline-preview" id="previewTagline">Your tagline will appear here</div>
+        <div class="brand-chips" id="previewChips"></div>
+      </div>
+
+      <div class="section-divider">Automated Content Schedule</div>
+
+      <div class="schedule-preview">
+        <div class="schedule-item">
+          <div class="schedule-dot sd-orange"></div>
+          <div class="schedule-item-info">
+            <div class="schedule-item-title">📝 Long-form SEO Blog Post</div>
+            <div class="schedule-item-meta">WordPress • 1,500–2,500 words • Auto-generated from your keywords</div>
+          </div>
+          <select class="field-select select-sm" id="freqBlog">
+            <option>Weekly</option>
+            <option>Twice/week</option>
+            <option selected>Bi-weekly</option>
+            <option>Monthly</option>
+          </select>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-dot sd-blue"></div>
+          <div class="schedule-item-info">
+            <div class="schedule-item-title">💼 LinkedIn Article & Post</div>
+            <div class="schedule-item-meta">LinkedIn • Thought leadership adapted from blog content</div>
+          </div>
+          <select class="field-select select-sm" id="freqLinkedin">
+            <option>Daily</option>
+            <option selected>Weekly</option>
+            <option>Bi-weekly</option>
+          </select>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-dot sd-green"></div>
+          <div class="schedule-item-info">
+            <div class="schedule-item-title">🐦 Twitter/X Threads</div>
+            <div class="schedule-item-meta">Twitter/X • Key insights repurposed from articles</div>
+          </div>
+          <select class="field-select select-sm" id="freqTwitter">
+            <option selected>3× / week</option>
+            <option>Daily</option>
+            <option>Weekly</option>
+          </select>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-dot sd-yellow"></div>
+          <div class="schedule-item-info">
+            <div class="schedule-item-title">🔍 Meta SEO Refresh</div>
+            <div class="schedule-item-meta">Website • Title tags & meta descriptions updated on existing pages</div>
+          </div>
+          <select class="field-select select-sm" id="freqMeta">
+            <option>Weekly</option>
+            <option selected>Monthly</option>
+            <option>Quarterly</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Best publishing days</label>
+        <div class="chip-group" id="dayChips">
+          <div class="chip" onclick="toggleChip(this)">Mon</div>
+          <div class="chip selected" onclick="toggleChip(this)">Tue</div>
+          <div class="chip selected" onclick="toggleChip(this)">Wed</div>
+          <div class="chip" onclick="toggleChip(this)">Thu</div>
+          <div class="chip selected" onclick="toggleChip(this)">Fri</div>
+          <div class="chip" onclick="toggleChip(this)">Sat</div>
+          <div class="chip" onclick="toggleChip(this)">Sun</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Preferred publishing time</label>
+        <div class="field-row">
+          <select class="field-select" id="publishTime">
+            <option>8:00 AM</option>
+            <option selected>9:00 AM</option>
+            <option>10:00 AM</option>
+            <option>12:00 PM</option>
+            <option>2:00 PM</option>
+            <option>5:00 PM</option>
+            <option>7:00 PM</option>
+          </select>
+          <select class="field-select">
+            <option>GMT (London)</option>
+            <option>EST (New York)</option>
+            <option>PST (Los Angeles)</option>
+            <option>CET (Paris/Berlin)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn-back" onclick="prevStep(6)">← Back</button>
+        <button class="btn-finish" onclick="finishOnboarding()">
+          🚀 Launch My Content Engine
+        </button>
+      </div>
+    </div>
+
+    <!-- COMPLETION SCREEN -->
+    <div class="complete-screen" id="completeScreen">
+      <div class="complete-icon">🎉</div>
+      <h2 class="complete-title">You're all set!</h2>
+      <p class="complete-sub">Your AI content engine is configured and ready. First content will be generated within the next few minutes.</p>
+
+      <div class="profile-summary" id="profileSummary"></div>
+
+      <div class="complete-actions">
+        <button class="btn-launch" onclick="goToDashboard()">→ Open Dashboard</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API_URL = "https://api.anthropic.com/v1/messages";
+
+let currentStep = 1;
+const totalSteps = 6;
+let selectedTone = 'conversational';
+let chatHistory = [];
+let interviewQuestions = [];
+let currentQIndex = 0;
+let brandProfile = {};
+
+// ── NAVIGATION ──
+function nextStep(from) {
+  if (from === 1) {
+    if (!document.getElementById('bizName').value.trim()) {
+      pulseField('bizName'); return;
+    }
+    if (!document.getElementById('bizIndustry').value) {
+      pulseField('bizIndustry'); return;
+    }
+  }
+  goToStep(from + 1);
+}
+
+function prevStep(from) { goToStep(from - 1); }
+
+function goToStep(n) {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`step${n}`).classList.add('active');
+  document.querySelectorAll('.step-item').forEach(item => {
+    const s = parseInt(item.dataset.step);
+    item.classList.remove('active', 'done');
+    if (s === n) item.classList.add('active');
+    if (s < n) item.classList.add('done');
+  });
+  currentStep = n;
+  updateProgress();
+
+  if (n === 4) populateSuggestedKeywords();
+  if (n === 5) initAIInterview();
+  if (n === 6) buildStrategyPreview();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const pct = Math.round(((currentStep - 1) / totalSteps) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function pulseField(id) {
+  const el = document.getElementById(id);
+  el.style.borderColor = '#e53e3e';
+  el.style.boxShadow = '0 0 0 3px rgba(229,62,62,0.15)';
+  el.focus();
+  setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = ''; }, 2000);
+}
+
+// ── TONE SELECTION ──
+function selectTone(card, tone) {
+  document.querySelectorAll('.tone-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedTone = tone;
+}
+
+// ── CHIP TOGGLES ──
+function toggleChip(el) {
+  el.classList.toggle('selected');
+}
+
+function toggleChipLimit(el, groupId, max) {
+  const group = document.getElementById(groupId);
+  const selected = group.querySelectorAll('.chip.selected');
+  if (!el.classList.contains('selected') && selected.length >= max) return;
+  el.classList.toggle('selected');
+}
+
+// ── URL DETECTION ──
+function checkUrl() {
+  const url = document.getElementById('bizWebsite').value.trim();
+  const card = document.getElementById('analysisCard');
+  card.classList.toggle('visible', url.length > 8 && url.includes('.'));
+}
+
+// ── PREVIEW UPDATE ──
+function updatePreview() {
+  const name = document.getElementById('bizName').value || 'Your Business';
+  const tagline = document.getElementById('bizTagline') ? document.getElementById('bizTagline').value : '';
+  document.getElementById('previewBizName').textContent = name;
+  document.getElementById('previewTagline').textContent = tagline || 'Your tagline will appear here';
+}
+
+// ── KEYWORD MANAGEMENT ──
+function addKeyword() {
+  const input = document.getElementById('kwInput');
+  const val = input.value.trim();
+  if (!val) return;
+  const tags = document.getElementById('kwTags');
+  const tag = document.createElement('div');
+  tag.className = 'kw-tag';
+  tag.innerHTML = `${val} <span class="kw-remove" onclick="this.parentElement.remove()">×</span>`;
+  tags.appendChild(tag);
+  input.value = '';
+}
+
+const industrySuggestions = {
+  'Marketing & Advertising': ['digital marketing', 'SEO services', 'social media marketing', 'content strategy', 'PPC advertising', 'brand strategy'],
+  'E-commerce & Retail': ['online shopping', 'product reviews', 'best deals', 'buy online', 'free shipping', 'customer reviews'],
+  'Health & Wellness': ['wellness tips', 'healthy lifestyle', 'mental health', 'fitness advice', 'nutrition guide', 'weight loss'],
+  'Finance & Fintech': ['financial advice', 'investment tips', 'personal finance', 'money management', 'budgeting', 'fintech solutions'],
+  'Legal Services': ['legal advice', 'law firm', 'solicitor near me', 'legal consultation', 'contract law', 'employment law'],
+  'Real Estate': ['homes for sale', 'property investment', 'estate agent', 'buy to let', 'property market', 'first time buyer'],
+  'Technology & SaaS': ['software solutions', 'cloud computing', 'SaaS platform', 'tech tools', 'automation software', 'business software'],
+  'Construction & Trades': ['local builder', 'construction services', 'home renovation', 'trusted tradesman', 'building contractor', 'planning permission'],
+  'default': ['local business', 'near me', 'best service', 'trusted provider', 'affordable', 'professional services']
+};
+
+function populateSuggestedKeywords() {
+  const industry = document.getElementById('bizIndustry').value;
+  const suggestions = industrySuggestions[industry] || industrySuggestions['default'];
+  const container = document.getElementById('suggestedKws');
+  container.innerHTML = '';
+  suggestions.forEach(kw => {
+    const tag = document.createElement('div');
+    tag.className = 'kw-tag suggested';
+    tag.textContent = '+ ' + kw;
+    tag.onclick = function() {
+      const tags = document.getElementById('kwTags');
+      const newTag = document.createElement('div');
+      newTag.className = 'kw-tag';
+      newTag.innerHTML = `${kw} <span class="kw-remove" onclick="this.parentElement.remove()">×</span>`;
+      tags.appendChild(newTag);
+      tag.remove();
+    };
+    container.appendChild(tag);
+  });
+}
+
+// ── AI INTERVIEW ──
+async function initAIInterview() {
+  if (chatHistory.length > 0) return; // already started
+
+  const bizName = document.getElementById('bizName').value || 'your business';
+  const industry = document.getElementById('bizIndustry').value || 'your industry';
+  const oneLiner = document.getElementById('bizOneLiner').value || '';
+
+  addChatMsg('ai', `Hi! I'm your SEOFlow AI. I've reviewed what you've shared about ${bizName} — really interesting work in ${industry}. I just have a few quick questions to really nail your content voice. Ready?`);
+
+  setTimeout(() => {
+    addChatMsg('ai', `First question: What's the single biggest transformation or result you deliver for your customers? What does life look like for them *after* working with you?`);
+  }, 1200);
+}
+
+function addChatMsg(role, text) {
+  const messages = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = `msg ${role}`;
+
+  const avatarText = role === 'ai' ? '⚡' : 'ME';
+  msg.innerHTML = `
+    <div class="msg-avatar">${avatarText}</div>
+    <div class="msg-bubble">${text}</div>
+  `;
+  messages.appendChild(msg);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+  const messages = document.getElementById('chatMessages');
+  const typing = document.createElement('div');
+  typing.className = 'msg ai';
+  typing.id = 'typingIndicator';
+  typing.innerHTML = `
+    <div class="msg-avatar">⚡</div>
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  messages.appendChild(typing);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+const followUpQuestions = [
+  "Great! Now — who is your dream customer? Paint me a picture: what's their day like, what keeps them up at night, and why do they end up choosing you?",
+  "If a journalist wrote a story about your company in 3 years, what would the headline say? What would you have achieved?",
+  "What's one thing about your industry that you think most people get completely wrong? What's your contrarian take?",
+  "Finally — what are 3 words your best customers would use to describe working with you? And what would you *want* them to say?"
+];
+
+let followUpIndex = 0;
+
+async function sendChatMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addChatMsg('user', text);
+  input.value = '';
+  chatHistory.push({ role: 'user', content: text });
+
+  showTyping();
+
+  // After a short delay, respond with next question or wrap up
+  setTimeout(async () => {
+    removeTyping();
+    if (followUpIndex < followUpQuestions.length) {
+      addChatMsg('ai', followUpQuestions[followUpIndex]);
+      followUpIndex++;
+    } else {
+      // Final summary via AI
+      await generateInterviewSummary();
+    }
+  }, 1400);
+}
+
+async function generateInterviewSummary() {
+  const bizName = document.getElementById('bizName').value;
+  const allUserMsgs = chatHistory.map(m => m.content).join(' | ');
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Based on these answers from a business owner during onboarding for an AI content platform, write a warm 2-sentence summary of what makes their brand unique, then say you're ready to start creating content for them. Business: ${bizName}. Their answers: ${allUserMsgs}. Keep it under 80 words, conversational, and end with "Your content engine is ready. Let's go! 🚀"`
+        }]
+      })
+    });
+    const data = await response.json();
+    const summary = data.content?.[0]?.text || `Excellent! I've captured everything I need to know about ${bizName}. Your content engine is ready. Let's go! 🚀`;
+    addChatMsg('ai', summary);
+  } catch {
+    addChatMsg('ai', `Perfect — I've got a complete picture of your brand now. Your content will be crafted specifically for ${bizName}'s voice and audience. Your content engine is ready. Let's go! 🚀`);
+  }
+}
+
+// ── STRATEGY PREVIEW ──
+function buildStrategyPreview() {
+  const name = document.getElementById('bizName').value || 'Your Business';
+  const tagline = document.getElementById('bizTagline').value || '';
+  const industry = document.getElementById('bizIndustry').value || '';
+
+  document.getElementById('previewBizName').textContent = name;
+  document.getElementById('previewTagline').textContent = tagline || `${industry} specialist`;
+
+  const chips = document.getElementById('previewChips');
+  chips.innerHTML = '';
+
+  // Gather selected personalities
+  const personalities = [...document.querySelectorAll('#personalityChips .chip.selected')].slice(0,3);
+  personalities.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'brand-chip bc-orange';
+    chip.textContent = c.textContent;
+    chips.appendChild(chip);
+  });
+
+  // Gather selected values
+  const values = [...document.querySelectorAll('#valuesChips .chip.selected')].slice(0,2);
+  values.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'brand-chip bc-blue';
+    chip.textContent = c.textContent;
+    chips.appendChild(chip);
+  });
+
+  // Tone chip
+  const toneChip = document.createElement('div');
+  toneChip.className = 'brand-chip bc-green';
+  toneChip.textContent = selectedTone.charAt(0).toUpperCase() + selectedTone.slice(1) + ' tone';
+  chips.appendChild(toneChip);
+}
+
+// ── FINISH ONBOARDING ──
+async function finishOnboarding() {
+  const btn = document.querySelector('.btn-finish');
+  btn.innerHTML = `<span class="spinner-sm"></span> Building your profile...`;
+  btn.disabled = true;
+
+  // Collect all data into brand profile
+  const keywords = [...document.querySelectorAll('#kwTags .kw-tag')].map(t => t.textContent.replace('×','').trim());
+  const personalities = [...document.querySelectorAll('#personalityChips .chip.selected')].map(c => c.textContent);
+  const values = [...document.querySelectorAll('#valuesChips .chip.selected')].map(c => c.textContent);
+  const goals = [...document.querySelectorAll('#goalChips .chip.selected')].map(c => c.textContent);
+  const pillars = [...document.querySelectorAll('#pillarChips .chip.selected')].map(c => c.textContent);
+
+  brandProfile = {
+    name: document.getElementById('bizName').value,
+    industry: document.getElementById('bizIndustry').value,
+    type: document.getElementById('bizType').value,
+    website: document.getElementById('bizWebsite').value,
+    oneLiner: document.getElementById('bizOneLiner').value,
+    tagline: document.getElementById('bizTagline').value,
+    tone: selectedTone,
+    personalities, values, goals, keywords, pillars,
+    idealCustomer: document.getElementById('idealCustomer').value,
+    differentiators: document.getElementById('differentiators').value,
+  };
+
+  try {
+    // Use AI to generate a brand voice summary
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Create a concise brand voice summary (3 sentences max) for this business that will guide all AI content creation. Business: ${brandProfile.name}. Industry: ${brandProfile.industry}. What they do: ${brandProfile.oneLiner}. Tone: ${brandProfile.tone}. Values: ${brandProfile.values.join(', ')}. Goals: ${brandProfile.goals.join(', ')}. Return ONLY the brand voice statement, no preamble.`
+        }]
+      })
+    });
+    const data = await response.json();
+    brandProfile.voiceSummary = data.content?.[0]?.text || '';
+  } catch {
+    brandProfile.voiceSummary = `${brandProfile.name} creates ${brandProfile.tone} content that speaks directly to their audience with ${brandProfile.values.slice(0,2).join(' and ')} at the core.`;
+  }
+
+  // Save to storage
+  try {
+    await window.storage.set('brand-profile', JSON.stringify(brandProfile));
+  } catch(e) {}
+
+  showCompleteScreen();
+}
+
+function showCompleteScreen() {
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('completeScreen').classList.add('active');
+
+  // Update all sidebar steps to done
+  document.querySelectorAll('.step-item').forEach(item => {
+    item.classList.remove('active');
+    item.classList.add('done');
+  });
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressPct').textContent = '100%';
+
+  // Build profile summary
+  const summary = document.getElementById('profileSummary');
+  summary.innerHTML = `
+    <div class="profile-summary-title">Brand Profile</div>
+    <div class="profile-row">
+      <div class="profile-key">Business</div>
+      <div class="profile-val">${brandProfile.name} · ${brandProfile.industry}</div>
+    </div>
+    <div class="profile-row">
+      <div class="profile-key">Voice</div>
+      <div class="profile-val">${brandProfile.tone.charAt(0).toUpperCase() + brandProfile.tone.slice(1)} · ${brandProfile.personalities.slice(0,3).join(', ')}</div>
+    </div>
+    <div class="profile-row">
+      <div class="profile-key">Core Values</div>
+      <div class="profile-val">${brandProfile.values.slice(0,4).join(', ') || 'Not specified'}</div>
+    </div>
+    <div class="profile-row">
+      <div class="profile-key">Keywords</div>
+      <div class="profile-val">${brandProfile.keywords.slice(0,5).join(', ') || 'Not yet added'}</div>
+    </div>
+    <div class="profile-row">
+      <div class="profile-key">Goals</div>
+      <div class="profile-val">${brandProfile.goals.slice(0,3).join(', ') || 'Not specified'}</div>
+    </div>
+    ${brandProfile.voiceSummary ? `<div class="profile-row">
+      <div class="profile-key">AI Voice</div>
+      <div class="profile-val" style="font-style:italic;color:#6b6458;">"${brandProfile.voiceSummary}"</div>
+    </div>` : ''}
+  `;
+}
+
+function goToDashboard() {
+  alert('🚀 Redirecting to your SEOFlow dashboard...\n\nIn the full build, this opens the main dashboard pre-loaded with your first AI-generated content queue based on your brand profile!');
+}
+</script>
+</body>
+</html>
