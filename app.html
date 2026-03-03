@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEOFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── Backgrounds: true black ── */
+  --void:    #000000;
+  --base:    #080808;
+  --raised:  #0f0f0f;
+  --lifted:  #141414;
+  --edge:    #1c1c1c;
+
+  /* ── Borders: neutral grey ── */
+  --line:    rgba(255,255,255,0.07);
+  --line2:   rgba(255,255,255,0.12);
+  --line3:   rgba(255,255,255,0.22);
+
+  /* ── Text ── */
+  --tx:      #f5f5f5;
+  --tx2:     #888888;
+  --tx3:     #484848;
+  --tx4:     #282828;
+
+  /* ── PRIMARY ACCENT: electric cyan ── */
+  --ac:      #00e5ff;
+  --ac2:     #00b8cc;
+  --ac3:     rgba(0,229,255,0.10);
+  --ac4:     rgba(0,229,255,0.05);
+  --acGlow:  0 0 20px rgba(0,229,255,0.18);
+
+  /* ── Semantic ── */
+  --green:   #00e676;
+  --greenD:  rgba(0,230,118,0.08);
+  --red:     #ff1744;
+  --redD:    rgba(255,23,68,0.08);
+  --amber:   #ffab00;
+  --amberD:  rgba(255,171,0,0.08);
+
+  --sidebar: 200px;
+  --radius:  5px;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+  --font-ui:   'Geist', system-ui, sans-serif;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--void);
+  color: var(--tx);
+  display: flex;
+  /* Subtle noise texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ─────────────────────────────────────────
+   SIDEBAR
+───────────────────────────────────────── */
+.sidebar {
+  width: var(--sidebar);
+  flex-shrink: 0;
+  height: 100vh;
+  background: var(--base);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* top glow line */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ac), transparent);
+  opacity: 0.4;
+}
+
+.sb-logo {
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.sb-logo-mark {
+  width: 26px; height: 26px;
+  border: 1px solid var(--line3);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  position: relative;
+}
+
+.sb-logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: linear-gradient(135deg, rgba(0,229,255,0.12), transparent);
+  border-radius: 3px;
+}
+
+.sb-wordmark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--tx);
+}
+
+.sb-wordmark span { color: var(--ac); }
+
+.sb-nav { padding: 8px 0; flex: 1; overflow-y: auto; }
+
+.nav-group-label {
+  padding: 12px 18px 4px;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--tx3);
+  font-family: var(--font-mono);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 18px;
+  cursor: pointer;
+  color: var(--tx2);
+  font-size: 12px;
+  font-weight: 400;
+  transition: color 0.15s;
+  position: relative;
+  letter-spacing: 0.01em;
+}
+
+.nav-item:hover { color: var(--tx); }
+
+.nav-item.active {
+  color: var(--ac);
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 1.5px;
+  background: var(--ac);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px var(--ac);
+}
+
+.nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--tx3);
+  flex-shrink: 0;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.nav-item.active .nav-dot {
+  background: var(--ac);
+  box-shadow: 0 0 6px var(--ac);
+}
+
+.nav-item:hover .nav-dot { background: var(--tx2); }
+
+.nav-pill {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ac);
+  background: var(--ac3);
+  border: 1px solid rgba(0,229,255,0.2);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+}
+
+.nav-pill.live {
+  color: var(--green);
+  background: var(--greenD);
+  border-color: rgba(79,255,176,0.2);
+}
+
+/* Sidebar brand */
+.sb-brand {
+  margin: 8px 12px;
+  padding: 10px 12px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.sb-brand-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sb-brand-meta {
+  font-size: 10px;
+  color: var(--tx3);
+  font-family: var(--font-mono);
+}
+
+.sb-brand-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 7px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+
+.status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.sb-footer {
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.autopilot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.autopilot-row:hover { border-color: var(--line2); }
+
+.ap-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--tx2);
+  font-family: var(--font-mono);
+}
+
+.ap-label span { color: var(--ac); }
+
+/* Toggle */
+.toggle {
+  width: 28px; height: 15px;
+  background: var(--edge);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle.on { background: rgba(79,255,176,0.2); border-color: rgba(79,255,176,0.3); }
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 9px; height: 9px;
+  background: var(--tx3);
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggle.on::after {
+  transform: translateX(13px);
+  background: var(--green);
+  box-shadow: 0 0 5px var(--green);
+}
+
+/* ─────────────────────────────────────────
+   MAIN
+───────────────────────────────────────── */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+/* TOPBAR */
+.topbar {
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--base);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 12px;
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+}
+
+.topbar-breadcrumb .current { color: var(--tx2); }
+
+.topbar-breadcrumb .sep { color: var(--tx4); }
+
+.topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-ui);
+  transition: all 0.15s;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--ac3);
+  color: var(--ac);
+  font-weight: 600;
+  border: 1px solid rgba(0,229,255,0.22);
+}
+
+.btn-primary:hover {
+  background: rgba(0,229,255,0.15);
+  border-color: rgba(0,229,255,0.45);
+  box-shadow: 0 0 20px rgba(0,229,255,0.18);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--tx2);
+  border: 1px solid var(--line2);
+}
+
+.btn-ghost:hover { background: var(--raised); color: var(--tx); border-color: var(--line3); }
+
+.btn-dim {
+  background: var(--raised);
+  color: var(--tx2);
+  border: 1px solid var(--line);
+}
+
+.btn-dim:hover { border-color: var(--line2); color: var(--tx); }
+
+/* ─────────────────────────────────────────
+   CONTENT AREA
+───────────────────────────────────────── */
+.content { flex: 1; overflow-y: auto; padding: 28px 28px 48px; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 2px; }
+
+/* ─────────────────────────────────────────
+   VIEWS
+───────────────────────────────────────── */
+.view { display: none; }
+.view.active { display: block; animation: appear 0.25s ease; }
+@keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ─────────────────────────────────────────
+   PANELS / CARDS
+───────────────────────────────────────── */
+.panel {
+  background: var(--base);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.panel-hd {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tx2);
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.panel-body { padding: 16px; }
+
+/* ─────────────────────────────────────────
+   GRID UTILITIES
+───────────────────────────────────────── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.grid-main { display: grid; grid-template-columns: 1fr 280px; gap: 14px; }
+.grid-engine { display: grid; grid-template-columns: 1fr 300px; gap: 14px; }
+.gap-14 { margin-bottom: 14px; }
+.gap-20 { margin-bottom: 20px; }
+
+/* ─────────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────────── */
+.stat-card {
+  background: var(--base);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px 18px 14px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.stat-card:hover { border-color: var(--line2); }
+
+.stat-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--tx);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-value strong { font-weight: 600; }
+
+.stat-sub {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+}
+
+.stat-sub.up { color: var(--green); }
+.stat-sub.dn { color: var(--red); }
+
+/* Thin top accent */
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 32px; height: 1px;
+  background: var(--ac);
+}
+
+/* ─────────────────────────────────────────
+   FORM ELEMENTS
+───────────────────────────────────────── */
+.field { margin-bottom: 12px; }
+
+.field-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--tx3);
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.field-input, .field-select, .field-textarea {
+  width: 100%;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  color: var(--tx);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.field-input:focus, .field-select:focus, .field-textarea:focus {
+  border-color: var(--line3);
+  background: var(--lifted);
+}
+
+.field-input::placeholder { color: var(--tx3); }
+.field-textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+.field-select option { background: var(--raised); }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ─────────────────────────────────────────
+   TABS
+───────────────────────────────────────── */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.tab {
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--tx3);
+  border-bottom: 1px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s;
+  letter-spacing: 0.02em;
+}
+
+.tab:hover { color: var(--tx2); }
+.tab.active { color: var(--ac); border-bottom-color: var(--ac); }
+
+/* ─────────────────────────────────────────
+   CONTENT ROWS (queue items)
+───────────────────────────────────────── */
+.row-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.12s;
+  cursor: default;
+}
+
+.row-item:last-child { border-bottom: none; }
+.row-item:hover { background: var(--raised); }
+
+.row-type {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.rt-blog    { color: var(--ac);    background: var(--ac3);   border: 1px solid rgba(0,229,255,0.15); }
+.rt-article { color: var(--green); background: var(--greenD); border: 1px solid rgba(79,255,176,0.15); }
+.rt-social  { color: var(--amber); background: var(--amberD); border: 1px solid rgba(255,184,77,0.15); }
+.rt-meta    { color: var(--tx2);   background: var(--raised); border: 1px solid var(--line2); }
+
+.row-info { flex: 1; min-width: 0; }
+.row-title { font-size: 12px; font-weight: 500; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-meta  { font-size: 10px; color: var(--tx3); margin-top: 2px; font-family: var(--font-mono); }
+
+.row-status {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.rs-published { color: var(--green); background: var(--greenD); }
+.rs-scheduled { color: var(--amber); background: var(--amberD); }
+.rs-draft     { color: var(--tx3);   background: var(--raised); border: 1px solid var(--line); }
+.rs-generating{ color: var(--ac);    background: var(--ac3); }
+
+/* ─────────────────────────────────────────
+   GENERATE BUTTON
+───────────────────────────────────────── */
+.gen-btn {
+  width: 100%;
+  padding: 11px;
+  background: var(--ac3);
+  color: var(--ac);
+  border: 1px solid rgba(0,229,255,0.22);
+  border: none;
+  border-radius: var(--radius);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.gen-btn:hover { background: rgba(0,229,255,0.16); border-color: rgba(0,229,255,0.45); box-shadow: 0 0 24px rgba(0,229,255,0.2); }
+.gen-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+.spinner {
+  width: 13px; height: 13px;
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-top-color: var(--ac);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─────────────────────────────────────────
+   BRAND CONTEXT
+───────────────────────────────────────── */
+.brand-ctx {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.1);
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+}
+
+.brand-ctx-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--ac);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.brand-ctx-value {
+  font-size: 11px;
+  color: var(--tx2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* OUTPUT */
+.output-panel {
+  display: none;
+  background: var(--raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin-top: 12px;
+  overflow: hidden;
+  animation: appear 0.3s ease;
+}
+
+.output-panel.show { display: block; }
+
+.output-hd {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.output-type {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--ac);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.output-title {
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tx);
+  line-height: 1.35;
+  border-bottom: 1px solid var(--line);
+}
+
+.output-preview {
+  padding: 12px 14px;
+  font-size: 11px;
+  color: var(--tx2);
+  line-height: 1.7;
+  max-height: 100px;
+  overflow: hidden;
+  position: relative;
+}
+
+.output-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 32px;
+  background: linear-gradient(transparent, var(--raised));
+}
+
+.output-stats {
+  padding: 8px 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 14px;
+}
+
+.output-stat {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+}
+
+.output-stat span { color: var(--tx2); }
+
+.output-actions {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 6px;
+}
+
+/* LOAD BAR */
+.load-bar { height: 1px; background: var(--line); margin-top: 10px; display: none; overflow: hidden; }
+.load-bar.on { display: block; }
+.load-bar-fill { height: 100%; background: linear-gradient(90deg, transparent, var(--ac), transparent); animation: loadSlide 2s ease-in-out infinite; }
+@keyframes loadSlide { from { transform: translateX(-100%); } to { transform: translateX(200%); } }
+
+/* ─────────────────────────────────────────
+   CALENDAR
+───────────────────────────────────────── */
+.cal-dow-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.cal-dow {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+  text-align: center;
+  padding: 4px 0;
+  letter-spacing: 0.08em;
+}
+
+.cal-grid-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+
+.cal-day {
+  background: var(--base);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 6px 7px;
+  min-height: 68px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.cal-day:hover { border-color: var(--line2); }
+
+.cal-day.today {
+  border-color: rgba(0,229,255,0.3);
+  background: rgba(0,229,255,0.04);
+}
+
+.cal-day.other { opacity: 0.25; }
+
+.cal-day-num {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+  margin-bottom: 4px;
+}
+
+.cal-day.today .cal-day-num { color: var(--ac); }
+
+.cal-event {
+  font-size: 9px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.ce-blog    { background: var(--ac3);   color: var(--ac2); }
+.ce-social  { background: var(--amberD);color: var(--amber); }
+.ce-article { background: var(--greenD);color: var(--green); }
+
+/* ─────────────────────────────────────────
+   SEO
+───────────────────────────────────────── */
+.kw-table { width: 100%; border-collapse: collapse; }
+
+.kw-table th {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--tx3);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.kw-table td {
+  padding: 9px 14px;
+  font-size: 11px;
+  color: var(--tx2);
+  border-bottom: 1px solid var(--line);
+}
+
+.kw-table tr:last-child td { border-bottom: none; }
+.kw-table tr:hover td { background: var(--raised); }
+
+.rank-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tx);
+}
+
+.rank-num.good { color: var(--green); }
+.rank-num.mid  { color: var(--amber); }
+
+.delta { font-family: var(--font-mono); font-size: 10px; font-weight: 500; }
+.delta.up { color: var(--green); }
+.delta.dn { color: var(--red); }
+
+.diff-track { width: 48px; height: 3px; background: var(--edge); border-radius: 2px; overflow: hidden; }
+.diff-fill  { height: 100%; border-radius: 2px; }
+.df-easy    { background: var(--green); }
+.df-med     { background: var(--amber); }
+.df-hard    { background: var(--red); }
+
+.opp-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.opp-row:last-child { border-bottom: none; }
+.opp-row:hover { background: var(--raised); }
+
+.opp-title { font-size: 11px; font-weight: 500; color: var(--tx); margin-bottom: 5px; }
+
+.opp-tags { display: flex; gap: 5px; }
+
+.opp-tag {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 1px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.ot-vol  { color: var(--ac);    background: var(--ac3); }
+.ot-easy { color: var(--green); background: var(--greenD); }
+.ot-med  { color: var(--amber); background: var(--amberD); }
+
+/* SEO health */
+.health-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.health-check:last-child { border-bottom: none; }
+.hc-icon { font-size: 11px; width: 14px; flex-shrink: 0; }
+.hc-label { font-size: 11px; color: var(--tx2); flex: 1; }
+.hc-ok  .hc-label { color: var(--tx); }
+.hc-bad .hc-label { color: var(--tx3); }
+
+.hc-fix {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--ac);
+  cursor: pointer;
+  padding: 2px 6px;
+  border: 1px solid rgba(0,229,255,0.2);
+  border-radius: 3px;
+  transition: all 0.15s;
+}
+.hc-fix:hover { background: rgba(0,229,255,0.04); border-color: rgba(0,229,255,0.35); }
+
+/* ─────────────────────────────────────────
+   ANALYTICS
+───────────────────────────────────────── */
+.chart-wrap { height: 140px; position: relative; }
+canvas { width: 100% !important; display: block; }
+
+.source-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.source-row:last-child { border-bottom: none; }
+
+.source-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.source-label { font-size: 11px; color: var(--tx2); flex: 1; }
+.source-bar  { width: 64px; height: 2px; background: var(--edge); border-radius: 1px; overflow: hidden; }
+.source-fill { height: 100%; border-radius: 1px; }
+.source-pct  { font-size: 10px; font-family: var(--font-mono); color: var(--tx3); min-width: 28px; text-align: right; }
+
+.top-post-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.top-post-row:last-child { border-bottom: none; }
+.tp-n { font-family: var(--font-mono); font-size: 11px; color: var(--tx3); width: 16px; flex-shrink: 0; }
+.tp-info { flex: 1; min-width: 0; }
+.tp-t { font-size: 11px; font-weight: 500; color: var(--tx); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp-v { font-size: 10px; color: var(--tx3); font-family: var(--font-mono); margin-top: 1px; }
+.tp-d { font-size: 10px; font-family: var(--font-mono); color: var(--green); }
+
+/* ROI */
+.roi-cell {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+.roi-label { font-size: 9px; font-family: var(--font-mono); color: var(--tx3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+.roi-val { font-size: 22px; font-weight: 300; color: var(--tx); letter-spacing: -0.02em; }
+.roi-sub { font-size: 10px; color: var(--tx3); font-family: var(--font-mono); margin-top: 3px; }
+
+/* ─────────────────────────────────────────
+   PUBLISHING
+───────────────────────────────────────── */
+.pub-platform {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.pub-platform:last-child { border-bottom: none; }
+.pub-platform:hover { background: var(--raised); }
+
+.pub-icon { font-size: 18px; width: 24px; flex-shrink: 0; text-align: center; }
+.pub-name { font-size: 12px; font-weight: 500; color: var(--tx); }
+.pub-url  { font-size: 10px; color: var(--tx3); font-family: var(--font-mono); margin-top: 1px; }
+
+.pub-status-badge {
+  margin-left: auto;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.psb-on  { color: var(--green); background: var(--greenD); border: 1px solid rgba(79,255,176,0.2); }
+.psb-off { color: var(--tx3);   background: var(--raised); border: 1px solid var(--line); }
+
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.log-row:last-child { border-bottom: none; }
+.log-status-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.lsd-ok  { background: var(--green); box-shadow: 0 0 5px var(--green); }
+.lsd-err { background: var(--red); }
+.lsd-pnd { background: var(--amber); }
+.log-title { font-size: 11px; font-weight: 500; color: var(--tx); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-where { font-size: 10px; color: var(--tx3); font-family: var(--font-mono); }
+.log-time  { font-size: 10px; color: var(--tx3); font-family: var(--font-mono); }
+
+/* ─────────────────────────────────────────
+   BRAND PROFILE
+───────────────────────────────────────── */
+.profile-section {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--raised);
+}
+.profile-sec-label {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--tx3);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.profile-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.pchip {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--line2);
+  color: var(--tx2);
+  background: var(--edge);
+}
+.pchip.ac   { color: var(--ac);    background: var(--ac3);   border-color: rgba(0,229,255,0.2); }
+.pchip.gn   { color: var(--green); background: var(--greenD);border-color: rgba(79,255,176,0.2); }
+.pchip.am   { color: var(--amber); background: var(--amberD);border-color: rgba(255,184,77,0.2); }
+
+.voice-box {
+  padding: 16px;
+  background: rgba(0,229,255,0.04);
+  border: 1px solid rgba(0,229,255,0.10);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--tx2);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────────────
+   MODAL
+───────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-overlay.show { display: flex; animation: appear 0.2s ease; }
+
+.modal {
+  background: var(--raised);
+  border: 1px solid var(--line2);
+  border-radius: 8px;
+  width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.modal-hd {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx);
+}
+
+.modal-close {
+  width: 24px; height: 24px;
+  background: var(--edge);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--tx3);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { color: var(--tx); border-color: var(--line2); }
+
+.modal-body { padding: 18px; }
+.modal-foot { padding: 12px 18px; border-top: 1px solid var(--line); display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ─────────────────────────────────────────
+   IDEAS
+───────────────────────────────────────── */
+.idea-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.idea-row:last-child { border-bottom: none; }
+.idea-row:hover { background: var(--raised); }
+.idea-row:hover .idea-use { opacity: 1; }
+.idea-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--tx4); flex-shrink: 0; }
+.idea-text { font-size: 11px; color: var(--tx2); flex: 1; line-height: 1.4; }
+.idea-use { font-size: 9px; font-family: var(--font-mono); color: var(--ac); opacity: 0; transition: opacity 0.15s; }
+
+/* ─────────────────────────────────────────
+   COMPETITORS
+───────────────────────────────────────── */
+.comp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.comp-row:last-child { border-bottom: none; }
+.comp-domain { font-size: 11px; font-family: var(--font-mono); color: var(--tx2); flex: 1; }
+.comp-track { flex: 1; height: 2px; background: var(--edge); border-radius: 1px; overflow: hidden; }
+.comp-fill { height: 100%; background: linear-gradient(90deg, var(--ac), var(--green)); border-radius: 1px; }
+.comp-score { font-size: 11px; font-family: var(--font-mono); color: var(--tx3); min-width: 24px; text-align: right; }
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  background: var(--raised);
+  border: 1px solid var(--line2);
+  border-radius: 6px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 9999;
+  max-width: 300px;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+
+.toast-icon { font-size: 12px; }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--tx3);
+}
+.empty-icon { font-size: 24px; margin-bottom: 8px; opacity: 0.4; }
+.empty-text { font-size: 11px; font-family: var(--font-mono); }
+
+/* Comp section header */
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--tx2);
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--line); margin: 16px 0; }
+
+/* ═══════════════════════════════════════════════
+   V4 OVERRIDE — fonts + accent colour
+   Injected as a cascade override (wins over above)
+═══════════════════════════════════════════════ */
+
+/* --- New colour tokens --- */
+:root {
+  /* Accent: soft blue-white — desaturated, cool, premium */
+  --ac:      #c2d6f0;
+  --ac2:     #96b4d4;
+  --ac3:     rgba(194,214,240,0.09);
+  --ac4:     rgba(194,214,240,0.05);
+  --acGlow:  0 0 32px rgba(194,214,240,0.10);
+
+  /* Slightly cooler text to match */
+  --tx:      #edf0f4;
+  --tx2:     #7e8899;
+  --tx3:     #454d58;
+  --tx4:     #262d36;
+
+  /* Backgrounds: keep true black, tiny cool tint on surfaces */
+  --base:    #070809;
+  --raised:  #0e1012;
+  --lifted:  #131618;
+  --edge:    #1a1e22;
+
+  /* Borders: cool grey */
+  --line:    rgba(194,214,240,0.07);
+  --line2:   rgba(194,214,240,0.12);
+  --line3:   rgba(194,214,240,0.20);
+
+  /* Semantic: softer, more refined */
+  --green:   #6ee7a8;
+  --greenD:  rgba(110,231,168,0.08);
+  --amber:   #e8a847;
+  --amberD:  rgba(232,168,71,0.08);
+  --red:     #e05470;
+  --redD:    rgba(224,84,112,0.08);
+
+  /* New font stack */
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-ui:      'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  --radius: 13px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+}
+
+/* --- Typography overhaul --- */
+
+/* Wordmark: Playfair, premium feel */
+.sb-wordmark {
+  font-family: var(--font-display) !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  font-style: italic;
+}
+.sb-wordmark span { color: var(--ac) !important; font-style: normal; }
+
+/* Stat values: Playfair for editorial weight */
+.stat-value {
+  font-family: var(--font-display) !important;
+  font-size: 30px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Panel titles: Inter, slightly heavier */
+.panel-title {
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.10em !important;
+  color: var(--tx3) !important;
+}
+
+/* Nav items: Inter */
+.nav-item {
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.01em !important;
+}
+
+/* Nav group labels: Inter */
+.nav-group-label {
+  font-family: var(--font-ui) !important;
+  font-size: 9px !important;
+  letter-spacing: 0.14em !important;
+  font-weight: 600 !important;
+}
+
+/* Buttons: Inter */
+.btn {
+  font-family: var(--font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+
+/* Primary button: ghost-style with refined accent */
+.btn-primary {
+  background: var(--ac3) !important;
+  color: var(--ac) !important;
+  border: 1px solid rgba(194,214,240,0.18) !important;
+  font-weight: 600 !important;
+}
+.btn-primary:hover {
+  background: rgba(194,214,240,0.13) !important;
+  border-color: rgba(194,214,240,0.35) !important;
+  box-shadow: 0 0 24px rgba(194,214,240,0.10) !important;
+}
+
+/* Gen button */
+.gen-btn {
+  font-family: var(--font-ui) !important;
+  background: var(--ac3) !important;
+  color: var(--ac) !important;
+  border: 1px solid rgba(194,214,240,0.16) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+}
+.gen-btn:hover {
+  background: rgba(194,214,240,0.13) !important;
+  border-color: rgba(194,214,240,0.32) !important;
+  box-shadow: 0 0 20px rgba(194,214,240,0.10) !important;
+}
+
+/* Output title: Playfair */
+.output-title {
+  font-family: var(--font-display) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+}
+
+/* Row titles: Inter */
+.row-title {
+  font-family: var(--font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+.row-meta { font-family: var(--font-mono) !important; }
+
+/* Brand voice box: Playfair italic — centrepiece */
+.voice-box {
+  font-family: var(--font-display) !important;
+  font-style: italic !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+  line-height: 1.75 !important;
+  color: var(--tx2) !important;
+  background: var(--ac4) !important;
+  border: 1px solid rgba(194,214,240,0.10) !important;
+  padding: 20px 22px !important;
+}
+
+/* Modal title */
+.modal-title {
+  font-family: var(--font-display) !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+
+/* Field labels */
+.field-label {
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+}
+
+/* Tabs */
+.tab {
+  font-family: var(--font-ui) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+.tab.active { color: var(--ac) !important; border-bottom-color: var(--ac) !important; }
+
+/* Topbar breadcrumb */
+.topbar-breadcrumb { font-family: var(--font-mono) !important; }
+.topbar-breadcrumb .current { color: var(--tx2) !important; }
+
+/* Rank numbers: Inter bold */
+.rank-num {
+  font-family: var(--font-ui) !important;
+  font-weight: 700 !important;
+}
+.rank-num.good { color: var(--green) !important; }
+.rank-num.mid  { color: var(--amber) !important; }
+
+/* ROI values */
+.roi-val {
+  font-family: var(--font-display) !important;
+  font-weight: 500 !important;
+  font-size: 22px !important;
+}
+
+/* Section title */
+.section-title {
+  font-family: var(--font-ui) !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.10em !important;
+  text-transform: uppercase !important;
+  color: var(--tx3) !important;
+}
+
+/* Sidebar brand */
+.sb-brand-name { font-family: var(--font-ui) !important; font-weight: 600 !important; }
+.sb-brand-meta { font-family: var(--font-mono) !important; }
+.ap-label { font-family: var(--font-mono) !important; }
+
+/* Nav pill */
+.nav-pill {
+  color: var(--ac) !important;
+  background: var(--ac3) !important;
+  border: 1px solid rgba(194,214,240,0.16) !important;
+  font-family: var(--font-mono) !important;
+}
+.nav-pill.live {
+  color: var(--green) !important;
+  background: var(--greenD) !important;
+  border-color: rgba(76,201,138,0.20) !important;
+}
+
+/* Active nav indicator bar */
+.nav-item.active::before {
+  background: var(--ac) !important;
+  box-shadow: 0 0 8px rgba(194,214,240,0.30) !important;
+}
+.nav-item.active .nav-dot {
+  background: var(--ac) !important;
+  box-shadow: 0 0 5px rgba(194,214,240,0.30) !important;
+}
+
+/* Brand context pill */
+.brand-ctx { border: 1px solid rgba(194,214,240,0.09) !important; }
+.brand-ctx-label { color: var(--ac) !important; font-family: var(--font-ui) !important; font-weight: 600 !important; }
+
+/* Output type label */
+.output-type { color: var(--ac) !important; font-family: var(--font-mono) !important; }
+
+/* Status badges */
+.rs-generating { color: var(--ac) !important; background: var(--ac3) !important; }
+.rt-blog { color: var(--ac) !important; background: var(--ac3) !important; border-color: rgba(194,214,240,0.14) !important; }
+
+/* Opportunity tags */
+.ot-vol { color: var(--ac) !important; background: var(--ac3) !important; }
+
+/* SEO health fix button */
+.hc-fix { color: var(--ac) !important; border-color: rgba(194,214,240,0.18) !important; font-family: var(--font-mono) !important; }
+.hc-fix:hover { background: var(--ac4) !important; border-color: rgba(194,214,240,0.32) !important; }
+
+/* Competitor fill */
+.comp-fill { background: linear-gradient(90deg, var(--ac2), var(--green)) !important; }
+.comp-domain { font-family: var(--font-mono) !important; }
+.comp-score  { font-family: var(--font-mono) !important; }
+
+/* Calendar today highlight */
+.cal-day.today { border-color: rgba(194,214,240,0.25) !important; background: rgba(194,214,240,0.04) !important; }
+.cal-day.today .cal-day-num { color: var(--ac) !important; }
+.cal-event.ce-blog { background: rgba(194,214,240,0.10) !important; color: var(--ac) !important; }
+
+/* Autopilot */
+.ap-label span { color: var(--green) !important; }
+.toggle.on { background: rgba(76,201,138,0.18) !important; border-color: rgba(76,201,138,0.28) !important; }
+.toggle.on::after { background: var(--green) !important; box-shadow: 0 0 5px var(--green) !important; }
+
+/* Sidebar top glow line */
+.sidebar::before { background: linear-gradient(90deg, transparent, var(--ac), transparent) !important; opacity: 0.25 !important; }
+
+/* Logo mark inner glow */
+.sb-logo-mark::after { background: linear-gradient(135deg, rgba(194,214,240,0.10), transparent) !important; }
+
+/* Stat card top accent line */
+.stat-card::before { background: var(--ac2) !important; opacity: 0.6; }
+
+/* Empty state */
+.empty-text { font-family: var(--font-mono) !important; }
+
+/* Chart: cooler line colour handled inline via JS variable — 
+   override here for canvas gradient fallback */
+
+/* ═══════════════════════════════════════════════
+   V5 OVERRIDE — softer green, rounding, spacing
+═══════════════════════════════════════════════ */
+
+/* Softer green */
+.status-dot       { background: var(--green) !important; box-shadow: 0 0 6px rgba(110,231,168,0.35) !important; }
+.nav-pill.live    { color: var(--green) !important; background: rgba(110,231,168,0.08) !important; border-color: rgba(110,231,168,0.22) !important; }
+.toggle.on        { background: rgba(110,231,168,0.14) !important; border-color: rgba(110,231,168,0.24) !important; }
+.toggle.on::after { background: var(--green) !important; box-shadow: 0 0 5px rgba(110,231,168,0.45) !important; }
+.rs-published     { color: var(--green) !important; background: rgba(110,231,168,0.08) !important; }
+.lsd-ok           { background: var(--green) !important; box-shadow: 0 0 4px rgba(110,231,168,0.35) !important; }
+.psb-on           { color: var(--green) !important; background: rgba(110,231,168,0.08) !important; border-color: rgba(110,231,168,0.18) !important; }
+.rt-article       { color: var(--green) !important; background: rgba(110,231,168,0.07) !important; border-color: rgba(110,231,168,0.14) !important; }
+.hc-ok .hc-icon   { color: var(--green) !important; }
+.delta.up         { color: var(--green) !important; }
+.stat-sub.up      { color: var(--green) !important; }
+.tp-d             { color: var(--green) !important; }
+.rank-num.good    { color: var(--green) !important; }
+.ap-label span    { color: var(--green) !important; }
+.comp-fill        { background: linear-gradient(90deg, var(--ac2), var(--green)) !important; }
+.df-easy          { background: var(--green) !important; }
+.ot-easy          { color: var(--green) !important; background: rgba(110,231,168,0.07) !important; }
+
+/* Rounding */
+.panel            { border-radius: 13px !important; }
+.stat-card        { border-radius: 13px !important; }
+.modal            { border-radius: 16px !important; }
+.btn              { border-radius: 8px !important; }
+.gen-btn          { border-radius: 8px !important; }
+.field-input,
+.field-select,
+.field-textarea   { border-radius: 8px !important; }
+.output-panel     { border-radius: 13px !important; }
+.brand-ctx        { border-radius: 8px !important; }
+.sb-brand         { border-radius: 10px !important; }
+.autopilot-row    { border-radius: 10px !important; }
+.sb-logo-mark     { border-radius: 8px !important; }
+.cal-day          { border-radius: 8px !important; }
+.pchip            { border-radius: 6px !important; }
+.profile-section  { border-radius: 13px !important; }
+.voice-box        { border-radius: 13px !important; }
+.row-type         { border-radius: 5px !important; }
+.row-status       { border-radius: 5px !important; }
+.nav-pill         { border-radius: 5px !important; }
+.toast            { border-radius: 13px !important; }
+.roi-cell         { border-radius: 10px !important; }
+.tab              { border-radius: 6px 6px 0 0 !important; }
+.diff-track       { border-radius: 3px !important; }
+
+/* Breathing room */
+.content          { padding: 32px 36px 64px !important; }
+.panel-hd         { padding: 16px 20px !important; }
+.panel-body       { padding: 22px !important; }
+.stat-card        { padding: 22px 22px 18px !important; }
+.row-item         { padding: 12px 20px !important; }
+.kw-table th      { padding: 10px 18px !important; }
+.kw-table td      { padding: 12px 18px !important; }
+.opp-row          { padding: 13px 18px !important; }
+.source-row       { padding: 10px 18px !important; }
+.top-post-row     { padding: 12px 18px !important; }
+.comp-row         { padding: 11px 18px !important; }
+.health-check     { padding: 11px 18px !important; }
+.log-row          { padding: 11px 18px !important; }
+.pub-platform     { padding: 14px 18px !important; }
+.nav-item         { padding: 9px 20px !important; }
+.topbar           { padding: 0 28px !important; }
+.modal-body       { padding: 22px 24px !important; }
+.modal-hd         { padding: 18px 24px !important; }
+.modal-foot       { padding: 14px 24px !important; }
+.brand-ctx        { padding: 10px 13px !important; margin-bottom: 16px !important; }
+.output-title     { padding: 16px 18px !important; }
+.output-preview   { padding: 14px 18px !important; }
+.output-stats     { padding: 10px 18px !important; }
+.output-actions   { padding: 12px 18px !important; gap: 8px !important; }
+.voice-box        { padding: 22px 24px !important; }
+.profile-section  { padding: 18px !important; }
+.cal-day          { padding: 9px 10px !important; min-height: 78px !important; }
+.field            { margin-bottom: 14px !important; }
+.grid-4           { gap: 16px !important; margin-bottom: 24px !important; }
+.grid-2           { gap: 16px !important; }
+.grid-main        { gap: 16px !important; }
+.grid-engine      { gap: 16px !important; }
+.sb-brand         { margin: 10px 14px !important; padding: 13px 14px !important; }
+.sb-logo          { padding: 24px 20px 20px !important; }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">⚡</div>
+    <div class="sb-wordmark">SEO<span>Flow</span></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="nav-group-label">Platform</div>
+
+    <div class="nav-item active" onclick="nav(this,'dashboard')">
+      <div class="nav-dot"></div>Dashboard
+    </div>
+    <div class="nav-item" onclick="nav(this,'engine')">
+      <div class="nav-dot"></div>Content Engine
+      <span class="nav-pill">AI</span>
+    </div>
+    <div class="nav-item" onclick="nav(this,'calendar')">
+      <div class="nav-dot"></div>Calendar
+      <span class="nav-pill" id="calPill">4</span>
+    </div>
+    <div class="nav-item" onclick="nav(this,'seo')">
+      <div class="nav-dot"></div>SEO Intelligence
+    </div>
+    <div class="nav-item" onclick="nav(this,'analytics')">
+      <div class="nav-dot"></div>Analytics
+    </div>
+    <div class="nav-item" onclick="nav(this,'publishing')">
+      <div class="nav-dot"></div>Publishing
+      <span class="nav-pill live">Live</span>
+    </div>
+
+    <div class="nav-group-label" style="margin-top:8px">Config</div>
+    <div class="nav-item" onclick="nav(this,'profile')">
+      <div class="nav-dot"></div>Brand Profile
+    </div>
+  </nav>
+
+  <div class="sb-brand" id="sbBrand">
+    <div class="sb-brand-name" id="sbName">—</div>
+    <div class="sb-brand-meta" id="sbMeta">loading profile</div>
+    <div class="sb-brand-status">
+      <div class="status-dot"></div>
+      <span id="sbTone">auto</span>
+    </div>
+  </div>
+
+  <div class="sb-footer">
+    <div class="autopilot-row" onclick="toggleAP()">
+      <div class="ap-label">auto_pilot <span id="apTxt">enabled</span></div>
+      <div class="toggle on" id="apToggle"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<div class="main">
+
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>seoflow</span>
+      <span class="sep">/</span>
+      <span class="current" id="breadcrumb">dashboard</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="nav(null,'profile')">brand profile</button>
+      <button class="btn btn-primary" onclick="nav(null,'engine')">+ generate</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="view active" id="view-dashboard">
+      <div class="grid-4 gap-20">
+        <div class="stat-card">
+          <div class="stat-label">Published</div>
+          <div class="stat-value" id="stPublished"><strong>0</strong></div>
+          <div class="stat-sub up" id="stPublishedSub">via AI engine</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Organic Traffic</div>
+          <div class="stat-value"><strong>8.4</strong>k</div>
+          <div class="stat-sub up">↑ 34% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Keywords Ranking</div>
+          <div class="stat-value" id="stKws"><strong>312</strong></div>
+          <div class="stat-sub up">↑ 47 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Hours Saved</div>
+          <div class="stat-value" id="stHours"><strong>0</strong>h</div>
+          <div class="stat-sub">vs manual writing</div>
+        </div>
+      </div>
+
+      <div class="grid-main">
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">Content Queue</span>
+            <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="nav(null,'engine')">+ new</button>
+          </div>
+          <div id="dashQueue">
+            <div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no content yet</div></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="panel">
+            <div class="panel-hd"><span class="panel-title">Connections</span></div>
+            <div id="dashConnections"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd"><span class="panel-title">This Week</span></div>
+            <div id="dashWeek">
+              <div style="padding:10px 14px;font-size:11px;color:var(--tx3);font-family:var(--font-mono)">no items scheduled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CONTENT ENGINE ══ -->
+    <div class="view" id="view-engine">
+      <div class="grid-engine">
+
+        <!-- Generator -->
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">AI Generator</span>
+            <span style="font-size:10px;color:var(--green);font-family:var(--font-mono)">● profile loaded</span>
+          </div>
+          <div class="panel-body">
+
+            <div class="brand-ctx">
+              <span class="brand-ctx-label">Context</span>
+              <span class="brand-ctx-value" id="ctxVal">loading brand profile...</span>
+            </div>
+
+            <div class="tab-row" style="margin-bottom:14px">
+              <div class="tab active" onclick="setTab(this,'blog')">Blog</div>
+              <div class="tab" onclick="setTab(this,'article')">Article</div>
+              <div class="tab" onclick="setTab(this,'social')">Social</div>
+              <div class="tab" onclick="setTab(this,'meta')">Meta SEO</div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Topic <span style="text-transform:none;letter-spacing:0;color:var(--tx4)">— or leave blank for AI to select</span></label>
+              <input class="field-input" id="genTopic" placeholder="e.g. Why local SEO matters for small businesses in 2025" />
+            </div>
+
+            <div class="field-row" style="margin-bottom:12px">
+              <div class="field">
+                <label class="field-label">Tone</label>
+                <select class="field-select" id="genTone">
+                  <option value="">Use brand default</option>
+                  <option>Professional</option>
+                  <option>Conversational</option>
+                  <option>Bold & Direct</option>
+                  <option>Educational</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field-label">Publish To</label>
+                <select class="field-select" id="genPlatform">
+                  <option>WordPress</option>
+                  <option>LinkedIn</option>
+                  <option>Twitter / X</option>
+                  <option>All Platforms</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field" style="margin-bottom:14px">
+              <label class="field-label">Focus Keyword</label>
+              <input class="field-input" id="genKeyword" placeholder="e.g. local SEO services (AI picks if blank)" />
+            </div>
+
+            <button class="gen-btn" id="genBtn" onclick="generate()">
+              <span id="genIcon">Generate</span>
+              <div class="spinner" id="genSpinner"></div>
+            </button>
+            <div class="load-bar" id="loadBar"><div class="load-bar-fill"></div></div>
+
+            <div class="output-panel" id="outputPanel">
+              <div class="output-hd">
+                <span class="output-type" id="outType">BLOG POST</span>
+                <div style="display:flex;gap:5px">
+                  <button class="btn btn-ghost" style="font-size:10px;padding:3px 8px" onclick="copyOutput()">copy</button>
+                </div>
+              </div>
+              <div class="output-title" id="outTitle"></div>
+              <div class="output-preview" id="outPreview"></div>
+              <div class="output-stats">
+                <span class="output-stat"><span id="outWords">—</span> words</span>
+                <span class="output-stat"><span id="outRead">—</span> min read</span>
+                <span class="output-stat">keyword: <span id="outKw" style="color:var(--ac)">—</span></span>
+              </div>
+              <div class="output-actions">
+                <button class="btn btn-primary" style="font-size:11px" onclick="doPublish()">Publish now</button>
+                <button class="btn btn-dim" style="font-size:11px" onclick="doSchedule()">Schedule</button>
+                <button class="btn btn-ghost" style="font-size:11px" onclick="doDraft()">Save draft</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right col -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="panel">
+            <div class="panel-hd">
+              <span class="panel-title">Queue</span>
+              <span style="font-size:10px;font-family:var(--font-mono);color:var(--tx3)" id="qCount">0 items</span>
+            </div>
+            <div id="engineQueue" style="max-height:280px;overflow-y:auto">
+              <div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">queue empty</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-hd"><span class="panel-title">Content Ideas</span></div>
+            <div id="ideaList">
+              <div style="padding:10px 14px;font-size:11px;color:var(--tx3);font-family:var(--font-mono)">generating ideas...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CALENDAR ══ -->
+    <div class="view" id="view-calendar">
+      <div style="display:grid;grid-template-columns:1fr 260px;gap:14px">
+        <div class="panel">
+          <div class="panel-hd">
+            <div style="display:flex;align-items:center;gap:12px">
+              <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="shiftMonth(-1)">←</button>
+              <span class="panel-title" id="calTitle" style="font-size:12px;color:var(--tx)">March 2026</span>
+              <button class="btn btn-ghost" style="padding:4px 8px;font-size:11px" onclick="shiftMonth(1)">→</button>
+            </div>
+            <button class="btn btn-primary" style="font-size:10px;padding:5px 10px" onclick="openSchedModal()">+ schedule</button>
+          </div>
+          <div class="panel-body" style="padding:12px">
+            <div class="cal-dow-row">
+              <div class="cal-dow">SUN</div><div class="cal-dow">MON</div><div class="cal-dow">TUE</div>
+              <div class="cal-dow">WED</div><div class="cal-dow">THU</div><div class="cal-dow">FRI</div>
+              <div class="cal-dow">SAT</div>
+            </div>
+            <div class="cal-grid-days" id="calDays"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="panel">
+            <div class="panel-hd"><span class="panel-title">Auto-publish</span></div>
+            <div id="autoPublishList"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-hd"><span class="panel-title">Upcoming</span></div>
+            <div id="upcomingList">
+              <div style="padding:10px 14px;font-size:11px;color:var(--tx3);font-family:var(--font-mono)">nothing scheduled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SEO INTELLIGENCE ══ -->
+    <div class="view" id="view-seo">
+      <div class="grid-2 gap-14">
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">Keyword Rankings</span>
+            <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="toast('Refreshing via GSC...', true)">↻ refresh</button>
+          </div>
+          <table class="kw-table" id="kwTable">
+            <thead><tr>
+              <th>Keyword</th><th>Rank</th><th>Δ</th><th>Vol</th><th>Difficulty</th>
+            </tr></thead>
+            <tbody id="kwBody"></tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">Content Opportunities</span>
+            <span style="font-size:9px;font-family:var(--font-mono);color:var(--green)">AI-detected</span>
+          </div>
+          <div id="oppList"></div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Competitor Landscape</span></div>
+          <div id="compList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">SEO Health</span>
+            <span style="font-family:var(--font-mono);font-size:12px;color:var(--tx2)" id="healthScore">74 / 100</span>
+          </div>
+          <div id="healthList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ANALYTICS ══ -->
+    <div class="view" id="view-analytics">
+      <div class="grid-4 gap-20">
+        <div class="stat-card">
+          <div class="stat-label">Organic Sessions</div>
+          <div class="stat-value"><strong>8,421</strong></div>
+          <div class="stat-sub up">↑ 34%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg. Position</div>
+          <div class="stat-value"><strong>14</strong>.2</div>
+          <div class="stat-sub up">↑ 3.1 positions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Click-Through Rate</div>
+          <div class="stat-value"><strong>3.8</strong>%</div>
+          <div class="stat-sub up">↑ 0.6%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Impressions</div>
+          <div class="stat-value"><strong>218</strong>k</div>
+          <div class="stat-sub up">↑ 28%</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 220px;gap:14px;margin-bottom:14px">
+        <div class="panel">
+          <div class="panel-hd">
+            <span class="panel-title">Traffic</span>
+            <div style="display:flex;gap:3px">
+              <span class="tab active" style="padding:3px 8px;font-size:10px;cursor:pointer" onclick="setChartTab(this)">7d</span>
+              <span class="tab" style="padding:3px 8px;font-size:10px;cursor:pointer" onclick="setChartTab(this)">30d</span>
+              <span class="tab" style="padding:3px 8px;font-size:10px;cursor:pointer" onclick="setChartTab(this)">90d</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap"><canvas id="trafficCanvas"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Sources</span></div>
+          <div id="sourceList"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Top Posts</span></div>
+          <div id="topPostList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Content ROI</span></div>
+          <div class="panel-body">
+            <div class="grid-2" id="roiGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PUBLISHING ══ -->
+    <div class="view" id="view-publishing">
+      <div class="grid-2 gap-14">
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Connected Platforms</span></div>
+          <div id="pubPlatformList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-hd"><span class="panel-title">Settings</span></div>
+          <div class="panel-body">
+            <div class="field">
+              <label class="field-label">WordPress URL</label>
+              <input class="field-input" id="wpUrl" placeholder="https://yoursite.com" />
+            </div>
+            <div class="field">
+              <label class="field-label">Default Status</label>
+              <select class="field-select">
+                <option>Publish immediately</option>
+                <option>Save as draft</option>
+                <option>Pending review</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label">Auto-publish Delay</label>
+              <select class="field-select">
+                <option>Immediately</option>
+                <option selected>30 minutes</option>
+                <option>2 hours</option>
+                <option>Next slot</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="toast('Settings saved',true)">Save</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <div class="panel-hd">
+          <span class="panel-title">Publish Log</span>
+          <button class="btn btn-ghost" style="font-size:10px;padding:4px 9px" onclick="pubLog=[];renderPubLog()">clear</button>
+        </div>
+        <div id="pubLogList">
+          <div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no activity yet</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BRAND PROFILE ══ -->
+    <div class="view" id="view-profile">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <div style="font-size:18px;font-weight:600;color:var(--tx)" id="profName">Brand Profile</div>
+          <div style="font-size:11px;color:var(--tx3);font-family:var(--font-mono);margin-top:3px" id="profMeta">—</div>
+        </div>
+        <button class="btn btn-ghost" onclick="toast('Opens onboarding editor in full build',true)">edit profile</button>
+      </div>
+
+      <div class="grid-2 gap-14" id="profileGrid"></div>
+
+      <div style="margin-top:14px">
+        <div class="section-title">Brand Voice Statement</div>
+        <div class="voice-box" id="voiceBox">Loading...</div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-primary" style="font-size:11px" onclick="regenVoice()">↻ Regenerate</button>
+          <button class="btn btn-ghost" style="font-size:11px" onclick="testVoice()">Test voice</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════ SCHEDULE MODAL ════════════ -->
+<div class="modal-overlay" id="schedModal">
+  <div class="modal">
+    <div class="modal-hd">
+      <span class="modal-title">Schedule Content</span>
+      <button class="modal-close" onclick="closeModal('schedModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label class="field-label">Title</label>
+        <input class="field-input" id="mTitle" placeholder="Leave blank to auto-generate" />
+      </div>
+      <div class="field-row" style="margin-bottom:12px">
+        <div class="field">
+          <label class="field-label">Type</label>
+          <select class="field-select" id="mType">
+            <option value="blog">Blog Post</option>
+            <option value="article">Article</option>
+            <option value="social">Social</option>
+            <option value="meta">Meta SEO</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Platform</label>
+          <select class="field-select" id="mPlatform">
+            <option>WordPress</option>
+            <option>LinkedIn</option>
+            <option>Twitter/X</option>
+            <option>All</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row" style="margin-bottom:12px">
+        <div class="field">
+          <label class="field-label">Date</label>
+          <input class="field-input" id="mDate" type="date" />
+        </div>
+        <div class="field">
+          <label class="field-label">Time</label>
+          <input class="field-input" id="mTime" type="time" value="09:00" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Auto-generate?</label>
+        <select class="field-select" id="mAutoGen">
+          <option value="1">Yes — from brand profile</option>
+          <option value="0">No — I'll provide content</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('schedModal')">cancel</button>
+      <button class="btn btn-primary" onclick="confirmSched()">Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl">
+  <span class="toast-icon" id="toastIcon">●</span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const API = 'https://api.anthropic.com/v1/messages';
+
+// ── State ──────────────────────────────────────
+let brand = null;
+let queue = [];
+let pubLog = [];
+let scheduled = [];
+let curTab = 'blog';
+let curMonth = new Date(2026, 2, 1);
+let generated = null;
+let apOn = true;
+
+const platforms = [
+  {id:'wp',  name:'WordPress', icon:'🌐', url:'yoursite.com',     connected:true,  posts:0},
+  {id:'li',  name:'LinkedIn',  icon:'💼', url:'linkedin.com',     connected:true,  posts:0},
+  {id:'tw',  name:'Twitter/X', icon:'𝕏',  url:'twitter.com',      connected:true,  posts:0},
+  {id:'ig',  name:'Instagram', icon:'◎',  url:'instagram.com',    connected:false, posts:0},
+  {id:'fb',  name:'Facebook',  icon:'⬡',  url:'facebook.com',     connected:false, posts:0},
+  {id:'gsc', name:'Search Console', icon:'◈', url:'search.google.com', connected:false, posts:0},
+];
+
+const kwData = [
+  {kw:'SEO services near me',    rank:8,  d:+3, vol:'2.4k', diff:45},
+  {kw:'local SEO marketing',     rank:12, d:+5, vol:'1.8k', diff:38},
+  {kw:'content marketing agency',rank:23, d:-1, vol:'3.1k', diff:62},
+  {kw:'small business SEO',      rank:17, d:+7, vol:'2.9k', diff:51},
+  {kw:'website ranking tips',    rank:34, d:+2, vol:'890',  diff:29},
+  {kw:'SEO audit checklist',     rank:41, d: 0, vol:'1.2k', diff:35},
+  {kw:'blog content strategy',   rank:28, d:+4, vol:'1.5k', diff:44},
+];
+
+const opps = [
+  {title:'How to rank #1 on Google Maps in 2025', vol:'3.2k', diff:'easy'},
+  {title:'SEO checklist for brand-new websites',  vol:'2.8k', diff:'easy'},
+  {title:'Local SEO vs national SEO explained',   vol:'1.9k', diff:'medium'},
+  {title:'Best time to post on LinkedIn for B2B', vol:'1.4k', diff:'easy'},
+  {title:'How long does SEO take to show results',vol:'5.1k', diff:'medium'},
+];
+
+const comps = [
+  {d:'agencyX.com',  s:82},
+  {d:'seotop.co.uk', s:76},
+  {d:'growthco.io',  s:71},
+  {d:'searchpro.com',s:65},
+];
+
+const healthChecks = [
+  {l:'Title tags optimised',        ok:true},
+  {l:'Meta descriptions present',   ok:true},
+  {l:'Site speed < 3s',             ok:true},
+  {l:'Mobile responsive',           ok:true},
+  {l:'Schema markup',               ok:false},
+  {l:'Internal linking structure',  ok:false},
+  {l:'XML sitemap submitted',       ok:true},
+  {l:'Core Web Vitals passing',     ok:false},
+];
+
+const calSeeds = {4:[{t:'blog',n:'SEO Strategy 2025'}], 7:[{t:'social',n:'LinkedIn Post'},{t:'blog',n:'Content Calendar Guide'}], 11:[{t:'article',n:'Local SEO Deep Dive'}], 14:[{t:'social',n:'Twitter Thread'}], 18:[{t:'blog',n:'Keyword Research Tips'}], 21:[{t:'social',n:'Weekly Insight'}], 25:[{t:'article',n:'On-Page SEO Checklist'}]};
+
+// ── Init ──────────────────────────────────────
+async function init() {
+  await loadBrand();
+  renderAll();
+  loadIdeas();
+}
+
+async function loadBrand() {
+  try {
+    const r = await window.storage.get('brand-profile');
+    if (r?.value) brand = JSON.parse(r.value);
+  } catch {}
+  if (!brand) brand = {
+    name:'Your Business', industry:'Marketing', type:'B2B',
+    tone:'conversational',
+    personalities:['Expert','Trustworthy','Results-driven'],
+    values:['Customer first','Quality','Integrity'],
+    goals:['Generate leads','Build brand awareness'],
+    keywords:['SEO services','content marketing','local SEO'],
+    pillars:['How-to guides','Tips & best practices'],
+    idealCustomer:'Small business owners who want to grow online',
+    differentiators:'AI-powered content at a fraction of agency cost',
+    voiceSummary:'We create expert, conversational content that helps businesses grow online — building trust and driving results through every piece we publish.',
+  };
+}
+
+function renderAll() {
+  applyBrand();
+  renderDashConnections();
+  renderSEO();
+  renderAnalytics();
+  renderPubPlatforms();
+  renderPubLog();
+  renderCalendar();
+  renderAutoPublish();
+  renderProfile();
+  updateStats();
+}
+
+function applyBrand() {
+  document.getElementById('sbName').textContent = brand.name;
+  document.getElementById('sbMeta').textContent = brand.industry + ' · ' + (brand.type||'');
+  document.getElementById('sbTone').textContent = (brand.tone||'auto') + ' · active';
+  document.getElementById('ctxVal').textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
+  document.getElementById('profName').textContent = brand.name;
+  document.getElementById('profMeta').textContent = brand.industry + ' / ' + (brand.type||'');
+}
+
+// ── Navigation ─────────────────────────────────
+function nav(el, id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.nav-item').forEach(n => { if(n.textContent.trim().toLowerCase().replace(/\s+/g,'-').includes(id)) n.classList.add('active'); });
+  document.getElementById('breadcrumb').textContent = id.replace('-',' ');
+  if (id==='analytics') setTimeout(drawChart,50);
+  if (id==='calendar') renderCalendar();
+  if (id==='profile') renderProfile();
+}
+
+// ── Content Engine ─────────────────────────────
+function setTab(el, t) {
+  document.querySelectorAll('.tab-row .tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  curTab = t;
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+async function generate() {
+  const topic   = document.getElementById('genTopic').value.trim();
+  const toneOvr = document.getElementById('genTone').value;
+  const platform= document.getElementById('genPlatform').value;
+  const kw      = document.getElementById('genKeyword').value.trim();
+
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('genSpinner');
+  const icon = document.getElementById('genIcon');
+  const lb = document.getElementById('loadBar');
+
+  btn.disabled=true; icon.textContent='Generating'; spinner.style.display='block';
+  lb.classList.add('on');
+  document.getElementById('outputPanel').classList.remove('show');
+
+  const tone     = toneOvr || brand.tone || 'conversational';
+  const kws      = kw || (brand.keywords||[]).slice(0,3).join(', ');
+  const typeMap  = { blog:'a 1000-word SEO blog post', article:'a 1500-word in-depth article', social:'3 social media posts (LinkedIn, Twitter, Instagram) labelled separately', meta:'an SEO title tag (max 60 chars), meta description (max 160 chars), and 3 H2 suggestions' };
+
+  const prompt = `Write ${typeMap[curTab]} for ${brand.name}, a ${brand.industry} company.
+
+Voice: ${brand.voiceSummary||tone+' tone'}
+Audience: ${brand.idealCustomer||'small business owners'}
+Keywords to weave in naturally: ${kws}
+Platform: ${platform}
+${topic ? 'Topic: "'+topic+'"' : 'Pick the most relevant topic from the keywords above.'}
+
+Rules:
+— Tone must be ${tone}
+— First line must be the title/headline only
+— Include H2 subheadings (for blog/article)
+— End with a CTA relevant to ${brand.name}
+— Final line: META: [2-sentence meta description under 160 chars]
+
+Output content only. Start with the title.`;
+
+  try {
+    const res = await fetch(API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    showOutput(text, platform, kws.split(',')[0].trim());
+  } catch {
+    toast('Generation failed — check connection', false);
+  } finally {
+    btn.disabled=false; icon.textContent='Generate'; spinner.style.display='none';
+    lb.classList.remove('on');
+    const fill = lb.querySelector('.load-bar-fill');
+    fill.style.animation='none'; fill.offsetHeight; fill.style.animation='';
+  }
+}
+
+function showOutput(text, platform, kw) {
+  const lines = text.split('\n').filter(l=>l.trim());
+  const title = lines[0].replace(/^#+\s*/,'').replace(/\*\*/g,'');
+  const body  = lines.slice(1).join('\n');
+  const words = text.split(/\s+/).length;
+  generated   = { title, body, full:text, type:curTab, platform, kw };
+
+  document.getElementById('outType').textContent    = curTab.toUpperCase().replace('META','META SEO');
+  document.getElementById('outTitle').textContent   = title;
+  document.getElementById('outPreview').textContent = body.slice(0,400);
+  document.getElementById('outWords').textContent   = '~'+words;
+  document.getElementById('outRead').textContent    = Math.ceil(words/200);
+  document.getElementById('outKw').textContent      = kw;
+  document.getElementById('outputPanel').classList.add('show');
+  toast('Content generated', true);
+}
+
+function doPublish() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'published', generated.type);
+  addPubLog(generated.title, generated.platform, 'ok');
+  platforms.forEach(p=>{ if(generated.platform.toLowerCase().includes(p.name.toLowerCase())) p.posts++; });
+  renderPubPlatforms();
+  toast('Published to '+generated.platform, true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function doSchedule() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'scheduled', generated.type);
+  toast('Scheduled for '+generated.platform, true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function doDraft() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'draft', generated.type);
+  toast('Saved as draft', true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function copyOutput() {
+  if (!generated) return;
+  navigator.clipboard?.writeText(generated.full);
+  toast('Copied to clipboard', true);
+}
+
+// ── Queue ──────────────────────────────────────
+function pushQueue(title, platform, status, type='blog') {
+  const item = { id:Date.now(), title, platform, status, type, ts: new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) };
+  queue.unshift(item);
+  try { window.storage.set('queue', JSON.stringify(queue)); } catch {}
+  renderQueue();
+  renderDashQueue();
+  updateStats();
+}
+
+function renderQueue() {
+  const el = document.getElementById('engineQueue');
+  document.getElementById('qCount').textContent = queue.length + ' item' + (queue.length!==1?'s':'');
+  if (!queue.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">queue empty</div></div>'; return; }
+  el.innerHTML = queue.slice(0,10).map(i=>`
+    <div class="row-item">
+      <span class="row-type rt-${i.type||'blog'}">${i.type||'blog'}</span>
+      <div class="row-info"><div class="row-title">${i.title}</div><div class="row-meta">${i.platform} · ${i.ts}</div></div>
+      <span class="row-status rs-${i.status}">${i.status}</span>
+    </div>`).join('');
+}
+
+function renderDashQueue() {
+  const el = document.getElementById('dashQueue');
+  if (!queue.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no content yet</div></div>'; return; }
+  el.innerHTML = queue.slice(0,6).map(i=>`
+    <div class="row-item">
+      <span class="row-type rt-${i.type||'blog'}">${i.type||'blog'}</span>
+      <div class="row-info"><div class="row-title">${i.title}</div><div class="row-meta">${i.platform} · ${i.ts}</div></div>
+      <span class="row-status rs-${i.status}">${i.status}</span>
+    </div>`).join('');
+}
+
+// ── Stats ──────────────────────────────────────
+function updateStats() {
+  const pub = queue.filter(i=>i.status==='published').length;
+  document.getElementById('stPublished').innerHTML = `<strong>${pub}</strong>`;
+  document.getElementById('stPublishedSub').textContent = `${pub>0?'↑ '+pub+' published':''} via AI engine`;
+  document.getElementById('stKws').innerHTML = `<strong>${312+Math.floor(pub*2)}</strong>`;
+  document.getElementById('stHours').innerHTML = `<strong>${Math.round(pub*1.5)}</strong>h`;
+}
+
+// ── Ideas ──────────────────────────────────────
+async function loadIdeas() {
+  const el = document.getElementById('ideaList');
+  const kws = (brand.keywords||[]).join(', ');
+  const industry = brand.industry || 'marketing';
+  try {
+    const res = await fetch(API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user', content:`Generate 5 SEO blog title ideas for a ${industry} business targeting: ${kws}. Return ONLY a JSON array of strings. No other text.`}] })
+    });
+    const data = await res.json();
+    let txt = data.content?.[0]?.text||'[]';
+    txt = txt.replace(/```json|```/g,'').trim();
+    const ideas = JSON.parse(txt);
+    el.innerHTML = ideas.map(idea=>`
+      <div class="idea-row" onclick="useIdea('${idea.replace(/'/g,"\\'")}')">
+        <div class="idea-dot"></div>
+        <div class="idea-text">${idea}</div>
+        <span class="idea-use">use →</span>
+      </div>`).join('');
+  } catch {
+    const fallback = ['10 SEO mistakes hurting your rankings','How to write blogs Google loves','Local SEO guide for trades businesses','Why content consistency drives traffic','Keyword research for non-technical founders'];
+    el.innerHTML = fallback.map(idea=>`
+      <div class="idea-row" onclick="useIdea('${idea}')">
+        <div class="idea-dot"></div>
+        <div class="idea-text">${idea}</div>
+        <span class="idea-use">use →</span>
+      </div>`).join('');
+  }
+}
+
+function useIdea(idea) {
+  nav(null,'engine');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes('Content Engine')) n.classList.add('active'); else n.classList.remove('active'); });
+  document.getElementById('genTopic').value = idea;
+  toast('Topic loaded', true);
+}
+
+// ── Calendar ───────────────────────────────────
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent = months[curMonth.getMonth()] + ' ' + curMonth.getFullYear();
+
+  const first = new Date(curMonth.getFullYear(), curMonth.getMonth(), 1).getDay();
+  const days  = new Date(curMonth.getFullYear(), curMonth.getMonth()+1, 0).getDate();
+  const prev  = new Date(curMonth.getFullYear(), curMonth.getMonth(), 0).getDate();
+  const today = new Date();
+
+  const evts = {...calSeeds};
+  scheduled.forEach(s=>{
+    const d = new Date(s.date);
+    if(d.getMonth()===curMonth.getMonth()&&d.getFullYear()===curMonth.getFullYear()) {
+      const k = d.getDate();
+      if(!evts[k]) evts[k]=[];
+      evts[k].push({t:s.type,n:s.title||'Scheduled'});
+    }
+  });
+
+  let html='';
+  for(let i=first-1;i>=0;i--) html+=`<div class="cal-day other"><div class="cal-day-num">${prev-i}</div></div>`;
+  for(let d=1;d<=days;d++){
+    const isToday=today.getDate()===d&&today.getMonth()===curMonth.getMonth()&&today.getFullYear()===curMonth.getFullYear();
+    const es=evts[d]||[];
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="openSchedOnDay(${d})">
+      <div class="cal-day-num">${d}</div>
+      ${es.slice(0,2).map(e=>`<div class="cal-event ce-${e.t}">${e.n}</div>`).join('')}
+      ${es.length>2?`<div style="font-size:9px;color:var(--tx3);font-family:var(--font-mono)">+${es.length-2}</div>`:''}
+    </div>`;
+  }
+  const rem = (first+days)%7; if(rem) for(let d=1;d<=7-rem;d++) html+=`<div class="cal-day other"><div class="cal-day-num">${d}</div></div>`;
+  document.getElementById('calDays').innerHTML = html;
+}
+
+function shiftMonth(d) { curMonth=new Date(curMonth.getFullYear(),curMonth.getMonth()+d,1); renderCalendar(); }
+
+function renderAutoPublish() {
+  document.getElementById('autoPublishList').innerHTML = platforms.slice(0,4).map(p=>`
+    <div class="pub-platform">
+      <div class="pub-icon">${p.icon}</div>
+      <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.connected?'weekly':'not connected'}</div></div>
+      <div class="toggle ${p.connected?'on':''}" onclick="this.classList.toggle('on')"></div>
+    </div>`).join('');
+}
+
+function openSchedModal() {
+  document.getElementById('mDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('schedModal').classList.add('show');
+}
+
+function openSchedOnDay(d) {
+  const dt=new Date(curMonth.getFullYear(),curMonth.getMonth(),d);
+  document.getElementById('mDate').value=dt.toISOString().split('T')[0];
+  document.getElementById('schedModal').classList.add('show');
+}
+
+function confirmSched() {
+  const title=document.getElementById('mTitle').value||'AI-generated';
+  const type=document.getElementById('mType').value;
+  const platform=document.getElementById('mPlatform').value;
+  const date=document.getElementById('mDate').value;
+  scheduled.push({title,type,platform,date});
+  document.getElementById('calPill').textContent=scheduled.length+4;
+  renderCalendar();
+  closeModal('schedModal');
+  toast('Scheduled: '+title, true);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ── Dashboard Connections ──────────────────────
+function renderDashConnections() {
+  document.getElementById('dashConnections').innerHTML = platforms.slice(0,6).map(p=>`
+    <div class="pub-platform" style="padding:9px 14px">
+      <div class="pub-icon" style="font-size:14px">${p.icon}</div>
+      <div style="flex:1"><div class="pub-name" style="font-size:11px">${p.name}</div></div>
+      <span class="pub-status-badge ${p.connected?'psb-on':'psb-off'}">${p.connected?'live':'off'}</span>
+    </div>`).join('');
+}
+
+// ── SEO ────────────────────────────────────────
+function renderSEO() {
+  document.getElementById('kwBody').innerHTML = kwData.map(k=>{
+    const g=k.rank<=15?'good':k.rank<=30?'mid':'';
+    const dc=k.diff<40?'df-easy':k.diff<60?'df-med':'df-hard';
+    const dt=k.d>0?`<span class="delta up">+${k.d}</span>`:k.d<0?`<span class="delta dn">${k.d}</span>`:`<span style="color:var(--tx3);font-size:10px">—</span>`;
+    return `<tr>
+      <td style="font-weight:500;color:var(--tx)">${k.kw}</td>
+      <td><span class="rank-num ${g}">#${k.rank}</span></td>
+      <td>${dt}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--tx3)">${k.vol}</td>
+      <td><div class="diff-track"><div class="diff-fill ${dc}" style="width:${k.diff}%"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('oppList').innerHTML = opps.map(o=>`
+    <div class="opp-row" onclick="loadOpp('${o.title.replace(/'/g,"\\'")}')">
+      <div class="opp-title">${o.title}</div>
+      <div class="opp-tags">
+        <span class="opp-tag ot-vol">${o.vol}/mo</span>
+        <span class="opp-tag ${o.diff==='easy'?'ot-easy':'ot-med'}">${o.diff}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('compList').innerHTML = comps.map(c=>`
+    <div class="comp-row">
+      <span class="comp-domain">${c.d}</span>
+      <div class="comp-track"><div class="comp-fill" style="width:${c.s}%"></div></div>
+      <span class="comp-score">${c.s}</span>
+    </div>`).join('');
+
+  document.getElementById('healthList').innerHTML = healthChecks.map(h=>`
+    <div class="health-check ${h.ok?'hc-ok':'hc-bad'}">
+      <span class="hc-icon" style="color:${h.ok?'var(--green)':'var(--tx3)'}">${h.ok?'✓':'✗'}</span>
+      <span class="hc-label">${h.l}</span>
+      ${!h.ok?`<span class="hc-fix" onclick="toast('Generating fix for: '+\`${h.l}\`,true)">fix</span>`:''}
+    </div>`).join('');
+}
+
+function loadOpp(title) {
+  nav(null,'engine');
+  document.getElementById('genTopic').value=title;
+  toast('Opportunity loaded', true);
+}
+
+// ── Analytics ──────────────────────────────────
+function renderAnalytics() {
+  const sources=[
+    {l:'Organic Search',s:58,c:'var(--ac)'},
+    {l:'Direct',        s:22,c:'var(--ac2)'},
+    {l:'Social Media',  s:12,c:'var(--amber)'},
+    {l:'Referral',      s: 8,c:'var(--tx2)'},
+  ];
+  document.getElementById('sourceList').innerHTML = sources.map(s=>`
+    <div class="source-row">
+      <div class="source-dot" style="background:${s.c}"></div>
+      <div class="source-label">${s.l}</div>
+      <div class="source-bar"><div class="source-fill" style="width:${s.s}%;background:${s.c}"></div></div>
+      <div class="source-pct">${s.s}%</div>
+    </div>`).join('');
+
+  const posts=[
+    {t:'10 SEO Mistakes Killing Your Traffic',   v:'1,842',d:'+34%'},
+    {t:'How to Rank on Google Maps (2025)',       v:'1,203',d:'+28%'},
+    {t:'Local SEO Guide for Small Businesses',   v:'891',  d:'+19%'},
+    {t:'Why Blog Consistency Drives Traffic',    v:'654',  d:'+12%'},
+    {t:'Content Calendar Template + Tips',       v:'412',  d:'+8%'},
+  ];
+  document.getElementById('topPostList').innerHTML = posts.map((p,i)=>`
+    <div class="top-post-row">
+      <div class="tp-n">${i+1}</div>
+      <div class="tp-info"><div class="tp-t">${p.t}</div><div class="tp-v">${p.v} sessions</div></div>
+      <div class="tp-d">${p.d}</div>
+    </div>`).join('');
+
+  const pub = queue.filter(i=>i.status==='published').length;
+  document.getElementById('roiGrid').innerHTML = [
+    {l:'Content Created',  v:String(pub)||'0',    s:'by AI engine'},
+    {l:'Time per Post',    v:'4 min',    s:'vs 3hr manual'},
+    {l:'Cost per Post',    v:'£0.08',    s:'vs £250 agency'},
+    {l:'Value Generated',  v:`£${(pub*250).toLocaleString()||'0'}`, s:'equivalent'},
+  ].map(r=>`<div class="roi-cell"><div class="roi-label">${r.l}</div><div class="roi-val">${r.v}</div><div class="roi-sub">${r.s}</div></div>`).join('');
+}
+
+function drawChart() {
+  const canvas = document.getElementById('trafficCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth||500, H=140;
+  canvas.width=W; canvas.height=H;
+  const data=[320,480,420,610,580,720,690,840,780,920,870,1050,980,1180];
+  const max=Math.max(...data);
+  const pad={t:10,r:12,b:16,l:28};
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const pts=data.map((v,i)=>({x:pad.l+(i/(data.length-1))*pw, y:pad.t+ph-(v/max)*ph}));
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let i=0;i<4;i++) {
+    const y=pad.t+(ph/3)*i;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+pw,y); ctx.stroke();
+  }
+
+  // Fill
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ph);
+  grad.addColorStop(0,'rgba(194,214,240,0.12)'); grad.addColorStop(1,'rgba(194,214,240,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.lineTo(pts[pts.length-1].x,pad.t+ph); ctx.lineTo(pts[0].x,pad.t+ph); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.strokeStyle='rgba(194,214,240,0.70)'; ctx.lineWidth=1.5; ctx.stroke();
+}
+
+function setChartTab(el) {
+  document.querySelectorAll('#view-analytics .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  drawChart();
+}
+
+// ── Publishing ─────────────────────────────────
+function renderPubPlatforms() {
+  document.getElementById('pubPlatformList').innerHTML = platforms.map(p=>`
+    <div class="pub-platform" onclick="togglePlatform('${p.id}')">
+      <div class="pub-icon">${p.icon}</div>
+      <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.url}</div></div>
+      <span class="pub-status-badge ${p.connected?'psb-on':'psb-off'}">${p.connected?'connected':'connect'}</span>
+    </div>`).join('');
+}
+
+function togglePlatform(id) {
+  const p=platforms.find(x=>x.id===id);
+  if(!p) return;
+  p.connected=!p.connected;
+  renderPubPlatforms();
+  renderDashConnections();
+  toast((p.connected?'Connected: ':'Disconnected: ')+p.name, p.connected);
+}
+
+function addPubLog(title, where, status) {
+  pubLog.unshift({title, where, status, time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  renderPubLog();
+}
+
+function renderPubLog() {
+  const el=document.getElementById('pubLogList');
+  if(!pubLog.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no activity yet</div></div>';return;}
+  el.innerHTML=pubLog.map(l=>`
+    <div class="log-row">
+      <div class="log-status-dot lsd-${l.status==='ok'?'ok':l.status==='err'?'err':'pnd'}"></div>
+      <div class="log-title">${l.title}</div>
+      <div class="log-where">${l.where}</div>
+      <div class="log-time">${l.time}</div>
+    </div>`).join('');
+}
+
+// ── Brand Profile ──────────────────────────────
+function renderProfile() {
+  if(!brand) return;
+  document.getElementById('profName').textContent=brand.name;
+  document.getElementById('profMeta').textContent=brand.industry+' / '+(brand.type||'');
+  document.getElementById('voiceBox').textContent=brand.voiceSummary||'No voice statement yet.';
+
+  const chips=(arr,cls)=>(arr||[]).map(v=>`<span class="pchip ${cls}">${v}</span>`).join('');
+  document.getElementById('profileGrid').innerHTML=`
+    <div class="profile-section"><div class="profile-sec-label">Voice & Tone</div><div class="profile-chips"><span class="pchip ac">${brand.tone||'conversational'}</span>${chips(brand.personalities,'ac')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Core Values</div><div class="profile-chips">${chips(brand.values,'gn')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Goals</div><div class="profile-chips">${chips(brand.goals,'am')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Keywords</div><div class="profile-chips">${chips(brand.keywords,'')}</div></div>
+    <div class="profile-section" style="grid-column:1/-1"><div class="profile-sec-label">Ideal Customer</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">${brand.idealCustomer||'—'}</div></div>
+    <div class="profile-section" style="grid-column:1/-1"><div class="profile-sec-label">Differentiators</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">${brand.differentiators||'—'}</div></div>
+  `;
+}
+
+async function regenVoice() {
+  document.getElementById('voiceBox').textContent='Regenerating...';
+  try {
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Write a 2-3 sentence brand voice statement for ${brand.name}, a ${brand.industry} company. Tone: ${brand.tone}. Values: ${(brand.values||[]).join(', ')}. Return only the statement, no preamble.`}]})});
+    const data=await res.json();
+    brand.voiceSummary=data.content?.[0]?.text||'';
+    document.getElementById('voiceBox').textContent=brand.voiceSummary;
+    try{await window.storage.set('brand-profile',JSON.stringify(brand));}catch{}
+    toast('Voice regenerated',true);
+  } catch { toast('Failed to regenerate',false); }
+}
+
+function testVoice() { useIdea('Why our approach is different from every other agency'); }
+
+// ── Autopilot ──────────────────────────────────
+function toggleAP() {
+  apOn=!apOn;
+  document.getElementById('apToggle').classList.toggle('on',apOn);
+  document.getElementById('apTxt').textContent=apOn?'enabled':'paused';
+  toast('Auto-pilot '+(apOn?'enabled':'paused'), apOn);
+}
+
+// ── Toast ──────────────────────────────────────
+let toastT;
+function toast(msg, ok=true) {
+  const el=document.getElementById('toastEl');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIcon').textContent=ok?'●':'◆';
+  document.getElementById('toastIcon').style.color=ok?'var(--green)':'var(--amber)';
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── Boot ───────────────────────────────────────
+window.addEventListener('load',()=>{
+  init();
+  const obs=new MutationObserver(()=>{
+    if(document.getElementById('view-analytics').classList.contains('active')) setTimeout(drawChart,50);
+  });
+  obs.observe(document.getElementById('view-analytics'),{attributes:true,attributeFilter:['class']});
+});
+</script>
+</body>
+</html>
