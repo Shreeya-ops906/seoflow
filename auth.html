@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEOFlow — Sign in</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>window.__clerk_publishable_key = 'pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ';</script>
+<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ" src="https://unbiased-piglet-73.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#00e5ff;--blue2:#00bcd4;--blue3:#006070;
+  --blue-t:rgba(0,229,255,.10);--blue-b:rgba(0,229,255,.22);
+  --ink:#0d1117;--tx:#1a2230;--tx2:#5a6a7a;--tx3:#a0aec0;
+  --grey1:#f4f7fb;--grey2:#edf1f7;--bdr:#dde4ee;--bdr2:#c8d2e0;
+  --green:#00c853;--red:#e05470;--r:10px;--r2:18px;
+}
+html,body{height:100%;-webkit-font-smoothing:antialiased}
+body{font-family:'Bricolage Grotesque',system-ui,sans-serif;background:var(--grey1);color:var(--tx);display:flex;flex-direction:column;min-height:100vh;}
+nav{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-sq{width:30px;height:30px;border-radius:7px;background:var(--ink);display:grid;place-items:center}
+.logo-sq svg{width:16px;height:16px;stroke:var(--blue);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.logo-name{font-weight:800;font-size:16px;color:var(--tx);letter-spacing:-.03em}
+.nav-back{font-size:13px;color:var(--tx3);text-decoration:none;font-weight:500;transition:.15s}
+.nav-back:hover{color:var(--tx2)}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 16px}
+.card{background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r2);padding:40px;width:100%;max-width:420px;box-shadow:0 4px 32px rgba(0,0,0,.06);}
+.card-header{text-align:center;margin-bottom:32px}
+.card-icon{width:48px;height:48px;border-radius:12px;background:var(--blue-t);border:1.5px solid var(--blue-b);display:grid;place-items:center;margin:0 auto 16px;}
+.card-icon svg{width:22px;height:22px;stroke:var(--blue3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card h1{font-size:22px;font-weight:800;color:var(--tx);letter-spacing:-.03em;margin-bottom:6px}
+.card-sub{font-size:14px;color:var(--tx3);font-weight:500}
+.tabs{display:flex;background:var(--grey1);border-radius:10px;padding:4px;margin-bottom:28px;border:1px solid var(--bdr)}
+.tab{flex:1;text-align:center;padding:8px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;color:var(--tx3);font-family:'DM Mono',monospace}
+.tab.on{background:#fff;color:var(--tx);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-family:'DM Mono',monospace}
+.field input{width:100%;background:#fff;border:1.5px solid var(--bdr2);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--tx);font-family:'Bricolage Grotesque',sans-serif;outline:none;transition:.15s;}
+.field input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-t)}
+.field input::placeholder{color:var(--tx3)}
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:44px}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--tx3);}
+.pw-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.btn-submit{width:100%;background:var(--blue);color:var(--ink);font-size:14px;font-weight:700;padding:13px;border-radius:9px;border:none;cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:.2s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-submit:hover{background:var(--blue2);transform:translateY(-1px)}
+.btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.spin{width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--ink);border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.btn-submit.loading .spin{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--tx3);font-size:12px;font-weight:600}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bdr)}
+.btn-google{width:100%;background:#fff;color:var(--tx);font-size:14px;font-weight:600;padding:12px;border-radius:9px;border:1.5px solid var(--bdr2);cursor:pointer;font-family:'Bricolage Grotesque',sans-serif;transition:.15s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-google:hover{border-color:var(--bdr);background:var(--grey1)}
+.btn-google svg{width:18px;height:18px;flex-shrink:0}
+.alert{border-radius:9px;padding:11px 14px;font-size:13px;font-weight:500;margin-bottom:16px;display:none;line-height:1.5;}
+.alert.err{background:rgba(224,84,112,.08);border:1px solid rgba(224,84,112,.2);color:#c0304f}
+.alert.ok{background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.2);color:#007a30}
+.alert.show{display:block}
+.card-foot{text-align:center;font-size:12px;color:var(--tx3);margin-top:22px;line-height:1.6;font-weight:500}
+.card-foot a{color:var(--blue3);text-decoration:none;font-weight:600}
+.terms{font-size:11px;color:var(--tx3);text-align:center;margin-top:16px;line-height:1.6}
+.terms a{color:var(--blue3);text-decoration:none}
+.pw-strength{display:flex;gap:4px;margin-top:7px}
+.pw-bar{flex:1;height:3px;background:var(--bdr);border-radius:2px;transition:.3s}
+.pw-bar.w{background:#e05470}.pw-bar.f{background:#ffab00}.pw-bar.s{background:var(--green)}
+.forgot{font-size:12px;color:var(--blue3);text-decoration:none;float:right;margin-top:-20px;margin-bottom:16px;display:block;font-weight:600}
+.forgot:hover{text-decoration:underline}
+.success-state{display:none;text-align:center;padding:16px 0}
+.big-check{width:56px;height:56px;border-radius:50%;background:rgba(0,200,83,.1);border:2px solid rgba(0,200,83,.3);display:grid;place-items:center;margin:0 auto 18px;}
+.big-check svg{width:26px;height:26px;stroke:#00c853;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.success-state h2{font-size:20px;font-weight:800;color:var(--tx);margin-bottom:8px;letter-spacing:-.02em}
+.success-state p{font-size:14px;color:var(--tx2);line-height:1.6;font-weight:500}
+footer{text-align:center;padding:20px;font-size:11px;color:var(--tx3);font-family:'DM Mono',monospace;border-top:1px solid var(--bdr);}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-sq"><svg viewBox="0 0 17 17"><polyline points="1,14 5.5,8 9.5,11 16,3"/><circle cx="16" cy="3" r="1.5" fill="var(--blue)" stroke="none"/></svg></div>
+    <span class="logo-name">SEOFlow</span>
+  </a>
+  <a href="/" class="nav-back">← Back to home</a>
+</nav>
+<main>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon"><svg viewBox="0 0 22 22"><path d="M11 2a5 5 0 0 1 5 5v1h2a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h2V7a5 5 0 0 1 5-5z"/><circle cx="11" cy="13" r="1.5" fill="var(--blue3)" stroke="none"/></svg></div>
+      <h1 id="card-title">Welcome to SEOFlow</h1>
+      <p class="card-sub" id="card-sub">Sign in or create your free account</p>
+    </div>
+    <div class="tabs">
+      <div class="tab on" id="tab-login" onclick="switchTab('login')">Sign in</div>
+      <div class="tab" id="tab-signup" onclick="switchTab('signup')">Create account</div>
+    </div>
+    <div class="alert" id="alert"></div>
+    <div class="success-state" id="success-state">
+      <div class="big-check"><svg viewBox="0 0 26 26"><polyline points="5,13 10,18 21,7"/></svg></div>
+      <h2>Check your email</h2>
+      <p>We've sent a verification code to <strong id="confirm-email"></strong>.<br>Enter it below to activate your account.</p>
+      <div class="field" style="margin-top:20px;text-align:left">
+        <label>Verification code</label>
+        <input type="text" id="otp-input" placeholder="Enter 6-digit code" maxlength="6" style="letter-spacing:.2em;font-size:18px;text-align:center">
+      </div>
+      <button class="btn-submit" onclick="verifyOTP()" style="margin-top:8px">
+        <div class="spin"></div>
+        <span>Verify & continue →</span>
+      </button>
+    </div>
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <a href="#" class="forgot" onclick="showForgot(event)">Forgot password?</a>
+        <div class="pw-wrap">
+          <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password">
+          <button class="pw-toggle" onclick="togglePw('login-password',this)" type="button" tabindex="-1">
+            <svg class="eye-off" viewBox="0 0 16 16"><path d="M2 2l12 12M6.5 6.7A3 3 0 0 0 9.3 9.5M4.2 4.5C2.8 5.5 1.5 7 1.5 8s2.8 4 6.5 4c1.2 0 2.3-.3 3.2-.8M7 4.1C7.3 4 7.7 4 8 4c3.7 0 6.5 3 6.5 4 0 .6-.5 1.4-1.2 2.1"/></svg>
+            <svg class="eye-on" viewBox="0 0 16 16" style="display:none"><path d="M1.5 8S4.3 4 8 4s6.5 4 6.5 4-2.8 4-6.5 4S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-login" onclick="doLogin()">
+        <div class="spin"></div><span class="btn-txt">Sign in →</span>
+      </button>
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+    </div>
+    <!-- SIGNUP -->
+    <div id="form-signup" style="display:none">
+      <div class="field">
+        <label>Full name</label>
+        <input type="text" id="signup-name" placeholder="Jane Smith" autocomplete="name">
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="checkStrength(this.value)">
+          <button class="pw-toggle" onclick="togglePw('signup-password',this)" type="button" tabindex="-1">
+            <svg class="eye-off" viewBox="0 0 16 16"><path d="M2 2l12 12M6.5 6.7A3 3 0 0 0 9.3 9.5M4.2 4.5C2.8 5.5 1.5 7 1.5 8s2.8 4 6.5 4c1.2 0 2.3-.3 3.2-.8M7 4.1C7.3 4 7.7 4 8 4c3.7 0 6.5 3 6.5 4 0 .6-.5 1.4-1.2 2.1"/></svg>
+            <svg class="eye-on" viewBox="0 0 16 16" style="display:none"><path d="M1.5 8S4.3 4 8 4s6.5 4 6.5 4-2.8 4-6.5 4S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>
+          </button>
+        </div>
+        <div class="pw-strength"><div class="pw-bar" id="bar1"></div><div class="pw-bar" id="bar2"></div><div class="pw-bar" id="bar3"></div><div class="pw-bar" id="bar4"></div></div>
+      </div>
+      <button class="btn-submit" id="btn-signup" onclick="doSignup()">
+        <div class="spin"></div><span class="btn-txt">Create free account →</span>
+      </button>
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <p class="terms">By signing up you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+    </div>
+    <p class="card-foot" id="card-foot">Don't have an account? <a href="#" onclick="switchTab('signup');return false">Create one free →</a></p>
+  </div>
+</main>
+<footer>© 2025 SEOFlow Ltd · <a href="/" style="color:inherit">seoflow.site</a></footer>
+<script>
+let clerkReady = false;
+let signUpAttempt = null;
+
+window.addEventListener('load', async () => {
+  await window.Clerk.load();
+  clerkReady = true;
+  // If already signed in, go to app
+  if (window.Clerk.user) window.location.href = '/app.html';
+  // Check URL param for tab
+  if (new URLSearchParams(location.search).get('tab') === 'signup') switchTab('signup');
+});
+
+function switchTab(t) {
+  const isLogin = t === 'login';
+  document.getElementById('tab-login').classList.toggle('on', isLogin);
+  document.getElementById('tab-signup').classList.toggle('on', !isLogin);
+  document.getElementById('form-login').style.display = isLogin ? '' : 'none';
+  document.getElementById('form-signup').style.display = isLogin ? 'none' : '';
+  document.getElementById('card-title').textContent = isLogin ? 'Welcome back' : 'Start for free';
+  document.getElementById('card-sub').textContent = isLogin ? 'Sign in to your SEOFlow account' : 'No credit card required';
+  document.getElementById('card-foot').innerHTML = isLogin
+    ? 'Don\'t have an account? <a href="#" onclick="switchTab(\'signup\');return false">Create one free →</a>'
+    : 'Already have an account? <a href="#" onclick="switchTab(\'login\');return false">Sign in →</a>';
+  clearAlert();
+}
+
+function showAlert(msg, type='err') {
+  const el = document.getElementById('alert');
+  el.textContent = msg; el.className = 'alert ' + type + ' show';
+}
+function clearAlert() { document.getElementById('alert').className = 'alert'; }
+
+function setLoading(btnId, on) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.classList.toggle('loading', on); btn.disabled = on;
+}
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  const isText = input.type === 'text';
+  input.type = isText ? 'password' : 'text';
+  btn.querySelector('.eye-off').style.display = isText ? '' : 'none';
+  btn.querySelector('.eye-on').style.display = isText ? 'none' : '';
+}
+
+function checkStrength(v) {
+  const bars = ['bar1','bar2','bar3','bar4'].map(id => document.getElementById(id));
+  bars.forEach(b => b.className = 'pw-bar');
+  if (!v) return;
+  let score = 0;
+  if (v.length >= 8) score++;
+  if (/[A-Z]/.test(v)) score++;
+  if (/[0-9]/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const cls = score <= 2 ? 'w' : score === 3 ? 'f' : 's';
+  for (let i = 0; i < score; i++) bars[i].className = 'pw-bar ' + cls;
+}
+
+async function doLogin() {
+  clearAlert();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { showAlert('Please enter your email and password.'); return; }
+  setLoading('btn-login', true);
+  try {
+    await window.Clerk.client.signIn.create({ identifier: email, password });
+    await window.Clerk.setActive({ session: window.Clerk.client.signIn.createdSessionId });
+    window.location.href = '/app.html';
+  } catch (err) {
+    setLoading('btn-login', false);
+    const msg = err.errors?.[0]?.message || err.message || 'Sign in failed';
+    if (msg.toLowerCase().includes('password')) showAlert('Incorrect email or password. Please try again.');
+    else showAlert(msg);
+  }
+}
+
+async function doSignup() {
+  clearAlert();
+  const name = document.getElementById('signup-name').value.trim();
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  if (!name) { showAlert('Please enter your full name.'); return; }
+  if (!email) { showAlert('Please enter your email address.'); return; }
+  if (password.length < 8) { showAlert('Password must be at least 8 characters.'); return; }
+  setLoading('btn-signup', true);
+  try {
+    signUpAttempt = await window.Clerk.client.signUp.create({
+      emailAddress: email, password,
+      firstName: name.split(' ')[0],
+      lastName: name.split(' ').slice(1).join(' ') || ''
+    });
+    await signUpAttempt.prepareEmailAddressVerification({ strategy: 'email_code' });
+    setLoading('btn-signup', false);
+    // Show verification screen
+    document.getElementById('form-signup').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'none';
+    document.getElementById('card-foot').style.display = 'none';
+    document.getElementById('confirm-email').textContent = email;
+    document.getElementById('success-state').style.display = 'block';
+    document.getElementById('card-title').textContent = 'Almost there!';
+    document.getElementById('card-sub').textContent = 'Check your inbox';
+  } catch (err) {
+    setLoading('btn-signup', false);
+    const msg = err.errors?.[0]?.message || err.message || 'Sign up failed';
+    if (msg.toLowerCase().includes('exist')) showAlert('An account with this email already exists. Try signing in.');
+    else showAlert(msg);
+  }
+}
+
+async function verifyOTP() {
+  const code = document.getElementById('otp-input').value.trim();
+  if (!code || code.length < 6) { showAlert('Please enter the 6-digit code from your email.'); return; }
+  clearAlert();
+  try {
+    const result = await signUpAttempt.attemptEmailAddressVerification({ code });
+    if (result.status === 'complete') {
+      await window.Clerk.setActive({ session: result.createdSessionId });
+      window.location.href = '/app.html';
+    } else {
+      showAlert('Verification incomplete. Please try again.');
+    }
+  } catch (err) {
+    const msg = err.errors?.[0]?.message || 'Invalid code. Please try again.';
+    showAlert(msg);
+  }
+}
+
+async function doGoogle() {
+  try {
+    await window.Clerk.client.signIn.authenticateWithRedirect({
+      strategy: 'oauth_google',
+      redirectUrl: '/sso-callback',
+      redirectUrlComplete: '/app.html'
+    });
+  } catch (err) {
+    showAlert('Google sign-in failed. Please use email instead.');
+  }
+}
+
+async function showForgot(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showAlert('Enter your email address above first.'); return; }
+  try {
+    await window.Clerk.client.signIn.create({ strategy: 'reset_password_email_code', identifier: email });
+    showAlert('Password reset email sent. Check your inbox.', 'ok');
+  } catch (err) {
+    showAlert(err.errors?.[0]?.message || 'Could not send reset email.');
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const loginVisible = document.getElementById('form-login').style.display !== 'none';
+  const successVisible = document.getElementById('success-state').style.display !== 'none';
+  if (successVisible) verifyOTP();
+  else if (loginVisible) doLogin();
+  else doSignup();
+});
+</script>
+</body>
+</html>

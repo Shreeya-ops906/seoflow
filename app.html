@@ -1564,6 +1564,32 @@ canvas { width: 100% !important; display: block; }
 .sb-logo          { padding: 24px 20px 20px !important; }
 
 </style>
+
+<script>window.__clerk_publishable_key = 'pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ';</script>
+<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ" src="https://unbiased-piglet-73.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" onload="initClerkGuard()"></script>
+<script>
+function initClerkGuard() {
+  window.Clerk.load().then(() => {
+    if (!window.Clerk.user) {
+      window.location.href = '/auth.html';
+      return;
+    }
+    const user = window.Clerk.user;
+    const name = user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'there';
+    window._seoflowName = name;
+    document.querySelectorAll('.user-name').forEach(el => el.textContent = name);
+    document.querySelectorAll('.user-email').forEach(el => el.textContent = user.emailAddresses[0]?.emailAddress || '');
+    document.querySelectorAll('.user-initials').forEach(el => {
+      const initials = ((user.firstName?.[0]||'') + (user.lastName?.[0]||'')).toUpperCase() || name[0].toUpperCase();
+      el.textContent = initials;
+    });
+  });
+}
+window.signOut = async function() {
+  await window.Clerk.signOut();
+  window.location.href = '/auth.html';
+};
+</script>
 </head>
 <body>
 
@@ -1615,6 +1641,7 @@ canvas { width: 100% !important; display: block; }
   </div>
 
   <div class="sb-footer">
+    <div style="padding:8px 10px 4px;font-size:10px;color:rgba(255,255,255,.3);font-family:var(--font-mono)" class="user-name">loading...</div>
     <div class="autopilot-row" onclick="toggleAP()">
       <div class="ap-label">auto_pilot <span id="apTxt">enabled</span></div>
       <div class="toggle on" id="apToggle"></div>
@@ -1634,6 +1661,10 @@ canvas { width: 100% !important; display: block; }
     <div class="topbar-actions">
       <button class="btn btn-ghost" onclick="nav(null,'profile')">brand profile</button>
       <button class="btn btn-primary" onclick="nav(null,'engine')">+ generate</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:8px;padding-left:12px;border-left:1px solid rgba(255,255,255,.08)">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--ac);display:grid;place-items:center;font-size:10px;font-weight:700;color:#000;font-family:var(--font-mono)" class="user-initials">?</div>
+        <button class="btn btn-ghost" onclick="signOut()" style="font-size:11px;opacity:.5;padding:4px 8px">sign out</button>
+      </div>
     </div>
   </header>
 
