@@ -200,6 +200,32 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--cream3);border-radius:3px}
 
+/* PREMIUM POLISH */
+.page-desc{font-size:13px;color:var(--ink4);line-height:1.6;margin:-8px 0 20px;max-width:560px}
+.tool-header{margin-bottom:22px}
+.tool-header h2{font-family:var(--font-serif);font-size:20px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.tool-header .page-desc{margin-top:6px;margin-bottom:0}
+.empty-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 24px;text-align:center}
+.empty-hero-icon{font-size:36px;margin-bottom:14px;opacity:.4}
+.empty-hero-title{font-family:var(--font-serif);font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.empty-hero-desc{font-size:13px;color:var(--ink4);line-height:1.6;max-width:340px;margin-bottom:20px}
+.stat-trend{font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:3px}
+.stat-trend.up{color:var(--sage)}
+.stat-trend.neutral{color:var(--ink4)}
+.usage-bar{height:3px;background:var(--cream3);border-radius:2px;overflow:hidden;margin-top:6px}
+.usage-fill{height:100%;background:var(--amber);border-radius:2px;transition:width .4s}
+.preview-panel{background:var(--cream2);border:1.5px dashed var(--border2);border-radius:12px;padding:28px;margin-top:16px}
+.preview-panel-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink4);margin-bottom:12px}
+.audit-cat{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);opacity:.4}
+.audit-cat:last-child{border-bottom:none}
+.audit-cat-icon{width:32px;height:32px;border-radius:8px;background:var(--cream2);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.audit-cat-name{font-size:13px;font-weight:600;color:var(--ink)}
+.audit-cat-desc{font-size:11px;color:var(--ink4);margin-top:2px}
+.comp-saved{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.comp-saved-item{padding:12px 14px;background:var(--cream2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.15s}
+.comp-saved-item:hover{border-color:var(--amber);background:var(--surface)}
+.rank-auto-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:100px;background:var(--amber-l);color:var(--amber-d);cursor:pointer;border:none;font-family:var(--font-ui)}
+.rank-auto-pill:hover{background:var(--amber);color:#fff}
 /* MOBILE */
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:none}
 .hamburger span{display:block;width:20px;height:2px;background:var(--ink);border-radius:2px;transition:.3s}
@@ -313,9 +339,16 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
     </div>
   </nav>
   <div class="sb-footer">
+    <div style="padding:10px 16px 6px;border-top:1px solid rgba(255,255,255,.08)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3)">AI Posts this month</span>
+        <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5)" id="sb-usage-count">—</span>
+      </div>
+      <div class="usage-bar"><div class="usage-fill" id="sb-usage-fill" style="width:0%"></div></div>
+    </div>
     <div class="ap-row" onclick="toggleAP()">
-      <span class="ap-label">autopilot <span id="apTxt">on</span></span>
-      <div class="toggle on" id="apToggle"></div>
+      <span class="ap-label">autopilot <span id="apTxt">off</span></span>
+      <div class="toggle" id="apToggle"></div>
     </div>
     <button class="sb-signout" onclick="signOut()">Sign out</button>
   </div>
@@ -345,8 +378,8 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
       <div class="grid-4 gap-20">
         <div class="stat-card"><div class="stat-label">Published</div><div class="stat-value" id="stPublished"><strong>0</strong></div><div class="stat-sub up" id="stPublishedSub">via AI engine</div></div>
         <div class="stat-card"><div class="stat-label">Scheduled</div><div class="stat-value" id="stScheduled"><strong>0</strong></div><div class="stat-sub" id="stScheduledSub">upcoming</div></div>
-        <div class="stat-card"><div class="stat-label">Keywords</div><div class="stat-value" id="stKeywords"><strong>—</strong></div><div class="stat-sub up">ranking on Google</div></div>
-        <div class="stat-card"><div class="stat-label">Autopilot</div><div class="stat-value" id="stAP" style="font-size:20px;color:var(--sage)">● Active</div><div class="stat-sub up">publishing weekly</div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="nav(null,'ranks')"><div class="stat-label">Keywords tracked</div><div class="stat-value" id="stKeywords"><strong id="stKwCount">—</strong></div><div class="stat-sub" id="stKwSub">click to track keywords</div></div>
+        <div class="stat-card" style="cursor:pointer" onclick="nav(null,'autopilot')"><div class="stat-label">Autopilot</div><div class="stat-value" id="stAP" style="font-size:20px;color:var(--ink4)">○ Off</div><div class="stat-sub" id="stAPSub">click to configure</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;margin:24px 0 14px">
         <div class="card" id="seo-health-widget" style="padding:16px 20px;display:flex;align-items:center;gap:16px">
@@ -371,14 +404,17 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
         <div class="table-hd"><span>Status</span><span>Title</span><span>Keywords</span><span>SEO score</span><span>Date</span></div>
         <div id="dash-posts"></div>
       </div>
-      <div class="section-hd" style="margin-top:28px"><h2>Brand context</h2><button class="btn btn-ghost" onclick="nav(null,'profile')">Edit</button></div>
-      <div class="card"><span style="font-size:13px;color:var(--ink3)" id="ctxVal">Loading brand profile...</span></div>
+      <div class="section-hd" style="margin-top:28px"><h2>Brand context</h2><button class="btn btn-ghost" onclick="nav(null,'profile')">Edit profile →</button></div>
+      <div class="card" style="padding:18px 22px">
+        <span style="font-size:13px;color:var(--ink2);font-weight:600" id="ctxVal">Loading brand profile...</span>
+        <div id="ctxMeta" style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap"></div>
+      </div>
     </div>
 
     <!-- POSTS -->
     <div class="view" id="view-posts">
       <div class="section-hd">
-        <h2>Content</h2>
+        <h2>Content Library</h2>
         <div style="display:flex;gap:8px;align-items:center">
           <div style="display:flex;gap:4px;background:var(--cream2);border-radius:8px;padding:3px">
             <button class="btn" id="tab-list-btn" onclick="switchContentTab('list')" style="font-size:12px;padding:5px 12px;background:var(--cream);box-shadow:0 1px 3px rgba(0,0,0,.08)">List</button>
@@ -402,7 +438,14 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
             </tr></thead>
             <tbody id="all-posts"></tbody>
           </table>
-          <div id="all-posts-empty" style="padding:40px;text-align:center;color:var(--ink4);font-size:13px;display:none">No posts yet — generate your first post or enable Autopilot</div>
+          <div id="all-posts-empty" style="display:none">
+            <div class="empty-hero">
+              <div class="empty-hero-icon">📄</div>
+              <div class="empty-hero-title">Your content library is empty</div>
+              <div class="empty-hero-desc">Generate and publish your first post — it will appear here with its live URL, SEO score, and source.</div>
+              <button class="btn btn-primary" onclick="nav(null,'engine')">Generate first post ✦</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -423,8 +466,11 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- KEYWORDS -->
     <div class="view" id="view-keywords">
-      <div class="section-hd">
-        <h2>Keyword research</h2>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Keyword Research</h2>
+          <div class="page-desc">Get monthly search volume, difficulty scores, search intent, related keywords, and AI-generated content ideas for any topic.</div>
+        </div>
       </div>
 
       <div class="card" style="margin-bottom:16px">
@@ -480,20 +526,36 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
       <!-- Step 1: Input -->
       <div id="gen-step-input">
-        <div class="section-hd"><h2>Generate a blog post</h2></div>
+        <div class="section-hd" style="margin-top:0">
+          <div>
+            <h2>Content Engine</h2>
+            <div class="page-desc">Write a fully-structured, SEO-optimised blog post and publish it to WordPress automatically.</div>
+          </div>
+        </div>
         <div class="card">
           <div style="margin-bottom:20px">
             <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Target keyword or topic</label>
             <input class="kw-input" id="genKeyword" placeholder="e.g. How to prepare for the 11+ exam" style="width:100%;font-size:15px;padding:13px 16px">
+            <div id="gen-quick-kws" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
           </div>
-          <div style="margin-bottom:20px">
-            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Tone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap" id="tone-chips">
-              <div class="tone-chip on" onclick="selectTone(this,'authoritative')">Authoritative</div>
-              <div class="tone-chip" onclick="selectTone(this,'friendly')">Friendly</div>
-              <div class="tone-chip" onclick="selectTone(this,'educational')">Educational</div>
-              <div class="tone-chip" onclick="selectTone(this,'conversational')">Conversational</div>
-              <div class="tone-chip" onclick="selectTone(this,'professional')">Professional</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+            <div>
+              <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Post length</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap" id="length-chips">
+                <div class="tone-chip" onclick="selectLength(this,'short')" data-len="short">Short  ~600w</div>
+                <div class="tone-chip on" onclick="selectLength(this,'standard')" data-len="standard">Standard  ~1000w</div>
+                <div class="tone-chip" onclick="selectLength(this,'long')" data-len="long">Long  ~1500w</div>
+              </div>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Tone</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap" id="tone-chips">
+                <div class="tone-chip on" onclick="selectTone(this,'authoritative')">Authoritative</div>
+                <div class="tone-chip" onclick="selectTone(this,'friendly')">Friendly</div>
+                <div class="tone-chip" onclick="selectTone(this,'educational')">Educational</div>
+                <div class="tone-chip" onclick="selectTone(this,'conversational')">Conversational</div>
+                <div class="tone-chip" onclick="selectTone(this,'professional')">Professional</div>
+              </div>
             </div>
           </div>
           <button class="btn btn-primary" onclick="runGenerate()" id="btnGen" style="font-size:15px;padding:13px 28px">
@@ -565,7 +627,12 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
         <!-- CONTENT GRADER -->
     <div class="view" id="view-grader">
-      <div class="section-hd"><h2>Content Grader</h2></div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Content Grader</h2>
+          <div class="page-desc">Score any post across SEO, readability and engagement — then get a rewritten intro and specific fixes.</div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Paste a post URL or content to grade</div>
         <div style="display:flex;gap:10px;margin-bottom:12px">
@@ -574,6 +641,7 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
         </div>
         <textarea id="grader-content" class="kw-input" placeholder="Or paste raw post content here..." style="width:100%;min-height:120px;font-size:13px;padding:11px 14px;resize:vertical;font-family:inherit"></textarea>
       </div>
+      <div id="grader-recent-posts" style="margin-bottom:12px"></div>
       <div id="grader-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Analysing content...</div></div>
       <div id="grader-results" style="display:none">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
@@ -601,12 +669,23 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- SITE AUDIT -->
     <div class="view" id="view-audit">
-      <div class="section-hd"><h2>Site Audit</h2></div>
-      <div class="card" style="margin-bottom:16px">
-        <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Crawls your connected WordPress site and checks for SEO issues across all pages.</div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Site Audit</h2>
+          <div class="page-desc">A full technical SEO crawl of your WordPress site — checks meta, images, headings, internal links, schema, and more.</div>
+        </div>
         <button class="btn btn-primary" onclick="runAudit()" id="audit-btn">Run full audit ✦</button>
       </div>
-      <div id="audit-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Auditing site...</div></div>
+      <div id="audit-last-run" style="font-size:12px;color:var(--ink4);margin-bottom:16px"></div>
+      <div id="audit-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Crawling your site and checking for issues...</div></div>
+      <div id="audit-pre-state" class="card" style="padding:0;overflow:hidden">
+        <div class="audit-cat"><div class="audit-cat-icon">🏷</div><div><div class="audit-cat-name">Meta & Titles</div><div class="audit-cat-desc">Title tags, meta descriptions, duplicates</div></div></div>
+        <div class="audit-cat"><div class="audit-cat-icon">🖼</div><div><div class="audit-cat-name">Images & Media</div><div class="audit-cat-desc">Alt text, file sizes, lazy loading</div></div></div>
+        <div class="audit-cat"><div class="audit-cat-icon">🔗</div><div><div class="audit-cat-name">Internal Linking</div><div class="audit-cat-desc">Link structure, orphaned pages, anchor text</div></div></div>
+        <div class="audit-cat"><div class="audit-cat-icon">📄</div><div><div class="audit-cat-name">Content Quality</div><div class="audit-cat-desc">Word count, keyword usage, readability</div></div></div>
+        <div class="audit-cat"><div class="audit-cat-icon">⚡</div><div><div class="audit-cat-name">Performance Signals</div><div class="audit-cat-desc">Core Web Vitals, mobile-friendliness, HTTPS</div></div></div>
+        <div class="audit-cat"><div class="audit-cat-icon">📊</div><div><div class="audit-cat-name">Structured Data</div><div class="audit-cat-desc">Schema markup, Article/FAQ/BreadcrumbList</div></div></div>
+      </div>
       <div id="audit-results" style="display:none">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
           <div class="card" style="text-align:center;padding:20px"><div style="font-size:36px;font-weight:900;color:var(--sage)" id="aud-score">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Health Score</div></div>
@@ -622,7 +701,12 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- TOPIC CLUSTERS -->
     <div class="view" id="view-clusters">
-      <div class="section-hd"><h2>Topic Clusters</h2></div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Topic Clusters</h2>
+          <div class="page-desc">Build a content hub — one pillar page and up to 8 supporting posts — all internally linked for maximum SEO authority.</div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Enter a pillar topic to build a cluster around</div>
         <div style="display:flex;gap:10px">
@@ -645,7 +729,12 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- COMPETITOR ANALYSIS -->
     <div class="view" id="view-competitor">
-      <div class="section-hd"><h2>Competitor Analysis</h2></div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Competitor Analysis</h2>
+          <div class="page-desc">Uncover your competitors' strengths, find content gaps you can own, and get a list of posts to write that will outrank them.</div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Enter a competitor's website URL</div>
         <div style="display:flex;gap:10px">
@@ -669,9 +758,14 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- SOCIAL SNIPPETS -->
     <div class="view" id="view-social">
-      <div class="section-hd"><h2>Social Snippets</h2></div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Social Snippets</h2>
+          <div class="page-desc">Turn any blog post into ready-to-publish Twitter/X, LinkedIn, Facebook, and email subject lines — in one click.</div>
+        </div>
+      </div>
       <div class="card" style="margin-bottom:16px">
-        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Generate social posts for a published article</div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Paste a post URL or title to repurpose</div>
         <div style="display:flex;gap:10px;margin-bottom:10px">
           <input id="social-url" class="kw-input" placeholder="Paste your post URL or title..." style="flex:1;font-size:14px;padding:11px 14px">
           <button class="btn btn-primary" onclick="runSocialSnippets()" id="social-btn" style="white-space:nowrap">Generate ✦</button>
@@ -716,8 +810,11 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 <!-- AUTOPILOT VIEW -->
     <div class="view" id="view-autopilot">
 
-      <div class="section-hd">
-        <h2>Autopilot</h2>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Autopilot</h2>
+          <div class="page-desc">Set a schedule and let the AI research trending topics, write full posts, and publish them to WordPress — automatically.</div>
+        </div>
         <div style="display:flex;align-items:center;gap:12px">
           <span id="ap-status-badge" style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px;background:var(--cream3);color:var(--ink4)">Off</span>
           <button class="btn btn-primary" id="ap-toggle-btn" onclick="toggleAutopilot()">Enable autopilot</button>
@@ -777,7 +874,11 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">Autopilot log</div>
         <div class="card" style="padding:0;overflow:hidden">
           <div id="ap-log-body">
-            <div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No autopilot runs yet</div>
+            <div class="empty-hero" style="padding:36px 24px">
+              <div class="empty-hero-icon">🤖</div>
+              <div class="empty-hero-title">No runs yet</div>
+              <div class="empty-hero-desc">Once enabled, Autopilot will publish posts here on your chosen schedule. You can also trigger it manually with "Run now".</div>
+            </div>
           </div>
         </div>
       </div>
@@ -786,7 +887,12 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- PUBLISH -->
     <div class="view" id="view-publish">
-      <div class="section-hd"><h2>Publishing channels</h2></div>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Publishing</h2>
+          <div class="page-desc">Connect your WordPress site and all generated posts will publish there automatically — with featured images and internal links.</div>
+        </div>
+      </div>
 
       <!-- WordPress Connect Card -->
       <div class="card" id="wp-connect-card">
@@ -811,12 +917,13 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
             </div>
             <button onclick="disconnectWP()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--ink4);cursor:pointer;font-family:var(--font-ui)">Disconnect</button>
           </div>
-          <!-- Test publish -->
+          <!-- Verify connection -->
           <div style="margin-bottom:6px">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Test publish</div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:4px">Verify connection</div>
+            <div style="font-size:12px;color:var(--ink4);margin-bottom:10px">Publish a draft post to confirm everything is working correctly.</div>
             <div style="display:flex;gap:10px">
-              <input id="wp-test-title" class="kw-input" placeholder="Post title e.g. How to rank on Google in 2025" style="flex:1">
-              <button class="btn btn-primary" onclick="testPublish()" id="btn-test-publish">Publish test post</button>
+              <input id="wp-test-title" class="kw-input" placeholder="Test post title..." style="flex:1">
+              <button class="btn btn-ghost" onclick="testPublish()" id="btn-test-publish">Publish draft test</button>
             </div>
             <div id="wp-publish-result" style="display:none;margin-top:12px;padding:12px 14px;border-radius:9px;font-size:13px;font-weight:500"></div>
           </div>
@@ -857,7 +964,10 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
     <!-- PROFILE -->
     <div class="view" id="view-profile">
       <div class="section-hd">
-        <h2 id="profName">Brand Profile</h2>
+        <div>
+          <h2>Brand Profile</h2>
+          <div class="page-desc" id="profMeta2">Your business identity — used by the AI for every post it generates.</div>
+        </div>
         <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" id="profileGrid">
@@ -900,9 +1010,15 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- RANK TRACKER -->
     <div class="view" id="view-ranks">
-      <div class="section-hd">
-        <h2>Rank Tracker</h2>
-        <button class="btn btn-primary" onclick="estimateRankings()">Refresh estimates ✦</button>
+      <div class="section-hd" style="margin-top:0">
+        <div>
+          <h2>Rank Tracker</h2>
+          <div class="page-desc">Track your target keywords, get AI-estimated Google positions, and spot your highest-opportunity terms.</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost" onclick="importKwsFromBrand()" style="font-size:12px">↓ Import brand keywords</button>
+          <button class="btn btn-primary" onclick="estimateRankings()">Refresh estimates ✦</button>
+        </div>
       </div>
       <div class="card" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Track keywords</div>
@@ -1045,7 +1161,17 @@ function applyBrand() {
   if(sbName) sbName.textContent = brand.name;
   if(sbMeta) sbMeta.textContent = brand.industry + ' · ' + (brand.type||'');
   if(sbTone) sbTone.textContent = (brand.tone||'auto') + ' · active';
-  if(ctxVal) ctxVal.textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
+  if(ctxVal) ctxVal.textContent = brand.name || 'Your Business';
+  const ctxMeta = document.getElementById('ctxMeta');
+  if(ctxMeta) {
+    const items = [
+      brand.industry ? {l:'Industry',v:brand.industry} : null,
+      brand.tone ? {l:'Voice',v:brand.tone} : null,
+      (brand.keywords||[]).length ? {l:'Keywords',v:(brand.keywords||[]).slice(0,3).join(', ')} : null,
+      brand.bookingUrl ? {l:'Booking URL',v:'✓ Set'} : null,
+    ].filter(Boolean);
+    ctxMeta.innerHTML = items.map(i=>`<span style="font-size:11px;color:var(--ink4)"><strong style="color:var(--ink3);">${i.l}:</strong> ${i.v}</span>`).join('');
+  }
   const profName=document.getElementById('profName'); if(profName) profName.textContent=brand.name;
   const profMeta=document.getElementById('profMeta'); if(profMeta) profMeta.textContent=brand.industry+' / '+(brand.type||'');
 }
@@ -1208,20 +1334,30 @@ function renderDashQueue() {
   const stAP = document.getElementById('stAP');
   const apSettings = JSON.parse(localStorage.getItem('cruise_autopilot') || '{}');
   if (stAP) {
-    if (apSettings.enabled) {
+    const apCfg = JSON.parse(localStorage.getItem('cruise_autopilot') || '{}');
+    const freqLabel = {daily:'Daily',weekly:'Weekly','3x_week':'3× week',monthly:'Monthly'};
+    if (apCfg.enabled) {
       stAP.innerHTML = '● Active';
       stAP.style.color = 'var(--sage)';
-      const sub = document.getElementById('stAP')?.parentElement?.querySelector('.stat-sub');
+      const sub = document.getElementById('stAPSub');
+      if (sub) { sub.textContent = (freqLabel[apCfg.frequency] || 'Active') + ' publishing'; sub.className = 'stat-sub up'; }
     } else {
       stAP.innerHTML = '○ Off';
       stAP.style.color = 'var(--ink4)';
+      const sub = document.getElementById('stAPSub');
+      if (sub) { sub.textContent = 'click to enable'; sub.className = 'stat-sub neutral'; }
     }
   }
 
   const el = document.getElementById('dash-posts');
   if (!el) return;
   if (!allPosts.length) {
-    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet — use Generate or enable Autopilot</div>';
+    el.innerHTML = `<div class="empty-hero">
+      <div class="empty-hero-icon">✦</div>
+      <div class="empty-hero-title">No published posts yet</div>
+      <div class="empty-hero-desc">Generate your first AI-written, SEO-optimised post and publish it to WordPress in one click.</div>
+      <button class="btn btn-primary" onclick="nav(null,'engine')">Generate your first post →</button>
+    </div>`;
     return;
   }
   el.innerHTML = allPosts.slice(0,8).map(p => {
@@ -1526,8 +1662,8 @@ function renderPubLog() {
 // ── Brand Profile ──────────────────────────────
 function renderProfile() {
   if(!brand) return;
-  document.getElementById('profName').textContent=brand.name;
-  document.getElementById('profMeta').textContent=brand.industry+' / '+(brand.type||'');
+  const pn = document.getElementById('profName'); if(pn) pn.textContent = brand.name;
+  const pm = document.getElementById('profMeta'); if(pm) pm.textContent = brand.industry+' / '+(brand.type||'');
   document.getElementById('voiceBox').textContent=brand.voiceSummary||'No voice statement yet.';
 
   const chips=(arr,cls)=>(arr||[]).map(v=>`<span class="pchip ${cls}">${v}</span>`).join('');
@@ -1592,10 +1728,25 @@ window.addEventListener('load',()=>{
 let selectedTone = 'authoritative';
 let generatedPostData = null;
 
+let selectedLength = 'standard';
 function selectTone(el, tone) {
-  document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('on'));
+  document.querySelectorAll('#tone-chips .tone-chip').forEach(c => c.classList.remove('on'));
   el.classList.add('on');
   selectedTone = tone;
+}
+function selectLength(el, len) {
+  document.querySelectorAll('#length-chips .tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  selectedLength = len;
+}
+function loadGenQuickKws() {
+  const el = document.getElementById('gen-quick-kws');
+  if (!el) return;
+  const ranked = JSON.parse(localStorage.getItem('cruise_rank_history') || '[]').slice(0,5);
+  const brandKws = (brand?.keywords || []).slice(0,5);
+  const all = [...ranked.map(r=>r.keyword), ...brandKws].filter((v,i,a)=>a.indexOf(v)===i).slice(0,6);
+  if (!all.length) return;
+  el.innerHTML = '<span style="font-size:11px;color:var(--ink4)">Quick add:</span>' + all.map(kw=>`<button class="rank-auto-pill" onclick="document.getElementById('genKeyword').value='${kw.replace(/'/g,"\\'")}';">${kw}</button>`).join('');
 }
 
 function resetGenerator() {
@@ -1633,11 +1784,12 @@ async function runGenerate() {
     brandInfo = `Business: ${b.name || ''}. Industry: ${b.industry || ''}. Target audience: ${b.audience || ''}. Brand voice: ${b.voice || selectedTone}.`;
   } catch(e) { brandInfo = `Brand tone: ${selectedTone}.`; }
 
+  const lengthMap = {short:'600–700 words',standard:'1,000–1,200 words',long:'1,500–1,800 words'};
   const prompt = `You are an expert SEO content writer. Write a comprehensive, SEO-optimised blog post for the following:
 
 Keyword/Topic: "${keyword}"
 Tone: ${selectedTone}
-Target length: 1,000–1,200 words
+Target length: ${lengthMap[selectedLength]||'1,000–1,200 words'}
 ${brandInfo}
 
 Requirements:
@@ -1821,6 +1973,22 @@ function initAutopilot() {
   if (saved) {
     try { apSettings = { ...apSettings, ...JSON.parse(saved) }; } catch(e) {}
   }
+  // Populate usage indicator
+  const apLogs = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
+  const wpLogs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
+  const monthCount = [...apLogs, ...wpLogs].filter(l => l.ts && new Date(l.ts) >= thisMonth).length;
+  const usageEl = document.getElementById('sb-usage-count');
+  const usageFill = document.getElementById('sb-usage-fill');
+  const MONTHLY_LIMIT = 50;
+  if (usageEl) usageEl.textContent = monthCount + '/' + MONTHLY_LIMIT;
+  if (usageFill) usageFill.style.width = Math.min(100, (monthCount/MONTHLY_LIMIT)*100) + '%';
+  // Sync sidebar toggle with actual saved state
+  apOn = apSettings.enabled || false;
+  const apToggleEl = document.getElementById('apToggle');
+  const apTxtEl = document.getElementById('apTxt');
+  if (apToggleEl) apToggleEl.classList.toggle('on', apOn);
+  if (apTxtEl) { apTxtEl.textContent = apOn ? 'on' : 'off'; apTxtEl.style.color = apOn ? 'var(--sage)' : 'var(--ink4)'; }
   // Pre-fill seeds from brand keywords
   if (!apSettings.seeds && brand.keywords?.length) {
     apSettings.seeds = brand.keywords.slice(0, 5).join(', ');
@@ -2070,7 +2238,7 @@ function renderAllPosts() {
     return `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:10px 16px">${statusBadge}</td>
       <td style="padding:10px 16px;font-size:13px;font-weight:600;max-width:280px">${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--amber)">${p.title}</a>` : p.title}</td>
-      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${p.topic || '—'}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${(p.topic && isNaN(String(p.topic)) && p.topic !== '—') ? p.topic : '—'}</td>
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4);text-align:center">${p.seoScore || '—'}</td>
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${date}</td>
       <td style="padding:10px 16px">${sourceBadge}</td>
@@ -2287,6 +2455,12 @@ function initNewFeatures() {
   renderDashQueue();
   syncWPPostsToLog();
   loadDashHealth();
+  // Update keyword count stat
+  const rankData = JSON.parse(localStorage.getItem('cruise_rank_history') || '[]');
+  const kwCountEl = document.getElementById('stKwCount');
+  const kwSubEl = document.getElementById('stKwSub');
+  if (kwCountEl) kwCountEl.textContent = rankData.length || '—';
+  if (kwSubEl && rankData.length) kwSubEl.textContent = 'keywords tracked';
   // Pre-fill keyword seeds from brand
   const sugg = document.getElementById('kw-suggestions');
   if (sugg && brand?.keywords?.length) {
@@ -2446,6 +2620,9 @@ Perform a comprehensive SEO audit and return ONLY a JSON object:
       </div>`).join('');
 
     localStorage.setItem('cruise_last_audit', JSON.stringify({ health_score: d.health_score, ts: new Date().toISOString() }));
+    document.getElementById('audit-pre-state').style.display = 'none';
+    const lastRun = document.getElementById('audit-last-run');
+    if (lastRun) lastRun.textContent = 'Last run: just now · ' + d.pages_checked + ' pages checked';
     results.style.display = '';
     loadDashHealth();
   } catch(e) { toast('Audit error: ' + e.message, false); }
@@ -2868,8 +3045,8 @@ function renderWPLog() {
     <div style="display:grid;grid-template-columns:60px 1fr 1fr 100px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center">
       <span class="badge ${l.status === 'ok' ? 'badge-live' : 'badge-draft'}">${l.status === 'ok' ? 'Sent' : 'Failed'}</span>
       <span style="font-size:13px;font-weight:600;color:var(--ink2)">${l.title}</span>
-      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.url.replace('https://','')}</span>
-      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time}</span>
+      <span style="font-size:11px;color:var(--ink4)">${l.url ? '<a href="'+l.url+'" target="_blank" style="color:var(--amber);font-weight:600">'+(() => { try { return new URL(l.url).hostname; } catch(e) { return l.url.replace('https://','').split('/')[0]; } })()+'</a>' : '—'}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time || (l.ts ? new Date(l.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—')}</span>
     </div>`).join('')}`;
 }
 
@@ -2914,12 +3091,15 @@ function nav(el, id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const view = document.getElementById('view-' + id);
   if (view) view.classList.add('active');
-  document.getElementById('breadcrumb').textContent = id;
+  const crumbMap = {dashboard:'Dashboard',posts:'Content',keywords:'Keywords',engine:'Generate',grader:'Content Grader',audit:'Site Audit',clusters:'Topic Clusters',competitor:'Competitor',social:'Social Snippets',ranks:'Rank Tracker',autopilot:'Autopilot',publish:'Publish',profile:'Brand Profile'};
+  document.getElementById('breadcrumb').textContent = crumbMap[id] || id.replace(/-/g,' ').replace(/\b\w/g,x=>x.toUpperCase());
   if (id === 'profile') { renderProfile(); loadProfileView(); }
+  if (id === 'engine') setTimeout(loadGenQuickKws, 50);
   if (id === 'dashboard') { renderDashQueue(); loadDashHealth(); }
   if (id === 'posts') renderAllPosts();
   if (id === 'publish') renderPublish();
   if (id === 'ranks') loadRankTracker();
+  if (id === 'grader') setTimeout(initGraderRecent, 50);
   if (window.innerWidth <= 768) closeSidebar();
 }
 // ── Autopilot ──
@@ -2985,7 +3165,13 @@ function loadProfileView() {
     chip.classList.toggle('on', chip.textContent.toLowerCase() === tone);
   });
   const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
-  if (wpEl) wpEl.textContent = wp.url || 'No WordPress site connected';
+  if (wpEl) {
+    if (wp.url) {
+      wpEl.innerHTML = `<span style="color:var(--sage);font-weight:600">✓ Connected</span> — <a href="${wp.url}" target="_blank" style="color:var(--amber)">${wp.url}</a> (as ${wp.name || wp.username || 'user'})`;
+    } else {
+      wpEl.innerHTML = `<span style="color:var(--ink4)">Not connected —</span> <button class="btn btn-ghost" onclick="nav(null,'publish')" style="font-size:12px;padding:3px 10px;margin-left:4px">Connect WordPress →</button>`;
+    }
+  }
 }
 
 function selectProfileTone(el, tone) {
@@ -3032,7 +3218,10 @@ function loadDashHealth() {
     if (labelEl) labelEl.textContent = score >= 80 ? 'Site is in great SEO health' : score >= 60 ? 'A few issues to fix' : 'Site needs SEO attention';
     if (tsEl && audit.ts) {
       const d = new Date(audit.ts);
-      tsEl.textContent = 'Last audit: ' + d.toLocaleDateString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const fmt = d.toLocaleDateString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      tsEl.textContent = 'Last audit: ' + fmt;
+      const lastRunEl = document.getElementById('audit-last-run');
+      if (lastRunEl) lastRunEl.textContent = 'Last run: ' + fmt;
     }
   } catch(e) {}
 }
@@ -3040,7 +3229,34 @@ function loadDashHealth() {
 // ── Rank Tracker ────────────────────────────────────────────────
 function loadRankTracker() {
   const saved = JSON.parse(localStorage.getItem('cruise_rank_history') || '[]');
-  if (saved.length) renderRankTable(saved);
+  renderRankTable(saved);
+}
+function initGraderRecent() {
+  const el = document.getElementById('grader-recent-posts');
+  if (!el) return;
+  const posts = getAllPublishedPosts().slice(0,6);
+  if (!posts.length) return;
+  el.innerHTML = '<div style="font-size:11px;color:var(--ink4);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Quick grade a recent post:</div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
+    posts.map(p => `<button class="rank-auto-pill" onclick="document.getElementById('grader-url').value='${(p.url||'').replace(/'/g,"\\'")}';document.getElementById('grader-content').value='';document.getElementById('grader-btn').focus();">${(p.title||'').split(' ').slice(0,5).join(' ')}…</button>`).join('') +
+    '</div>';
+}
+function importKwsFromBrand() {
+  const kws = brand?.keywords || [];
+  if (!kws.length) { toast('No brand keywords set — add them in Brand Profile', false); return; }
+  const saved = JSON.parse(localStorage.getItem('cruise_rank_history') || '[]');
+  let added = 0;
+  kws.forEach(kw => {
+    if (!saved.find(r => r.keyword.toLowerCase() === kw.toLowerCase())) {
+      saved.push({ keyword: kw, position: null, change: 0, difficulty: '—', opportunity: '—', ts: null });
+      added++;
+    }
+  });
+  if (!added) { toast('All brand keywords are already tracked', false); return; }
+  localStorage.setItem('cruise_rank_history', JSON.stringify(saved));
+  renderRankTable(saved);
+  toast(added + ' keyword' + (added>1?'s':'') + ' imported!', true);
+  estimateRankings();
 }
 
 function addTrackKeywords() {
