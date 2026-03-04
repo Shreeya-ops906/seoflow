@@ -8,7 +8,7 @@ export default async function handler(req) {
 
   try {
     const body = req.method === 'POST' ? await req.json() : {};
-    const { wpUrl, wpUser, wpPass, brand, frequency, keywords, manualTrigger } = body;
+    const { wpUrl, wpUser, wpPass, brand, frequency, keywords, manualTrigger, bookingUrl, existingPosts } = body;
 
     // If called from cron (no body), we can't do anything without credentials
     // The dashboard passes credentials on manual trigger
@@ -131,7 +131,8 @@ Return ONLY a JSON object (no markdown, no code blocks):
         content: post.content_html,
         status: 'publish',
         excerpt: post.meta_description,
-        imageQuery: trendResult.topic
+        imageQuery: trendResult.topic,
+        internalLinks: { posts: existingPosts || [], bookingUrl: bookingUrl || '' }
       })
     });
 
