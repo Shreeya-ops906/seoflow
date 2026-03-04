@@ -333,7 +333,71 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
     <!-- PUBLISH -->
     <div class="view" id="view-publish">
       <div class="section-hd"><h2>Publishing channels</h2></div>
-      <div class="pub-grid" id="pub-grid"></div>
+
+      <!-- WordPress Connect Card -->
+      <div class="card" id="wp-connect-card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <div style="width:44px;height:44px;background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:22px;flex-shrink:0">🌐</div>
+          <div>
+            <div style="font-family:var(--font-serif);font-size:17px;font-weight:600;color:var(--ink)">WordPress</div>
+            <div style="font-size:12px;color:var(--ink4);margin-top:2px" id="wp-status-label">Not connected</div>
+          </div>
+          <div style="margin-left:auto">
+            <div id="wp-status-dot" style="width:10px;height:10px;border-radius:50%;background:var(--border2)"></div>
+          </div>
+        </div>
+
+        <!-- Connected state -->
+        <div id="wp-connected-state" style="display:none">
+          <div style="background:var(--sage-l);border:1px solid rgba(74,124,111,.2);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+            <span style="color:var(--sage);font-size:16px">✓</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)" id="wp-connected-url"></div>
+              <div style="font-size:11px;color:var(--ink4);margin-top:2px" id="wp-connected-user"></div>
+            </div>
+            <button onclick="disconnectWP()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--ink4);cursor:pointer;font-family:var(--font-ui)">Disconnect</button>
+          </div>
+          <!-- Test publish -->
+          <div style="margin-bottom:6px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Test publish</div>
+            <div style="display:flex;gap:10px">
+              <input id="wp-test-title" class="kw-input" placeholder="Post title e.g. How to rank on Google in 2025" style="flex:1">
+              <button class="btn btn-primary" onclick="testPublish()" id="btn-test-publish">Publish test post</button>
+            </div>
+            <div id="wp-publish-result" style="display:none;margin-top:12px;padding:12px 14px;border-radius:9px;font-size:13px;font-weight:500"></div>
+          </div>
+        </div>
+
+        <!-- Connect form -->
+        <div id="wp-connect-form">
+          <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:var(--ink3);line-height:1.6">
+            You'll need a WordPress <strong style="color:var(--ink)">Application Password</strong>. Go to your WordPress dashboard → <strong style="color:var(--ink)">Users → Profile</strong> → scroll to <strong style="color:var(--ink)">Application Passwords</strong>, type "Cruise SEO" and click Add.
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>WordPress site URL</label>
+            <input type="url" id="wp-url" class="kw-input" placeholder="https://yoursite.com" style="width:100%">
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>WordPress username</label>
+            <input type="text" id="wp-username" class="kw-input" placeholder="Your WordPress login username" style="width:100%">
+          </div>
+          <div class="field" style="margin-bottom:18px">
+            <label>Application password</label>
+            <input type="password" id="wp-apppass" class="kw-input" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" style="width:100%;font-family:monospace;letter-spacing:.05em">
+          </div>
+          <div id="wp-connect-alert" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px"></div>
+          <button class="btn btn-primary" onclick="connectWP()" id="btn-connect-wp" style="width:100%;justify-content:center;padding:13px">
+            <div class="spin" id="wp-spin"></div>
+            <span id="wp-btn-txt">Test connection & save</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent publishes -->
+      <div class="section-hd" style="margin-top:28px"><h2>Publish log</h2></div>
+      <div class="table-wrap" id="wp-log-wrap">
+        <div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet</div>
+      </div>
     </div>
 
     <!-- PROFILE -->
@@ -966,6 +1030,193 @@ window.addEventListener('load',()=>{
 </script>
 
 <script>
+// ── WordPress Connection ──
+const WP_KEY = 'cruise_wp_connection';
+
+function loadWPState() {
+  const saved = localStorage.getItem(WP_KEY);
+  if (saved) {
+    const wp = JSON.parse(saved);
+    showWPConnected(wp);
+  }
+}
+
+function renderPublish() {
+  loadWPState();
+  renderWPLog();
+}
+
+function connectWP() {
+  const url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  const username = document.getElementById('wp-username').value.trim();
+  const password = document.getElementById('wp-apppass').value.trim();
+
+  if (!url) { wpAlert('Please enter your WordPress site URL.', 'err'); return; }
+  if (!username) { wpAlert('Please enter your WordPress username.', 'err'); return; }
+  if (!password) { wpAlert('Please enter your Application Password.', 'err'); return; }
+
+  setWPLoading(true);
+  clearWPAlert();
+
+  const credentials = btoa(username + ':' + password);
+  const endpoint = url + '/wp-json/wp/v2/users/me';
+
+  fetch(endpoint, {
+    headers: {
+      'Authorization': 'Basic ' + credentials,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  })
+  .then(data => {
+    const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
+    localStorage.setItem(WP_KEY, JSON.stringify(wp));
+    setWPLoading(false);
+    showWPConnected(wp);
+    toast('WordPress connected successfully!', true);
+  })
+  .catch(err => {
+    setWPLoading(false);
+    if (err.message.includes('401')) {
+      wpAlert('Wrong username or application password. Double-check and try again.', 'err');
+    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+      wpAlert('Could not reach that URL. Check the site address is correct and the site is live.', 'err');
+    } else {
+      wpAlert('Connection failed: ' + err.message + '. Make sure the WordPress REST API is enabled.', 'err');
+    }
+  });
+}
+
+function showWPConnected(wp) {
+  document.getElementById('wp-connect-form').style.display = 'none';
+  document.getElementById('wp-connected-state').style.display = 'block';
+  document.getElementById('wp-connected-url').textContent = wp.url;
+  document.getElementById('wp-connected-user').textContent = 'Connected as ' + wp.name;
+  document.getElementById('wp-status-label').textContent = 'Connected';
+  document.getElementById('wp-status-dot').style.background = 'var(--sage)';
+}
+
+function disconnectWP() {
+  localStorage.removeItem(WP_KEY);
+  document.getElementById('wp-connect-form').style.display = 'block';
+  document.getElementById('wp-connected-state').style.display = 'none';
+  document.getElementById('wp-status-label').textContent = 'Not connected';
+  document.getElementById('wp-status-dot').style.background = 'var(--border2)';
+  document.getElementById('wp-url').value = '';
+  document.getElementById('wp-username').value = '';
+  document.getElementById('wp-apppass').value = '';
+  toast('WordPress disconnected', false);
+}
+
+async function testPublish() {
+  const saved = localStorage.getItem(WP_KEY);
+  if (!saved) { toast('Connect WordPress first', false); return; }
+  const wp = JSON.parse(saved);
+  const title = document.getElementById('wp-test-title').value.trim() || 'Test post from Cruise SEO';
+
+  const btn = document.getElementById('btn-test-publish');
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
+  const credentials = btoa(wp.username + ':' + atob(wp.password));
+
+  try {
+    const r = await fetch(wp.url + '/wp-json/wp/v2/posts', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + credentials,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title,
+        content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this post — it was created to verify your connection is working correctly.</p>',
+        status: 'draft'
+      })
+    });
+
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const post = await r.json();
+
+    const resultEl = document.getElementById('wp-publish-result');
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'var(--sage-l)';
+    resultEl.style.border = '1px solid rgba(74,124,111,.2)';
+    resultEl.style.color = 'var(--sage)';
+    resultEl.innerHTML = '✓ Draft post created on WordPress! <a href="' + wp.url + '/wp-admin/post.php?post=' + post.id + '&action=edit" target="_blank" style="color:var(--sage);font-weight:700;margin-left:6px">View in WordPress →</a>';
+
+    addWPLog(title, wp.url, 'ok');
+    toast('Post published to WordPress!', true);
+  } catch(err) {
+    const resultEl = document.getElementById('wp-publish-result');
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(192,48,79,.06)';
+    resultEl.style.border = '1px solid rgba(192,48,79,.2)';
+    resultEl.style.color = '#C0304F';
+    resultEl.textContent = 'Publish failed: ' + err.message;
+    addWPLog(title, wp.url, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Publish test post';
+}
+
+function addWPLog(title, url, status) {
+  const logs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  logs.unshift({ title, url, status, time: new Date().toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) });
+  localStorage.setItem('cruise_wp_log', JSON.stringify(logs.slice(0, 20)));
+  renderWPLog();
+}
+
+function renderWPLog() {
+  const logs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  const el = document.getElementById('wp-log-wrap');
+  if (!logs.length) {
+    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr 100px;padding:10px 18px;background:var(--cream2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4)">
+      <span>Status</span><span>Title</span><span>Site</span><span>Time</span>
+    </div>
+    ${logs.map(l => `
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr 100px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center">
+      <span class="badge ${l.status === 'ok' ? 'badge-live' : 'badge-draft'}">${l.status === 'ok' ? 'Sent' : 'Failed'}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--ink2)">${l.title}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.url.replace('https://','')}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time}</span>
+    </div>`).join('')}`;
+}
+
+function setWPLoading(on) {
+  document.getElementById('btn-connect-wp').disabled = on;
+  document.getElementById('wp-btn-txt').textContent = on ? 'Testing connection...' : 'Test connection & save';
+}
+
+function wpAlert(msg, type) {
+  const el = document.getElementById('wp-connect-alert');
+  el.style.display = 'block';
+  el.style.background = type === 'err' ? 'rgba(192,48,79,.07)' : 'var(--sage-l)';
+  el.style.border = '1px solid ' + (type === 'err' ? 'rgba(192,48,79,.2)' : 'rgba(74,124,111,.2)');
+  el.style.color = type === 'err' ? '#C0304F' : 'var(--sage)';
+  el.textContent = msg;
+}
+
+function clearWPAlert() {
+  document.getElementById('wp-connect-alert').style.display = 'none';
+}
+
+// ── Pre-fill WordPress credentials ──
+window.addEventListener('DOMContentLoaded', () => {
+  const urlEl = document.getElementById('wp-url');
+  const userEl = document.getElementById('wp-username');
+  if (urlEl && !localStorage.getItem(WP_KEY)) {
+    urlEl.value = 'https://smartxtutoring.uk';
+  }
+});
+
 // ── Override legacy CSS vars for compat ──
 document.documentElement.style.setProperty('--ac', 'var(--amber)');
 // ── Navigation ──
