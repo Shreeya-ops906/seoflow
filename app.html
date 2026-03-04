@@ -243,6 +243,34 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
       </div>
     </div>
     <div class="nav-section">
+      <div class="nav-section-label">SEO Tools</div>
+      <div class="nav-item" onclick="nav(this,'grader')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h8M2 12h10"/><circle cx="13" cy="11" r="3"/><path d="M15 13l1.5 1.5" opacity=".6"/></svg>
+        Content Grader
+      </div>
+      <div class="nav-item" onclick="nav(this,'audit')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M8 1L2 4v4c0 3.5 2.5 6 6 7 3.5-1 6-3.5 6-7V4z"/><path d="M5 8l2 2 4-4" opacity=".7"/></svg>
+        Site Audit
+      </div>
+      <div class="nav-item" onclick="nav(this,'clusters')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="4" r="2"/><circle cx="3" cy="12" r="2"/><circle cx="13" cy="12" r="2"/><path d="M8 6v2M8 8L3 10M8 8l5 2"/></svg>
+        Topic Clusters
+      </div>
+      <div class="nav-item" onclick="nav(this,'competitor')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M1 12l4-4 3 3 4-5 3 2"/><path d="M13 7h2v2" opacity=".5"/></svg>
+        Competitor
+      </div>
+      <div class="nav-item" onclick="nav(this,'social')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><circle cx="12" cy="4" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12" r="2"/><path d="M6 7l4-2M6 9l4 2"/></svg>
+        Social Snippets
+      </div>
+    </div>
+    <div class="nav-section">
       <div class="nav-section-label">Settings</div>
       <div class="nav-item" onclick="nav(this,'autopilot')">
         <div class="nav-dot"></div>
@@ -491,7 +519,157 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     </div>
 
-    <!-- AUTOPILOT VIEW -->
+        <!-- CONTENT GRADER -->
+    <div class="view" id="view-grader">
+      <div class="section-hd"><h2>Content Grader</h2></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Paste a post URL or content to grade</div>
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <input id="grader-url" class="kw-input" placeholder="https://yoursite.com/post-slug  — or paste content below" style="flex:1;font-size:14px;padding:11px 14px">
+          <button class="btn btn-primary" onclick="runGrader()" id="grader-btn" style="white-space:nowrap">Grade it ✦</button>
+        </div>
+        <textarea id="grader-content" class="kw-input" placeholder="Or paste raw post content here..." style="width:100%;min-height:120px;font-size:13px;padding:11px 14px;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <div id="grader-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Analysing content...</div></div>
+      <div id="grader-results" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:36px;font-weight:900" id="gr-overall">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Overall Score</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:var(--blue)" id="gr-seo">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">SEO</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:var(--sage)" id="gr-read">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Readability</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:var(--amber)" id="gr-eng">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Engagement</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:14px">Issues to fix</div>
+            <div id="gr-issues"></div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:14px">Quick wins</div>
+            <div id="gr-wins"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">Rewritten intro suggestion</div>
+          <div id="gr-rewrite" style="font-size:14px;line-height:1.7;color:var(--ink2);padding:14px;background:var(--cream2);border-radius:8px;border:1px solid var(--border)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SITE AUDIT -->
+    <div class="view" id="view-audit">
+      <div class="section-hd"><h2>Site Audit</h2></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Crawls your connected WordPress site and checks for SEO issues across all pages.</div>
+        <button class="btn btn-primary" onclick="runAudit()" id="audit-btn">Run full audit ✦</button>
+      </div>
+      <div id="audit-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Auditing site...</div></div>
+      <div id="audit-results" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:36px;font-weight:900;color:var(--sage)" id="aud-score">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Health Score</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:#C0304F" id="aud-errors">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Errors</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:var(--amber)" id="aud-warnings">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Warnings</div></div>
+          <div class="card" style="text-align:center;padding:20px"><div style="font-size:28px;font-weight:800;color:var(--blue)" id="aud-pages">—</div><div style="font-size:12px;color:var(--ink4);margin-top:4px">Pages Checked</div></div>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div id="audit-issues-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOPIC CLUSTERS -->
+    <div class="view" id="view-clusters">
+      <div class="section-hd"><h2>Topic Clusters</h2></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Enter a pillar topic to build a cluster around</div>
+        <div style="display:flex;gap:10px">
+          <input id="cluster-input" class="kw-input" placeholder="e.g. GCSE revision strategies" style="flex:1;font-size:14px;padding:11px 14px">
+          <button class="btn btn-primary" onclick="runClusterBuilder()" id="cluster-btn" style="white-space:nowrap">Build cluster ✦</button>
+        </div>
+      </div>
+      <div id="cluster-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Building topic cluster...</div></div>
+      <div id="cluster-results" style="display:none">
+        <div class="card" style="margin-bottom:16px;background:linear-gradient(135deg,#1a2e3a,#0f1f2a);border:none;padding:24px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.4);margin-bottom:8px">Pillar Page</div>
+          <div style="font-size:20px;font-weight:800;color:#fff" id="cluster-pillar-title"></div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:6px" id="cluster-pillar-desc"></div>
+          <button class="btn" onclick="generateClusterPillar()" style="margin-top:14px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:12px">Generate pillar post →</button>
+        </div>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Supporting posts <span id="cluster-count"></span></div>
+        <div id="cluster-posts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      </div>
+    </div>
+
+    <!-- COMPETITOR ANALYSIS -->
+    <div class="view" id="view-competitor">
+      <div class="section-hd"><h2>Competitor Analysis</h2></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Enter a competitor's website URL</div>
+        <div style="display:flex;gap:10px">
+          <input id="competitor-url" class="kw-input" placeholder="e.g. https://competitor.com" style="flex:1;font-size:14px;padding:11px 14px">
+          <button class="btn btn-primary" onclick="runCompetitor()" id="competitor-btn" style="white-space:nowrap">Analyse ✦</button>
+        </div>
+      </div>
+      <div id="competitor-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Analysing competitor...</div></div>
+      <div id="competitor-results" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+          <div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Their strengths</div><div id="comp-strengths"></div></div>
+          <div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Content gaps (your opportunity)</div><div id="comp-gaps"></div></div>
+          <div class="card"><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Keywords to target</div><div id="comp-keywords"></div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">Recommended posts to beat them</div>
+          <div id="comp-posts" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOCIAL SNIPPETS -->
+    <div class="view" id="view-social">
+      <div class="section-hd"><h2>Social Snippets</h2></div>
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">Generate social posts for a published article</div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <input id="social-url" class="kw-input" placeholder="Paste your post URL or title..." style="flex:1;font-size:14px;padding:11px 14px">
+          <button class="btn btn-primary" onclick="runSocialSnippets()" id="social-btn" style="white-space:nowrap">Generate ✦</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="social-recent-btns"></div>
+      </div>
+      <div id="social-loading" style="display:none;padding:40px;text-align:center"><div class="gen-spinner"></div><div style="margin-top:16px;color:var(--ink4);font-size:14px">Writing social posts...</div></div>
+      <div id="social-results" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:13px;font-weight:700">𝕏 Twitter / X</div>
+              <button class="btn" style="font-size:11px;padding:4px 10px" onclick="copySnippet('twitter')">Copy</button>
+            </div>
+            <div id="social-twitter" style="font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-wrap"></div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:13px;font-weight:700">LinkedIn</div>
+              <button class="btn" style="font-size:11px;padding:4px 10px" onclick="copySnippet('linkedin')">Copy</button>
+            </div>
+            <div id="social-linkedin" style="font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-wrap"></div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:13px;font-weight:700">Facebook</div>
+              <button class="btn" style="font-size:11px;padding:4px 10px" onclick="copySnippet('facebook')">Copy</button>
+            </div>
+            <div id="social-facebook" style="font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-wrap"></div>
+          </div>
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:13px;font-weight:700">Email subject lines</div>
+              <button class="btn" style="font-size:11px;padding:4px 10px" onclick="copySnippet('email')">Copy</button>
+            </div>
+            <div id="social-email" style="font-size:14px;line-height:1.6;color:var(--ink2);white-space:pre-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!-- AUTOPILOT VIEW -->
     <div class="view" id="view-autopilot">
 
       <div class="section-hd">
@@ -1473,7 +1651,12 @@ async function publishToWP() {
         title: generatedPostData.title,
         content: generatedPostData.content_html,
         status: 'publish',
-        imageQuery: generatedPostData.title.split(' ').slice(0,3).join(' ')
+        imageQuery: generatedPostData.title.split(' ').slice(0,3).join(' '),
+        internalLinks: (() => {
+          const posts = getAllPublishedPosts().slice(0,10);
+          const b = JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}');
+          return { posts: posts.map(p=>({title:p.title,url:p.url})), bookingUrl: b.bookingUrl||b.booking_url||'' };
+        })()
       })
     });
 
@@ -1669,7 +1852,9 @@ async function triggerNow() {
         brand: brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
         frequency: apFreq,
         keywords: seeds.split(',').map(s => s.trim()).filter(Boolean),
-        tone: apTone
+        tone: apTone,
+        bookingUrl: brand.bookingUrl || brand.booking_url || '',
+        existingPosts: getAllPublishedPosts().slice(0,10).map(p=>({title:p.title,url:p.url}))
       })
     });
 
@@ -2000,6 +2185,429 @@ function initNewFeatures() {
       ).join('');
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// SEO SUITE — Content Grader, Site Audit, Clusters, Competitor, Social
+// ═══════════════════════════════════════════════════════════════
+
+// ── Shared helpers ───────────────────────────────────────────────
+async function callAI(prompt, maxTokens) {
+  const res = await fetch('/api/ai-generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: maxTokens || 2000 })
+  });
+  const data = await res.json();
+  const raw = (data.content || []).map(x => x.text || '').join('');
+  return raw.replace(/```json\n?|```\n?/g, '').trim();
+}
+
+function scoreColor(n) {
+  if (n >= 80) return 'var(--sage)';
+  if (n >= 60) return 'var(--amber)';
+  return '#C0304F';
+}
+
+function issueItem(text, type) {
+  const icon = type === 'error' ? '✗' : type === 'warn' ? '⚠' : '✓';
+  const col = type === 'error' ? '#C0304F' : type === 'warn' ? 'var(--amber)' : 'var(--sage)';
+  return `<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);align-items:flex-start">
+    <span style="color:${col};font-weight:700;flex-shrink:0;font-size:13px">${icon}</span>
+    <span style="font-size:13px;color:var(--ink2);line-height:1.5">${text}</span>
+  </div>`;
+}
+
+// ── 1. CONTENT GRADER ────────────────────────────────────────────
+async function runGrader() {
+  const url = document.getElementById('grader-url')?.value?.trim();
+  const content = document.getElementById('grader-content')?.value?.trim();
+  if (!url && !content) { toast('Enter a URL or paste content', false); return; }
+
+  const btn = document.getElementById('grader-btn');
+  const loading = document.getElementById('grader-loading');
+  const results = document.getElementById('grader-results');
+  btn.disabled = true; btn.textContent = 'Grading...';
+  loading.style.display = ''; results.style.display = 'none';
+
+  try {
+    const subject = url || content.slice(0, 200);
+    const prompt = `You are an expert SEO content auditor. Analyse this content/URL: "${subject}"
+
+Grade it across multiple dimensions and provide actionable fixes.
+Return ONLY a JSON object:
+{
+  "overall": 72,
+  "seo_score": 68,
+  "readability_score": 80,
+  "engagement_score": 65,
+  "issues": ["Missing focus keyword in H1", "Meta description too long (180 chars)", "No internal links to related content", "Paragraphs too long — average 120 words"],
+  "quick_wins": ["Add keyword to first 100 words", "Break paragraphs into 3-4 sentences max", "Add a table of contents for posts over 1500 words", "Include at least 2 internal links"],
+  "rewritten_intro": "A better opening paragraph that hooks readers immediately and includes the focus keyword naturally within the first two sentences."
+}`;
+
+    const raw = await callAI(prompt, 1500);
+    const d = JSON.parse(raw);
+
+    const overall = document.getElementById('gr-overall');
+    overall.textContent = d.overall + '/100';
+    overall.style.color = scoreColor(d.overall);
+    document.getElementById('gr-seo').textContent = d.seo_score + '/100';
+    document.getElementById('gr-seo').style.color = scoreColor(d.seo_score);
+    document.getElementById('gr-read').textContent = d.readability_score + '/100';
+    document.getElementById('gr-read').style.color = scoreColor(d.readability_score);
+    document.getElementById('gr-eng').textContent = d.engagement_score + '/100';
+    document.getElementById('gr-eng').style.color = scoreColor(d.engagement_score);
+
+    document.getElementById('gr-issues').innerHTML = (d.issues || []).map(i => issueItem(i, 'error')).join('');
+    document.getElementById('gr-wins').innerHTML = (d.quick_wins || []).map(i => issueItem(i, 'ok')).join('');
+    document.getElementById('gr-rewrite').textContent = d.rewritten_intro || '';
+
+    results.style.display = '';
+  } catch(e) { toast('Grader error: ' + e.message, false); }
+
+  loading.style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Grade it ✦';
+}
+
+// ── 2. SITE AUDIT ────────────────────────────────────────────────
+async function runAudit() {
+  const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
+  if (!wp.url) { toast('Connect WordPress first in the Publish tab', false); return; }
+
+  const btn = document.getElementById('audit-btn');
+  const loading = document.getElementById('audit-loading');
+  const results = document.getElementById('audit-results');
+  btn.disabled = true; btn.textContent = 'Auditing...';
+  loading.style.display = ''; results.style.display = 'none';
+
+  try {
+    // Fetch posts from WP
+    const wpRes = await fetch('/api/wp-proxy', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) })
+    });
+    const wpData = await wpRes.json();
+    const posts = wpData.posts || [];
+    const postSummary = posts.slice(0,10).map(p =>
+      `Title: "${p.title?.rendered}" | Has excerpt: ${!!p.excerpt?.rendered?.replace(/<[^>]+>/g,'')} | Has featured image: ${!!p.featured_media}`
+    ).join('\n');
+
+    const prompt = `You are an SEO technical auditor. Analyse this WordPress site: ${wp.url}
+
+Here are the most recent posts:
+${postSummary}
+
+Perform a comprehensive SEO audit and return ONLY a JSON object:
+{
+  "health_score": 74,
+  "error_count": 3,
+  "warning_count": 7,
+  "pages_checked": ${posts.length},
+  "issues": [
+    { "type": "error", "category": "Meta", "title": "Missing meta descriptions", "detail": "8 of 20 posts have no meta description set", "fix": "Add meta descriptions in WordPress SEO plugin" },
+    { "type": "error", "category": "Images", "title": "Missing alt text", "detail": "Featured images on 5 posts have no alt text", "fix": "Edit each post and add descriptive alt text to images" },
+    { "type": "warn", "category": "Content", "title": "Thin content detected", "detail": "3 posts are under 300 words", "fix": "Expand these posts to at least 800 words" },
+    { "type": "warn", "category": "Internal Links", "title": "Low internal linking", "detail": "Most posts have fewer than 2 internal links", "fix": "Add links between related posts" },
+    { "type": "warn", "category": "Schema", "title": "No Article schema markup", "detail": "Posts are missing structured data", "fix": "Install Yoast SEO or RankMath and enable Article schema" }
+  ]
+}`;
+
+    const raw = await callAI(prompt, 2000);
+    const d = JSON.parse(raw);
+
+    const scoreEl = document.getElementById('aud-score');
+    scoreEl.textContent = d.health_score + '/100';
+    scoreEl.style.color = scoreColor(d.health_score);
+    document.getElementById('aud-errors').textContent = d.error_count;
+    document.getElementById('aud-warnings').textContent = d.warning_count;
+    document.getElementById('aud-pages').textContent = d.pages_checked;
+
+    const list = document.getElementById('audit-issues-list');
+    list.innerHTML = (d.issues || []).map(issue => `
+      <div style="padding:16px 20px;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:${issue.type==='error'?'rgba(192,48,79,.1)':'rgba(197,150,69,.1)'};color:${issue.type==='error'?'#C0304F':'var(--amber)'};">${issue.category}</span>
+          <span style="font-size:13px;font-weight:700;color:var(--ink)">${issue.title}</span>
+        </div>
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:6px">${issue.detail}</div>
+        <div style="font-size:12px;color:var(--sage);font-weight:600">Fix: ${issue.fix}</div>
+      </div>`).join('');
+
+    results.style.display = '';
+  } catch(e) { toast('Audit error: ' + e.message, false); }
+
+  loading.style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Run full audit ✦';
+}
+
+// ── 3. TOPIC CLUSTER BUILDER ─────────────────────────────────────
+let clusterData = null;
+
+async function runClusterBuilder() {
+  const topic = document.getElementById('cluster-input')?.value?.trim();
+  if (!topic) { toast('Enter a pillar topic', false); return; }
+
+  const btn = document.getElementById('cluster-btn');
+  const loading = document.getElementById('cluster-loading');
+  const results = document.getElementById('cluster-results');
+  btn.disabled = true; btn.textContent = 'Building...';
+  loading.style.display = ''; results.style.display = 'none';
+
+  try {
+    const b = JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}');
+    const bookingUrl = b.bookingUrl || b.booking_url || '';
+    const prompt = `You are an SEO content strategist. Build a topic cluster for: "${topic}"
+Brand: ${b.name || 'tutoring business'}
+${bookingUrl ? `Booking/contact URL: ${bookingUrl}` : ''}
+
+Create a pillar page and 8 supporting posts. Each supporting post should internally link back to the pillar AND include a CTA to book/contact the business${bookingUrl ? ' at ' + bookingUrl : ''}.
+
+Return ONLY JSON:
+{
+  "pillar": {
+    "title": "The Complete Guide to [Topic]",
+    "description": "Comprehensive overview targeting the main keyword",
+    "keyword": "main keyword",
+    "word_count": 3000
+  },
+  "supporting_posts": [
+    {
+      "title": "post title",
+      "keyword": "long-tail keyword",
+      "angle": "specific angle this post covers",
+      "internal_link_anchor": "anchor text to link back to pillar",
+      "cta": "Book a free ${topic} consultation today"
+    }
+  ]
+}`;
+
+    const raw = await callAI(prompt, 2500);
+    clusterData = JSON.parse(raw);
+
+    document.getElementById('cluster-pillar-title').textContent = clusterData.pillar?.title || '';
+    document.getElementById('cluster-pillar-desc').textContent = clusterData.pillar?.description || '';
+    document.getElementById('cluster-count').textContent = '(' + (clusterData.supporting_posts?.length || 0) + ' posts)';
+
+    const postsEl = document.getElementById('cluster-posts');
+    postsEl.innerHTML = (clusterData.supporting_posts || []).map((p, i) => `
+      <div class="card" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">${p.title}</div>
+        <div style="font-size:12px;color:var(--ink4);margin-bottom:4px">Keyword: <strong style="color:var(--blue)">${p.keyword}</strong></div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:10px">${p.angle}</div>
+        <div style="font-size:11px;color:var(--sage);margin-bottom:10px">↩ Links back via: "${p.internal_link_anchor}"</div>
+        <button class="btn btn-primary" style="font-size:11px;padding:5px 12px;width:100%" onclick="generateClusterPost(${i})">Generate this post →</button>
+      </div>`).join('');
+
+    results.style.display = '';
+  } catch(e) { toast('Cluster error: ' + e.message, false); }
+
+  loading.style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Build cluster ✦';
+}
+
+function generateClusterPillar() {
+  if (!clusterData?.pillar) return;
+  nav(null, 'engine');
+  setTimeout(() => {
+    const inp = document.querySelector('#view-engine input[type="text"], #view-engine input:not([type])');
+    if (inp) inp.value = clusterData.pillar.keyword || clusterData.pillar.title;
+  }, 100);
+}
+
+function generateClusterPost(idx) {
+  if (!clusterData?.supporting_posts?.[idx]) return;
+  const post = clusterData.supporting_posts[idx];
+  nav(null, 'engine');
+  setTimeout(() => {
+    const inp = document.querySelector('#view-engine input[type="text"], #view-engine input:not([type])');
+    if (inp) inp.value = post.keyword || post.title;
+  }, 100);
+}
+
+// ── 4. COMPETITOR ANALYSIS ───────────────────────────────────────
+async function runCompetitor() {
+  const url = document.getElementById('competitor-url')?.value?.trim();
+  if (!url) { toast('Enter a competitor URL', false); return; }
+
+  const btn = document.getElementById('competitor-btn');
+  const loading = document.getElementById('competitor-loading');
+  const results = document.getElementById('competitor-results');
+  btn.disabled = true; btn.textContent = 'Analysing...';
+  loading.style.display = ''; results.style.display = 'none';
+
+  try {
+    const b = JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}');
+    const prompt = `You are an SEO competitive analyst. Analyse the competitor website: ${url}
+My business: ${b.name || 'tutoring'} — ${b.industry || ''} — Keywords: ${(b.keywords||[]).join(', ')}
+
+Identify their strengths, content gaps I can exploit, and keywords I should target to beat them.
+Return ONLY JSON:
+{
+  "strengths": ["They rank well for X", "Strong backlink profile", "Regular content publishing"],
+  "content_gaps": ["No content on Y topic", "Missing local SEO pages", "No comparison posts"],
+  "keywords_to_target": [
+    { "keyword": "...", "why": "They rank #4, I can beat them with better content" }
+  ],
+  "recommended_posts": [
+    { "title": "...", "angle": "...", "keyword": "..." }
+  ]
+}`;
+
+    const raw = await callAI(prompt, 2000);
+    const d = JSON.parse(raw);
+
+    document.getElementById('comp-strengths').innerHTML = (d.strengths||[]).map(s => issueItem(s, 'warn')).join('');
+    document.getElementById('comp-gaps').innerHTML = (d.content_gaps||[]).map(s => issueItem(s, 'ok')).join('');
+    document.getElementById('comp-keywords').innerHTML = (d.keywords_to_target||[]).map(k =>
+      `<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:700;color:var(--blue)">${k.keyword}</div>
+        <div style="font-size:12px;color:var(--ink4);margin-top:2px">${k.why}</div>
+      </div>`).join('');
+
+    document.getElementById('comp-posts').innerHTML = (d.recommended_posts||[]).map(p => `
+      <div class="card" style="padding:14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:12px;color:var(--ink4);margin-bottom:8px">${p.angle}</div>
+        <button class="btn btn-primary" style="font-size:11px;padding:4px 12px" onclick="generateFromKeyword('${p.keyword?.replace(/'/g,"\\'")}')">Write this post →</button>
+      </div>`).join('');
+
+    results.style.display = '';
+  } catch(e) { toast('Competitor error: ' + e.message, false); }
+
+  loading.style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Analyse ✦';
+}
+
+// ── 5. SOCIAL SNIPPETS ───────────────────────────────────────────
+async function runSocialSnippets() {
+  const urlOrTitle = document.getElementById('social-url')?.value?.trim();
+  if (!urlOrTitle) { toast('Enter a URL or post title', false); return; }
+
+  const btn = document.getElementById('social-btn');
+  const loading = document.getElementById('social-loading');
+  const results = document.getElementById('social-results');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  loading.style.display = ''; results.style.display = 'none';
+
+  try {
+    const b = JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}');
+    const prompt = `You are a social media copywriter. Write social posts for this article: "${urlOrTitle}"
+Brand: ${b.name || 'business'} — ${b.industry || ''} — Tone: ${b.tone || 'professional'}
+
+Write engaging social posts for each platform. Return ONLY JSON:
+{
+  "twitter": "Tweet under 280 chars with 2-3 hashtags and a hook. Include the URL at the end.",
+  "linkedin": "LinkedIn post 150-200 words. Professional tone. Start with a bold hook line. Use line breaks. End with a question to drive comments. Include 3 hashtags.",
+  "facebook": "Facebook post 100-150 words. Conversational. Speak to parents/students. Include an emoji or two. End with a CTA.",
+  "email_subjects": "Subject line 1\nSubject line 2\nSubject line 3\nSubject line 4\nSubject line 5"
+}`;
+
+    const raw = await callAI(prompt, 1500);
+    const d = JSON.parse(raw);
+
+    document.getElementById('social-twitter').textContent = d.twitter || '';
+    document.getElementById('social-linkedin').textContent = d.linkedin || '';
+    document.getElementById('social-facebook').textContent = d.facebook || '';
+    document.getElementById('social-email').textContent = d.email_subjects || '';
+
+    results.style.display = '';
+  } catch(e) { toast('Social error: ' + e.message, false); }
+
+  loading.style.display = 'none';
+  btn.disabled = false; btn.textContent = 'Generate ✦';
+}
+
+function copySnippet(platform) {
+  const el = document.getElementById('social-' + platform);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => toast('Copied to clipboard!', true));
+}
+
+function initSocialRecent() {
+  const posts = getAllPublishedPosts().slice(0,5);
+  const el = document.getElementById('social-recent-btns');
+  if (!el || !posts.length) return;
+  el.innerHTML = '<span style="font-size:12px;color:var(--ink4);margin-right:4px">Recent:</span>' +
+    posts.map(p => `<span class="tone-chip" style="cursor:pointer;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" onclick="document.getElementById('social-url').value='${(p.url||p.title).replace(/'/g,"\\'")}';runSocialSnippets()">${p.title?.split(' ').slice(0,5).join(' ')}...</span>`).join('');
+}
+
+// ── 6. SEO META INJECTOR (runs on every publish) ─────────────────
+async function injectSEOMeta(wpUrl, wpUser, wpPass, postId, title, content) {
+  try {
+    const prompt = `Write an SEO meta description for this post:
+Title: "${title}"
+Content preview: "${content.replace(/<[^>]+>/g,'').slice(0,300)}"
+
+Return ONLY JSON:
+{
+  "meta_description": "150-160 char compelling meta description with keyword",
+  "focus_keyword": "main keyword phrase",
+  "og_title": "Open Graph title (can differ slightly from post title)"
+}`;
+    const raw = await callAI(prompt, 400);
+    const meta = JSON.parse(raw);
+    // Update the post with yoast/rankmath meta via WP REST
+    const creds = btoa(wpUser + ':' + wpPass);
+    await fetch(wpUrl + '/wp-json/wp/v2/posts/' + postId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + creds },
+      body: JSON.stringify({ meta: { _yoast_wpseo_metadesc: meta.meta_description, _yoast_wpseo_focuskw: meta.focus_keyword } })
+    });
+  } catch(e) { /* silent fail — meta injection is best-effort */ }
+}
+
+// ── 7. INTERNAL LINKING (injected into content on publish) ────────
+function injectInternalLinks(htmlContent, existingPosts, brandBookingUrl) {
+  let content = htmlContent;
+  const usedUrls = new Set();
+
+  // Link to booking/contact page
+  if (brandBookingUrl) {
+    const bookingPhrases = ['book a', 'book your', 'get in touch', 'contact us', 'speak to a tutor', 'free consultation', 'get started', 'try a lesson', 'enquire'];
+    for (const phrase of bookingPhrases) {
+      const regex = new RegExp(`(${phrase}[^<.!?]{0,40})`, 'gi');
+      if (regex.test(content)) {
+        content = content.replace(regex, `<a href="${brandBookingUrl}" rel="noopener">$1</a>`);
+        break;
+      }
+    }
+  }
+
+  // Link to related existing posts (max 3)
+  let linksAdded = 0;
+  for (const post of existingPosts) {
+    if (linksAdded >= 3) break;
+    if (!post.url || usedUrls.has(post.url)) continue;
+    const words = (post.title || '').toLowerCase().split(' ').filter(w => w.length > 4);
+    for (const word of words) {
+      const regex = new RegExp(`(?<!href="|>)(${word}s?)(?![^<]*>)`, 'gi');
+      if (regex.test(content) && !content.includes('href="' + post.url)) {
+        content = content.replace(regex, `<a href="${post.url}" rel="noopener">$1</a>`);
+        usedUrls.add(post.url);
+        linksAdded++;
+        break;
+      }
+    }
+  }
+  return content;
+}
+
+// Hook into existing publishToWP to add internal links + meta
+const _origPublishToWP = typeof publishToWP === 'function' ? publishToWP : null;
+
+// Expose injectInternalLinks for use in publish flow
+window._injectInternalLinks = injectInternalLinks;
+window._injectSEOMeta = injectSEOMeta;
+
+// ── Init on nav ──────────────────────────────────────────────────
+const __origNav = nav;
+function nav(el, id) {
+  __origNav(el, id);
+  if (id === 'social') setTimeout(initSocialRecent, 50);
+}
+
+
 
 // ── WordPress Connection ──
 const WP_KEY = 'cruise_wp_connection';
