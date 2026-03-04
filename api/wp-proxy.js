@@ -129,6 +129,25 @@ export default async function handler(req) {
       return new Response(JSON.stringify({ ok: r.ok, posts: d }), { headers: CORS });
     }
 
+    if (action === 'getpost') {
+      const { postId } = body;
+      const r = await fetch(`${url}/wp-json/wp/v2/posts/${postId}`, { headers });
+      const d = await r.json();
+      return new Response(JSON.stringify({ ok: r.ok, content: d.content?.rendered || '', title: d.title?.rendered || '' }), { headers: CORS });
+    }
+
+    if (action === 'updatepost') {
+      const { postId, title, content } = body;
+      const r = await fetch(`${url}/wp-json/wp/v2/posts/${postId}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ title, content })
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
+      return new Response(JSON.stringify({ ok: true, link: d.link, title: d.title?.rendered }), { headers: CORS });
+    }
+
     return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: CORS });
 
   } catch(err) {
