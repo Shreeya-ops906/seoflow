@@ -1963,8 +1963,34 @@ function nav(el, id) {
 }
 
 // ── Initialise new features ──────────────────────────────────────
+function syncWPPostsToLog() {
+  const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
+  if (!wp.url) return;
+  fetch('/api/wp-proxy', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) })
+  }).then(r => r.json()).then(d => {
+    if (d.posts?.length) {
+      const logs = d.posts.map(p => ({
+        title: p.title?.rendered?.replace(/&#[0-9]+;/g, c => String.fromCharCode(parseInt(c.slice(2,-1)))) || p.slug,
+        url: p.link,
+        status: 'ok',
+        topic: '—',
+        ts: p.date,
+        seoScore: null,
+        source: 'WordPress'
+      }));
+      localStorage.setItem('cruise_wp_log', JSON.stringify(logs));
+      renderDashQueue();
+      renderAllPosts();
+    }
+  }).catch(() => {});
+}
+
 function initNewFeatures() {
   renderDashQueue();
+  syncWPPostsToLog();
   // Pre-fill keyword seeds from brand
   const sugg = document.getElementById('kw-suggestions');
   if (sugg && brand?.keywords?.length) {
