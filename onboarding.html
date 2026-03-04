@@ -945,6 +945,22 @@ body {
   content: ''; flex: 1; height: 1px; background: var(--border);
 }
 </style>
+
+<script>window.__clerk_publishable_key = 'pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ';</script>
+<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ" src="https://unbiased-piglet-73.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" onload="initOnboardingAuth()"></script>
+<script>
+function initOnboardingAuth() {
+  window.Clerk.load().then(() => {
+    if (!window.Clerk.user) {
+      window.location.href = '/auth.html';
+    }
+  });
+}
+window.signOut = async function() {
+  await window.Clerk.signOut();
+  window.location.href = '/auth.html';
+};
+</script>
 </head>
 <body>
 
@@ -1838,7 +1854,8 @@ function showCompleteScreen() {
 }
 
 function goToDashboard() {
-  alert('🚀 Redirecting to your SEOFlow dashboard...\n\nIn the full build, this opens the main dashboard pre-loaded with your first AI-generated content queue based on your brand profile!');
+  localStorage.setItem('seoflow_onboarding_complete', 'true');
+  window.location.href = '/app.html';
 }
 </script>
 </body>

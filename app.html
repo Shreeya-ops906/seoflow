@@ -1574,6 +1574,11 @@ function initClerkGuard() {
       window.location.href = '/auth.html';
       return;
     }
+    // First-time users: redirect to onboarding
+    if (!localStorage.getItem('seoflow_onboarding_complete')) {
+      window.location.href = '/onboarding.html';
+      return;
+    }
     const user = window.Clerk.user;
     const name = user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'there';
     window._seoflowName = name;
