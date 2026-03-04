@@ -1,121 +1,88 @@
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      }
-    });
-  }
-
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
-  }
+  const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
 
   try {
     const body = await req.json();
-    const { action, url, username, password, title, content, status } = body;
-
-    // Some hosts strip Authorization header — use both Basic auth methods
-    const credentials = btoa(`${username}:${password}`);
-    const headers = {
-      'Authorization': `Basic ${credentials}`,
-      'Content-Type': 'application/json',
-      // Some hosts need this to pass auth through
-      'X-WP-Nonce': '',
-    };
-
-    let endpoint, method, wpBody;
+    const { action, url, username, password, title, content, status, excerpt, imageQuery } = body;
+    const creds = btoa(`${username}:${password}`);
+    const headers = { 'Content-Type': 'application/json', 'Authorization': `Basic ${creds}` };
 
     if (action === 'test') {
-      // Try /users/me first, fall back to creating a test post as auth check
-      endpoint = `${url}/wp-json/wp/v2/users/me?context=edit`;
-      method = 'GET';
-    } else if (action === 'publish') {
-      endpoint = `${url}/wp-json/wp/v2/posts`;
-      method = 'POST';
-      wpBody = JSON.stringify({ title, content, status: status || 'draft' });
-    } else {
-      return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400 });
+      const r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers });
+      const d = await r.json();
+      return new Response(JSON.stringify({ ok: r.ok, name: d.name, error: d.message }), { headers: CORS });
     }
 
-    const wpRes = await fetch(endpoint, {
-      method,
-      headers,
-      ...(wpBody ? { body: wpBody } : {}),
-    });
-
-    const responseText = await wpRes.text();
-    
-    // Check if response is HTML (auth issue or redirect)
-    if (responseText.trim().startsWith('<')) {
-      // Try alternative: test by fetching posts with auth (public endpoint, auth just confirms creds work)
-      if (action === 'test') {
-        const postsRes = await fetch(`${url}/wp-json/wp/v2/posts?per_page=1&status=draft`, {
-          method: 'GET',
-          headers,
-        });
-        const postsText = await postsRes.text();
-        
-        if (postsText.trim().startsWith('<')) {
-          return new Response(JSON.stringify({ 
-            error: 'WordPress is returning HTML instead of JSON. Your host may be blocking authentication headers. Please add "SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1" to your .htaccess file.' 
-          }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-          });
-        }
-        
-        // If posts worked, auth is fine — return fake success
+    if (action === 'publish') {
+      // Step 1: Optionally fetch and upload a featured image from Unsplash
+      let featuredMediaId = null;
+      if (imageQuery) {
         try {
-          JSON.parse(postsText);
-          return new Response(JSON.stringify({ name: username, slug: username }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-          });
-        } catch(e) {
-          return new Response(JSON.stringify({ error: 'Could not verify credentials' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-          });
+          // Use Unsplash source (no API key needed)
+          const imgQuery = encodeURIComponent(imageQuery);
+          const imgUrl = `https://source.unsplash.com/1200x630/?${imgQuery}`;
+          const imgRes = await fetch(imgUrl);
+          if (imgRes.ok) {
+            const imgBuffer = await imgRes.arrayBuffer();
+            const imgBlob = new Uint8Array(imgBuffer);
+            const slug = imageQuery.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+            const mediaRes = await fetch(`${url}/wp-json/wp/v2/media`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Basic ${creds}`,
+                'Content-Disposition': `attachment; filename="${slug}.jpg"`,
+                'Content-Type': 'image/jpeg'
+              },
+              body: imgBlob
+            });
+            if (mediaRes.ok) {
+              const mediaData = await mediaRes.json();
+              featuredMediaId = mediaData.id;
+            }
+          }
+        } catch(imgErr) {
+          // Image upload failed silently — post still publishes
         }
       }
-      
-      return new Response(JSON.stringify({ error: 'WordPress returned HTML — authentication headers may be blocked by your host' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+
+      // Step 2: Publish the post
+      const postBody = {
+        title,
+        content,
+        status: status || 'publish',
+        excerpt: excerpt || ''
+      };
+      if (featuredMediaId) postBody.featured_media = featuredMediaId;
+
+      const r = await fetch(`${url}/wp-json/wp/v2/posts`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(postBody)
       });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
+
+      return new Response(JSON.stringify({
+        ok: true,
+        id: d.id,
+        link: d.link,
+        title: d.title?.rendered,
+        featuredImage: featuredMediaId ? true : false
+      }), { headers: CORS });
     }
 
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch(e) {
-      return new Response(JSON.stringify({ error: 'Invalid JSON from WordPress: ' + responseText.slice(0, 100) }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-      });
+    if (action === 'posts') {
+      const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=20&status=publish`, { headers });
+      const d = await r.json();
+      return new Response(JSON.stringify({ ok: r.ok, posts: d }), { headers: CORS });
     }
 
-    if (!wpRes.ok) {
-      return new Response(JSON.stringify({ error: data.message || `HTTP ${wpRes.status}`, code: data.code }), {
-        status: wpRes.status,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-      });
-    }
+    return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: CORS });
 
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
-
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-    });
+  } catch(err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: CORS });
   }
 }
