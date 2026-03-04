@@ -49,9 +49,44 @@ export default async function handler(req) {
       }
 
       // Step 2: Publish the post
+      // Inject internal links into content
+      let finalContent = content;
+      if (body.internalLinks) {
+        const { posts, bookingUrl } = body.internalLinks;
+        const usedUrls = new Set();
+        let linksAdded = 0;
+
+        // Link to booking/contact page
+        if (bookingUrl) {
+          const phrases = ['book a','book your','get in touch','contact us','speak to a tutor','free consultation','get started','try a lesson','enquire now'];
+          for (const phrase of phrases) {
+            if (finalContent.toLowerCase().includes(phrase) && !finalContent.includes('href="' + bookingUrl)) {
+              const regex = new RegExp('(' + phrase + '[^<.!?]{0,40})', 'gi');
+              finalContent = finalContent.replace(regex, '<a href="' + bookingUrl + '" rel="noopener">$1</a>');
+              break;
+            }
+          }
+        }
+
+        // Link to related posts (max 3)
+        for (const post of (posts || [])) {
+          if (linksAdded >= 3 || !post.url || usedUrls.has(post.url)) continue;
+          const words = (post.title || '').toLowerCase().split(' ').filter(w => w.length > 5);
+          for (const word of words) {
+            if (finalContent.toLowerCase().includes(word) && !finalContent.includes('href="' + post.url)) {
+              const regex = new RegExp('(?<!["\/])\b(' + word + 's?)\b(?![^<]*>)', 'gi');
+              finalContent = finalContent.replace(regex, '<a href="' + post.url + '" rel="noopener">$1</a>');
+              usedUrls.add(post.url);
+              linksAdded++;
+              break;
+            }
+          }
+        }
+      }
+
       const postBody = {
         title,
-        content,
+        content: finalContent,
         status: status || 'publish',
         excerpt: excerpt || ''
       };
