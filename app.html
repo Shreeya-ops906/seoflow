@@ -244,6 +244,11 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
     </div>
     <div class="nav-section">
       <div class="nav-section-label">Settings</div>
+      <div class="nav-item" onclick="nav(this,'autopilot')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 1 0 12A6 6 0 0 1 8 2zm0 2v4l3 2"/></svg>
+        Autopilot
+      </div>
       <div class="nav-item" onclick="nav(this,'publish')">
         <div class="nav-dot"></div>
         <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 1 0 12M8 2a6 6 0 0 0 0 12M2 8h12"/></svg>
@@ -403,6 +408,77 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
         <!-- Publish result -->
         <div id="gen-publish-result" style="display:none;margin-top:14px;padding:14px 18px;border-radius:10px;font-size:13px;font-weight:600"></div>
+      </div>
+
+    </div>
+
+    <!-- AUTOPILOT VIEW -->
+    <div class="view" id="view-autopilot">
+
+      <div class="section-hd">
+        <h2>Autopilot</h2>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span id="ap-status-badge" style="font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px;background:var(--cream3);color:var(--ink4)">Off</span>
+          <button class="btn btn-primary" id="ap-toggle-btn" onclick="toggleAutopilot()">Enable autopilot</button>
+        </div>
+      </div>
+
+      <div id="ap-active-card" style="display:none;margin-bottom:16px">
+        <div class="card" style="background:linear-gradient(135deg,#1a3a2e,#0f2419);border:none;padding:24px 28px">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+                <div style="width:8px;height:8px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite"></div>
+                <span style="font-size:13px;font-weight:700;color:#4ade80;text-transform:uppercase;letter-spacing:.08em">Autopilot running</span>
+              </div>
+              <div style="font-family:var(--font-serif);font-size:20px;font-weight:700;color:#fff" id="ap-next-label">Next post in —</div>
+              <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:4px" id="ap-frequency-label"></div>
+            </div>
+            <button class="btn" onclick="triggerNow()" id="ap-run-now-btn" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);font-size:13px">Run now ↗</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="ap-settings-card">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:16px">Autopilot settings</div>
+
+        <div style="margin-bottom:20px">
+          <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:10px">Posting frequency</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="freq-chips">
+            <div class="tone-chip" onclick="selectFreq(this,'daily')">Daily</div>
+            <div class="tone-chip on" onclick="selectFreq(this,'3x_week')">3x per week</div>
+            <div class="tone-chip" onclick="selectFreq(this,'weekly')">Weekly</div>
+            <div class="tone-chip" onclick="selectFreq(this,'monthly')">Monthly</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px">
+          <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:8px">Topic seeds <span style="font-weight:400;color:var(--ink4)">(comma separated — AI combines with trending topics)</span></label>
+          <input id="ap-seeds" class="kw-input" placeholder="e.g. GCSE revision, 11+ exam prep, tutoring tips" style="width:100%;font-size:14px;padding:11px 14px">
+        </div>
+
+        <div style="margin-bottom:20px">
+          <label style="font-size:13px;font-weight:600;color:var(--ink);display:block;margin-bottom:8px">Post tone</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="ap-tone-chips">
+            <div class="tone-chip on" onclick="selectApTone(this,'authoritative')">Authoritative</div>
+            <div class="tone-chip" onclick="selectApTone(this,'friendly')">Friendly</div>
+            <div class="tone-chip" onclick="selectApTone(this,'educational')">Educational</div>
+            <div class="tone-chip" onclick="selectApTone(this,'conversational')">Conversational</div>
+          </div>
+        </div>
+
+        <div style="padding:14px 16px;background:var(--cream2);border-radius:8px;border:1px solid var(--border);font-size:13px;color:var(--ink3)">
+          Autopilot scans trending topics in your industry, picks the best one, writes a full SEO post and publishes it live to WordPress automatically.
+        </div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">Autopilot log</div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <div id="ap-log-body">
+            <div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No autopilot runs yet</div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -587,6 +663,7 @@ function renderAll() {
   renderPubLog();
   renderCalendar();
   renderAutoPublish();
+  initAutopilot();
   renderProfile();
   updateStats();
 }
@@ -1324,6 +1401,209 @@ async function publishToWP() {
 
   btn.disabled = false;
   btn.textContent = 'Publish to WordPress ↗';
+}
+
+
+// ── Autopilot ─────────────────────────────────
+let apSettings = { enabled: false, frequency: '3x_week', seeds: '', tone: 'authoritative', nextRun: null };
+let apTone = 'authoritative';
+let apFreq = '3x_week';
+
+function initAutopilot() {
+  const saved = localStorage.getItem('cruise_autopilot');
+  if (saved) {
+    try { apSettings = { ...apSettings, ...JSON.parse(saved) }; } catch(e) {}
+  }
+  // Pre-fill seeds from brand keywords
+  if (!apSettings.seeds && brand.keywords?.length) {
+    apSettings.seeds = brand.keywords.slice(0, 5).join(', ');
+  }
+  apFreq = apSettings.frequency || '3x_week';
+  apTone = apSettings.tone || 'authoritative';
+  renderAutopilotUI();
+  renderApLog();
+}
+
+function saveApSettings() {
+  apSettings.frequency = apFreq;
+  apSettings.tone = apTone;
+  apSettings.seeds = document.getElementById('ap-seeds')?.value || apSettings.seeds;
+  localStorage.setItem('cruise_autopilot', JSON.stringify(apSettings));
+}
+
+function renderAutopilotUI() {
+  const badge = document.getElementById('ap-status-badge');
+  const btn = document.getElementById('ap-toggle-btn');
+  const activeCard = document.getElementById('ap-active-card');
+  const seedsEl = document.getElementById('ap-seeds');
+  if (seedsEl && apSettings.seeds) seedsEl.value = apSettings.seeds;
+
+  // Set freq chip
+  document.querySelectorAll('#freq-chips .tone-chip').forEach(c => {
+    c.classList.toggle('on', c.getAttribute('data-freq') === apFreq ||
+      c.textContent.toLowerCase().replace(/[^a-z0-9]/g,'_') === apFreq ||
+      (apFreq === '3x_week' && c.textContent.includes('3')) ||
+      (apFreq === 'weekly' && c.textContent.toLowerCase() === 'weekly') ||
+      (apFreq === 'daily' && c.textContent.toLowerCase() === 'daily') ||
+      (apFreq === 'monthly' && c.textContent.toLowerCase() === 'monthly')
+    );
+  });
+
+  // Set tone chip
+  document.querySelectorAll('#ap-tone-chips .tone-chip').forEach(c => {
+    c.classList.toggle('on', c.textContent.toLowerCase() === apTone);
+  });
+
+  if (apSettings.enabled) {
+    if (badge) { badge.textContent = 'Active'; badge.style.background = 'rgba(74,222,128,.15)'; badge.style.color = '#4ade80'; }
+    if (btn) { btn.textContent = 'Pause autopilot'; btn.style.background = 'rgba(192,48,79,.1)'; btn.style.color = '#C0304F'; btn.style.border = '1px solid rgba(192,48,79,.2)'; }
+    if (activeCard) activeCard.style.display = 'block';
+    updateNextRunLabel();
+  } else {
+    if (badge) { badge.textContent = 'Off'; badge.style.background = 'var(--cream3)'; badge.style.color = 'var(--ink4)'; }
+    if (btn) { btn.textContent = 'Enable autopilot'; btn.style.background = ''; btn.style.color = ''; btn.style.border = ''; }
+    if (activeCard) activeCard.style.display = 'none';
+  }
+}
+
+function updateNextRunLabel() {
+  const freqLabels = { daily: 'Daily at 8:00 AM UTC', '3x_week': 'Mon, Wed & Fri at 8:00 AM UTC', weekly: 'Every Monday at 8:00 AM UTC', monthly: '1st of every month at 8:00 AM UTC' };
+  const el = document.getElementById('ap-frequency-label');
+  const nextEl = document.getElementById('ap-next-label');
+  if (el) el.textContent = freqLabels[apFreq] || '';
+  if (nextEl) {
+    const next = calcNextRun(apFreq);
+    nextEl.textContent = 'Next post: ' + next;
+  }
+}
+
+function calcNextRun(freq) {
+  const now = new Date();
+  const next = new Date(now);
+  next.setUTCHours(8, 0, 0, 0);
+  if (freq === 'daily') {
+    if (now.getUTCHours() >= 8) next.setUTCDate(next.getUTCDate() + 1);
+  } else if (freq === '3x_week') {
+    const days = [1, 3, 5]; // Mon, Wed, Fri
+    let d = now.getUTCDay();
+    for (let i = 0; i < 7; i++) {
+      const check = (d + i) % 7;
+      if (days.includes(check) && (i > 0 || now.getUTCHours() < 8)) {
+        next.setUTCDate(next.getUTCDate() + i); break;
+      }
+    }
+  } else if (freq === 'weekly') {
+    let daysUntilMon = (8 - now.getUTCDay()) % 7 || 7;
+    if (now.getUTCDay() === 1 && now.getUTCHours() < 8) daysUntilMon = 0;
+    next.setUTCDate(next.getUTCDate() + daysUntilMon);
+  } else if (freq === 'monthly') {
+    next.setUTCDate(1);
+    if (now.getUTCDate() > 1 || now.getUTCHours() >= 8) next.setUTCMonth(next.getUTCMonth() + 1);
+  }
+  return next.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + ' at 8:00 AM';
+}
+
+function selectFreq(el, freq) {
+  document.querySelectorAll('#freq-chips .tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  apFreq = freq;
+  saveApSettings();
+  if (apSettings.enabled) updateNextRunLabel();
+}
+
+function selectApTone(el, tone) {
+  document.querySelectorAll('#ap-tone-chips .tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  apTone = tone;
+  saveApSettings();
+}
+
+function toggleAutopilot() {
+  // Check WP is connected
+  const wp = localStorage.getItem('cruise_wp_connection');
+  if (!wp && !apSettings.enabled) {
+    toast('Connect WordPress first in the Publish tab', false);
+    return;
+  }
+  saveApSettings();
+  apSettings.enabled = !apSettings.enabled;
+  localStorage.setItem('cruise_autopilot', JSON.stringify(apSettings));
+  renderAutopilotUI();
+  if (apSettings.enabled) toast('Autopilot enabled! First post will run on schedule.', true);
+  else toast('Autopilot paused.', false);
+}
+
+async function triggerNow() {
+  const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
+  if (!wp.url) { toast('Connect WordPress first', false); return; }
+
+  const btn = document.getElementById('ap-run-now-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Running...'; }
+
+  saveApSettings();
+  const seeds = apSettings.seeds || (brand.keywords || []).join(', ') || brand.industry || 'general business tips';
+
+  try {
+    const res = await fetch('/api/autopilot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        manualTrigger: true,
+        wpUrl: wp.url,
+        wpUser: wp.username,
+        wpPass: atob(wp.password),
+        brand: brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
+        frequency: apFreq,
+        keywords: seeds.split(',').map(s => s.trim()).filter(Boolean),
+        tone: apTone
+      })
+    });
+
+    const data = await res.json();
+    if (data.status === 'success') {
+      addApLog({ topic: data.topic, title: data.title, url: data.postUrl, status: 'ok', ts: data.timestamp });
+      toast('Post published: ' + data.title.slice(0, 40) + '...', true);
+      renderApLog();
+    } else {
+      addApLog({ topic: 'Error', title: data.error, url: '', status: 'err', ts: new Date().toISOString() });
+      toast('Autopilot error: ' + data.error, false);
+      renderApLog();
+    }
+  } catch(err) {
+    toast('Failed: ' + err.message, false);
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Run now ↗'; }
+}
+
+function addApLog(entry) {
+  const logs = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
+  logs.unshift(entry);
+  localStorage.setItem('cruise_ap_log', JSON.stringify(logs.slice(0, 50)));
+}
+
+function renderApLog() {
+  const el = document.getElementById('ap-log-body');
+  if (!el) return;
+  const logs = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
+  if (!logs.length) {
+    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No autopilot runs yet</div>';
+    return;
+  }
+  el.innerHTML = `<table style="width:100%;border-collapse:collapse">
+    <thead><tr style="background:var(--cream2);border-bottom:1px solid var(--border)">
+      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Status</th>
+      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Title</th>
+      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Topic</th>
+      <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Time</th>
+    </tr></thead>
+    <tbody>${logs.map(l => `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 16px"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${l.status==='ok'?'rgba(74,222,128,.12)':'rgba(192,48,79,.08)'};color:${l.status==='ok'?'#16a34a':'#C0304F'}">${l.status==='ok'?'Published':'Failed'}</span></td>
+      <td style="padding:10px 16px;font-size:13px;color:var(--ink2);max-width:300px">${l.url?`<a href="${l.url}" target="_blank" style="color:var(--amber);font-weight:600">${l.title}</a>`:l.title}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${l.topic || '—'}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${new Date(l.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
 }
 
 // ── WordPress Connection ──
