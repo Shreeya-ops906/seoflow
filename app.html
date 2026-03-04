@@ -1191,9 +1191,7 @@ Return ONLY a JSON object with this exact structure (no markdown, no code blocks
     const res = await fetch('/api/ai-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }]
-      })
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
     });
 
     const data = await res.json();
