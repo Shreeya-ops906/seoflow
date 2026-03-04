@@ -174,6 +174,21 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 .diff-med{background:#FDF6D4;color:#8B6914}
 .diff-hard{background:var(--amber-l);color:var(--amber-d)}
 
+/* TONE CHIPS */
+.tone-chip{font-size:12px;font-weight:700;padding:7px 14px;border-radius:100px;border:1.5px solid var(--border2);color:var(--ink3);cursor:pointer;transition:.15s;background:var(--surface)}
+.tone-chip:hover{border-color:var(--amber);color:var(--amber)}
+.tone-chip.on{background:var(--amber);border-color:var(--amber);color:#fff}
+
+/* EDITOR */
+#gen-editor h2{font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--ink);margin:28px 0 10px;letter-spacing:-.02em}
+#gen-editor h3{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);margin:22px 0 8px}
+#gen-editor p{margin-bottom:16px;color:var(--ink2)}
+#gen-editor ul,#gen-editor ol{margin:0 0 16px 24px;color:var(--ink2)}
+#gen-editor li{margin-bottom:6px}
+#gen-editor strong{color:var(--ink);font-weight:700}
+#gen-editor:focus{background:var(--surface)}
+#gen-editor:focus ~ #gen-edit-hint{opacity:0}
+
 /* TOAST */
 .toast{position:fixed;bottom:28px;right:28px;background:var(--ink);color:var(--cream);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;font-family:var(--font-ui)}
 .toast.ok{border-left:3px solid var(--sage)}
@@ -306,28 +321,90 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- ENGINE -->
     <div class="view" id="view-engine">
-      <div class="section-hd"><h2>Generate content</h2></div>
-      <div class="card">
-        <div class="engine-tabs">
-          <div class="etab on" onclick="switchETab(this,'blog')">Blog post</div>
-          <div class="etab" onclick="switchETab(this,'social')">Social</div>
-          <div class="etab" onclick="switchETab(this,'email')">Email</div>
-          <div class="etab" onclick="switchETab(this,'meta')">Meta description</div>
+
+      <!-- Step 1: Input -->
+      <div id="gen-step-input">
+        <div class="section-hd"><h2>Generate a blog post</h2></div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Target keyword or topic</label>
+            <input class="kw-input" id="genKeyword" placeholder="e.g. How to prepare for the 11+ exam" style="width:100%;font-size:15px;padding:13px 16px">
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Tone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" id="tone-chips">
+              <div class="tone-chip on" onclick="selectTone(this,'authoritative')">Authoritative</div>
+              <div class="tone-chip" onclick="selectTone(this,'friendly')">Friendly</div>
+              <div class="tone-chip" onclick="selectTone(this,'educational')">Educational</div>
+              <div class="tone-chip" onclick="selectTone(this,'conversational')">Conversational</div>
+              <div class="tone-chip" onclick="selectTone(this,'professional')">Professional</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="runGenerate()" id="btnGen" style="font-size:15px;padding:13px 28px">
+            Generate post ✦
+          </button>
         </div>
-        <div style="margin-bottom:12px">
-          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Target keyword or topic</label>
-          <textarea class="gen-area" id="genPrompt" rows="2" placeholder="e.g. How to prepare for the 11+ exam..."></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="generateContent()" id="btnGen" style="margin-bottom:16px">Generate ✦</button>
-        <div id="gen-output-wrap" style="display:none">
-          <div class="gen-output" id="genOutput"></div>
-          <div class="gen-meta" id="genMeta"></div>
-          <div style="display:flex;gap:10px;margin-top:12px">
-            <button class="btn btn-primary" onclick="approvePost()">✓ Approve & schedule</button>
-            <button class="btn btn-ghost" onclick="generateContent()">↺ Regenerate</button>
+      </div>
+
+      <!-- Step 2: Generating state -->
+      <div id="gen-step-loading" style="display:none">
+        <div class="section-hd"><h2>Writing your post...</h2></div>
+        <div class="card" style="padding:40px;text-align:center">
+          <div id="gen-progress-wrap">
+            <div style="width:48px;height:48px;border:3px solid var(--cream3);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px"></div>
+            <div style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px" id="gen-stage-title">Researching keyword...</div>
+            <div style="font-size:13px;color:var(--ink4)" id="gen-stage-sub">Analysing search intent and competition</div>
+          </div>
+          <div style="margin-top:24px;height:4px;background:var(--cream3);border-radius:2px;overflow:hidden;max-width:320px;margin-left:auto;margin-right:auto">
+            <div id="gen-progress-bar" style="height:100%;background:var(--amber);border-radius:2px;width:0%;transition:width .5s ease"></div>
           </div>
         </div>
       </div>
+
+      <!-- Step 3: Output / editor -->
+      <div id="gen-step-output" style="display:none">
+        <div class="section-hd">
+          <h2 id="gen-post-title-display">Post title</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="resetGenerator()">← New post</button>
+            <button class="btn btn-ghost" onclick="runGenerate()" id="btnRegen">↺ Regenerate</button>
+            <button class="btn btn-primary" onclick="publishToWP()" id="btnPublishWP">Publish to WordPress ↗</button>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">Word count</div>
+            <div class="stat-value" style="font-size:22px" id="gen-word-count">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">SEO score</div>
+            <div class="stat-value" style="font-size:22px" id="gen-seo-score">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">Read time</div>
+            <div class="stat-value" style="font-size:22px" id="gen-read-time">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:200px;padding:14px 18px">
+            <div class="stat-label">Meta description</div>
+            <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-top:4px" id="gen-meta-desc">—</div>
+          </div>
+        </div>
+
+        <!-- Editable post content -->
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:14px 20px;background:var(--cream2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4)">Post content — editable</span>
+            <span style="font-size:11px;color:var(--ink4)" id="gen-edit-hint">Click to edit</span>
+          </div>
+          <div id="gen-editor" contenteditable="true" style="padding:28px 32px;min-height:400px;font-size:15px;color:var(--ink2);line-height:1.85;outline:none;font-family:var(--font-ui)" oninput="onEditorChange()"></div>
+        </div>
+
+        <!-- Publish result -->
+        <div id="gen-publish-result" style="display:none;margin-top:14px;padding:14px 18px;border-radius:10px;font-size:13px;font-weight:600"></div>
+      </div>
+
     </div>
 
     <!-- PUBLISH -->
@@ -1030,6 +1107,223 @@ window.addEventListener('load',()=>{
 </script>
 
 <script>
+// ── AI Content Generator ──────────────────────
+let selectedTone = 'authoritative';
+let generatedPostData = null;
+
+function selectTone(el, tone) {
+  document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  selectedTone = tone;
+}
+
+function resetGenerator() {
+  document.getElementById('gen-step-input').style.display = 'block';
+  document.getElementById('gen-step-loading').style.display = 'none';
+  document.getElementById('gen-step-output').style.display = 'none';
+  document.getElementById('gen-publish-result').style.display = 'none';
+  generatedPostData = null;
+}
+
+function showGenStep(step) {
+  ['input','loading','output'].forEach(s => {
+    document.getElementById('gen-step-' + s).style.display = s === step ? 'block' : 'none';
+  });
+}
+
+function setGenStage(title, sub, pct) {
+  document.getElementById('gen-stage-title').textContent = title;
+  document.getElementById('gen-stage-sub').textContent = sub;
+  document.getElementById('gen-progress-bar').style.width = pct + '%';
+}
+
+async function runGenerate() {
+  const keyword = document.getElementById('genKeyword').value.trim();
+  if (!keyword) { toast('Enter a keyword or topic first', false); return; }
+
+  showGenStep('loading');
+  setGenStage('Researching keyword...', 'Analysing search intent and competition', 10);
+
+  // Get brand context
+  const brandCtx = localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '';
+  let brandInfo = '';
+  try { 
+    const b = JSON.parse(brandCtx);
+    brandInfo = `Business: ${b.name || ''}. Industry: ${b.industry || ''}. Target audience: ${b.audience || ''}. Brand voice: ${b.voice || selectedTone}.`;
+  } catch(e) { brandInfo = `Brand tone: ${selectedTone}.`; }
+
+  const prompt = `You are an expert SEO content writer. Write a comprehensive, SEO-optimised blog post for the following:
+
+Keyword/Topic: "${keyword}"
+Tone: ${selectedTone}
+Target length: 1,000–1,200 words
+${brandInfo}
+
+Requirements:
+- Write a compelling, keyword-rich H1 title (don't include "H1:" prefix, just the title)
+- Use proper H2 and H3 subheadings throughout
+- Include the target keyword naturally 4-6 times
+- Write an engaging intro that hooks the reader in the first 2 sentences
+- Use short paragraphs (2-4 sentences max) for readability
+- Include at least one bulleted or numbered list
+- End with a strong call-to-action conclusion
+- Write in UK English
+
+Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
+{
+  "title": "The full post title",
+  "meta_description": "A compelling meta description 150-160 characters",
+  "content_html": "The full post content as HTML using <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags only"
+}`;
+
+  try {
+    // Stage updates during generation
+    setTimeout(() => setGenStage('Planning structure...', 'Mapping headings and key points', 25), 1500);
+    setTimeout(() => setGenStage('Writing content...', 'Crafting SEO-optimised paragraphs', 50), 4000);
+    setTimeout(() => setGenStage('Optimising for SEO...', 'Checking keyword density and readability', 80), 8000);
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const post = JSON.parse(clean);
+
+    setGenStage('Done!', 'Your post is ready', 100);
+    await new Promise(r => setTimeout(r, 600));
+
+    // Calculate stats
+    const wordCount = post.content_html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    const readTime = Math.ceil(wordCount / 200);
+    const seoScore = calcSeoScore(post.content_html, post.title, keyword);
+
+    generatedPostData = { ...post, keyword, wordCount, readTime, seoScore };
+
+    // Render output
+    document.getElementById('gen-post-title-display').textContent = post.title;
+    document.getElementById('gen-word-count').textContent = wordCount.toLocaleString();
+    document.getElementById('gen-seo-score').innerHTML = `<span style="color:${seoScore >= 80 ? 'var(--sage)' : seoScore >= 60 ? 'var(--amber)' : '#C0304F'}">${seoScore}/100</span>`;
+    document.getElementById('gen-read-time').textContent = readTime + ' min';
+    document.getElementById('gen-meta-desc').textContent = post.meta_description;
+    document.getElementById('gen-editor').innerHTML = post.content_html;
+
+    showGenStep('output');
+    toast('Post generated! Review and publish.', true);
+
+  } catch(err) {
+    showGenStep('input');
+    toast('Generation failed: ' + err.message, false);
+    console.error(err);
+  }
+}
+
+function calcSeoScore(html, title, keyword) {
+  let score = 50;
+  const text = html.replace(/<[^>]+>/g, ' ').toLowerCase();
+  const kw = keyword.toLowerCase();
+  const kwCount = (text.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+
+  if (kwCount >= 3 && kwCount <= 8) score += 15;
+  else if (kwCount >= 1) score += 8;
+  if (title.toLowerCase().includes(kw)) score += 10;
+  if (wordCount >= 900) score += 10;
+  if (html.includes('<h2>') || html.includes('<h2 ')) score += 8;
+  if (html.includes('<ul>') || html.includes('<ol>')) score += 7;
+  return Math.min(score, 100);
+}
+
+function onEditorChange() {
+  if (!generatedPostData) return;
+  const html = document.getElementById('gen-editor').innerHTML;
+  const wordCount = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  const readTime = Math.ceil(wordCount / 200);
+  document.getElementById('gen-word-count').textContent = wordCount.toLocaleString();
+  document.getElementById('gen-read-time').textContent = readTime + ' min';
+  generatedPostData.content_html = html;
+  generatedPostData.wordCount = wordCount;
+}
+
+async function publishToWP() {
+  if (!generatedPostData) return;
+
+  const wpRaw = localStorage.getItem('cruise_wp_connection');
+  if (!wpRaw) {
+    toast('Connect WordPress first in the Publish tab', false);
+    return;
+  }
+  const wp = JSON.parse(wpRaw);
+
+  const btn = document.getElementById('btnPublishWP');
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
+  const resultEl = document.getElementById('gen-publish-result');
+  resultEl.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/wp-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'publish',
+        url: wp.url,
+        username: wp.username,
+        password: atob(wp.password),
+        title: generatedPostData.title,
+        content: generatedPostData.content_html,
+        status: 'publish'
+      })
+    });
+
+    const post = await r.json();
+    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
+
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'var(--sage-l)';
+    resultEl.style.border = '1px solid rgba(74,124,111,.2)';
+    resultEl.style.color = 'var(--sage)';
+    resultEl.innerHTML = `✓ Published live on WordPress! <a href="${post.link}" target="_blank" style="color:var(--sage);font-weight:700;margin-left:8px">View post →</a>`;
+
+    addWPLog(generatedPostData.title, wp.url, 'ok');
+    toast('Post published live!', true);
+
+    // Add to posts list
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    if (typeof posts !== 'undefined') {
+      posts.unshift({
+        status: 'live',
+        title: generatedPostData.title,
+        keywords: generatedPostData.keyword,
+        score: generatedPostData.seoScore + '',
+        date: dateStr,
+        words: generatedPostData.wordCount.toLocaleString()
+      });
+      if (typeof updateStats === 'function') updateStats();
+    }
+
+  } catch(err) {
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(192,48,79,.06)';
+    resultEl.style.border = '1px solid rgba(192,48,79,.2)';
+    resultEl.style.color = '#C0304F';
+    resultEl.textContent = 'Publish failed: ' + err.message;
+    addWPLog(generatedPostData.title, wp.url, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Publish to WordPress ↗';
+}
+
 // ── WordPress Connection ──
 const WP_KEY = 'cruise_wp_connection';
 
