@@ -305,26 +305,105 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
     <!-- POSTS -->
     <div class="view" id="view-posts">
-      <div class="section-hd"><h2>All content</h2><button class="btn btn-primary" onclick="nav(null,'engine')">+ New post</button></div>
-      <div class="table-wrap">
-        <div class="table-hd"><span>Status</span><span>Title</span><span>Keywords</span><span>SEO score</span><span>Date</span></div>
-        <div id="all-posts"></div>
+      <div class="section-hd">
+        <h2>Content</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="display:flex;gap:4px;background:var(--cream2);border-radius:8px;padding:3px">
+            <button class="btn" id="tab-list-btn" onclick="switchContentTab('list')" style="font-size:12px;padding:5px 12px;background:var(--cream);box-shadow:0 1px 3px rgba(0,0,0,.08)">List</button>
+            <button class="btn" id="tab-cal-btn" onclick="switchContentTab('calendar')" style="font-size:12px;padding:5px 12px;background:transparent;box-shadow:none;color:var(--ink4)">Calendar</button>
+          </div>
+          <button class="btn btn-primary" onclick="nav(null,'engine')">+ New post</button>
+        </div>
       </div>
+
+      <!-- List view -->
+      <div id="content-list-view">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse">
+            <thead><tr style="background:var(--cream2);border-bottom:1px solid var(--border)">
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Status</th>
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Title</th>
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Topic</th>
+              <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">SEO</th>
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Date</th>
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Source</th>
+            </tr></thead>
+            <tbody id="all-posts"></tbody>
+          </table>
+          <div id="all-posts-empty" style="padding:40px;text-align:center;color:var(--ink4);font-size:13px;display:none">No posts yet — generate your first post or enable Autopilot</div>
+        </div>
+      </div>
+
+      <!-- Calendar view -->
+      <div id="content-calendar-view" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <button class="btn" onclick="calNav(-1)">← Prev</button>
+          <span style="font-weight:700;font-size:16px" id="calTitle"></span>
+          <button class="btn" onclick="calNav(1)">Next →</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px">
+          ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div style="text-align:center;font-size:11px;font-weight:700;color:var(--ink4);padding:8px 0">${d}</div>`).join('')}
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px"></div>
+      </div>
+
     </div>
 
     <!-- KEYWORDS -->
     <div class="view" id="view-keywords">
-      <div class="section-hd"><h2>Keyword research</h2></div>
-      <div class="card">
-        <div class="kw-input-row">
-          <input class="kw-input" id="kwInput" placeholder="Enter a topic e.g. private tutoring London...">
-          <button class="btn btn-primary" onclick="researchKW()">Research</button>
-        </div>
-        <div id="kw-results"></div>
+      <div class="section-hd">
+        <h2>Keyword research</h2>
       </div>
-    </div>
 
-    <!-- ENGINE -->
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <input class="kw-input" id="kwInput" placeholder="Enter a topic e.g. private tutoring London..." style="flex:1;font-size:15px;padding:12px 16px">
+          <button class="btn btn-primary" onclick="runKwResearch()" id="kwBtn" style="white-space:nowrap;padding:12px 20px">Research ✦</button>
+        </div>
+        <div id="kw-suggestions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"></div>
+      </div>
+
+      <!-- Results -->
+      <div id="kw-results-wrap" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px">
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:800;color:var(--amber)" id="kw-stat-vol">—</div>
+            <div style="font-size:12px;color:var(--ink4);margin-top:4px">Est. Monthly Searches</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:800;color:var(--sage)" id="kw-stat-diff">—</div>
+            <div style="font-size:12px;color:var(--ink4);margin-top:4px">Difficulty Score</div>
+          </div>
+          <div class="card" style="text-align:center;padding:20px">
+            <div style="font-size:28px;font-weight:800;color:var(--blue)" id="kw-stat-opp">—</div>
+            <div style="font-size:12px;color:var(--ink4);margin-top:4px">Opportunity Score</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Related keywords</div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+          <table style="width:100%;border-collapse:collapse" id="kw-table">
+            <thead><tr style="background:var(--cream2);border-bottom:1px solid var(--border)">
+              <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Keyword</th>
+              <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Volume</th>
+              <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Difficulty</th>
+              <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Intent</th>
+              <th style="padding:10px 16px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Action</th>
+            </tr></thead>
+            <tbody id="kw-table-body"></tbody>
+          </table>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Content ideas</div>
+        <div id="kw-content-ideas" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      </div>
+
+      <div id="kw-loading" style="display:none;padding:40px;text-align:center">
+        <div class="gen-spinner"></div>
+        <div style="margin-top:16px;color:var(--ink4);font-size:14px">Researching keywords with AI...</div>
+      </div>
+
+
     <div class="view" id="view-engine">
 
       <!-- Step 1: Input -->
@@ -664,6 +743,7 @@ function renderAll() {
   renderCalendar();
   renderAutoPublish();
   initAutopilot();
+  initNewFeatures();
   renderProfile();
   updateStats();
 }
@@ -826,17 +906,50 @@ function renderQueue() {
 }
 
 function renderDashQueue() {
-  const el = document.getElementById('dashQueue');
-  if (!queue.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no content yet</div></div>'; return; }
-  el.innerHTML = queue.slice(0,6).map(i=>`
-    <div class="row-item">
-      <span class="row-type rt-${i.type||'blog'}">${i.type||'blog'}</span>
-      <div class="row-info"><div class="row-title">${i.title}</div><div class="row-meta">${i.platform} · ${i.ts}</div></div>
-      <span class="row-status rs-${i.status}">${i.status}</span>
-    </div>`).join('');
+  // Pull from combined log: autopilot + manual publishes
+  const apLogs = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
+  const wpLogs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  const allPosts = [...apLogs, ...wpLogs]
+    .filter(p => p.status === 'ok' && p.title)
+    .sort((a,b) => new Date(b.ts) - new Date(a.ts));
+
+  // Update stat cards
+  const stPub = document.getElementById('stPublished');
+  if (stPub) stPub.innerHTML = '<strong>' + allPosts.length + '</strong>';
+  const stAP = document.getElementById('stAP');
+  const apSettings = JSON.parse(localStorage.getItem('cruise_autopilot') || '{}');
+  if (stAP) {
+    if (apSettings.enabled) {
+      stAP.innerHTML = '● Active';
+      stAP.style.color = 'var(--sage)';
+      const sub = document.getElementById('stAP')?.parentElement?.querySelector('.stat-sub');
+    } else {
+      stAP.innerHTML = '○ Off';
+      stAP.style.color = 'var(--ink4)';
+    }
+  }
+
+  const el = document.getElementById('dash-posts');
+  if (!el) return;
+  if (!allPosts.length) {
+    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet — use Generate or enable Autopilot</div>';
+    return;
+  }
+  el.innerHTML = allPosts.slice(0,8).map(p => {
+    const date = new Date(p.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const score = p.seoScore || '—';
+    const source = p.source || (apLogs.includes(p) ? 'Autopilot' : 'Manual');
+    return `<div class="table-row">
+      <span><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:rgba(74,222,128,.12);color:#16a34a">Live</span></span>
+      <span style="font-weight:600;color:var(--ink2)">${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--amber)">${p.title}</a>` : p.title}</span>
+      <span style="font-size:12px;color:var(--ink4)">${p.topic || '—'}</span>
+      <span style="font-size:12px;color:var(--ink4)">${score}</span>
+      <span style="font-size:12px;color:var(--ink4)">${date}</span>
+    </div>`;
+  }).join('');
 }
 
-// ── Stats ──────────────────────────────────────
+
 function updateStats() {
   const pub = queue.filter(i=>i.status==='published').length;
   document.getElementById('stPublished').innerHTML = `<strong>${pub}</strong>`;
@@ -1359,7 +1472,8 @@ async function publishToWP() {
         password: atob(wp.password),
         title: generatedPostData.title,
         content: generatedPostData.content_html,
-        status: 'publish'
+        status: 'publish',
+        imageQuery: generatedPostData.title.split(' ').slice(0,3).join(' ')
       })
     });
 
@@ -1604,6 +1718,261 @@ function renderApLog() {
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${new Date(l.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
     </tr>`).join('')}</tbody>
   </table>`;
+}
+
+
+// ── Content List + Calendar ──────────────────────────────────────
+let calOffset = 0;
+
+function switchContentTab(tab) {
+  const listView = document.getElementById('content-list-view');
+  const calView = document.getElementById('content-calendar-view');
+  const listBtn = document.getElementById('tab-list-btn');
+  const calBtn = document.getElementById('tab-cal-btn');
+  if (tab === 'list') {
+    if(listView) listView.style.display = '';
+    if(calView) calView.style.display = 'none';
+    if(listBtn) { listBtn.style.background='var(--cream)'; listBtn.style.boxShadow='0 1px 3px rgba(0,0,0,.08)'; listBtn.style.color=''; }
+    if(calBtn) { calBtn.style.background='transparent'; calBtn.style.boxShadow='none'; calBtn.style.color='var(--ink4)'; }
+    renderAllPosts();
+  } else {
+    if(listView) listView.style.display = 'none';
+    if(calView) calView.style.display = '';
+    if(calBtn) { calBtn.style.background='var(--cream)'; calBtn.style.boxShadow='0 1px 3px rgba(0,0,0,.08)'; calBtn.style.color=''; }
+    if(listBtn) { listBtn.style.background='transparent'; listBtn.style.boxShadow='none'; listBtn.style.color='var(--ink4)'; }
+    renderCalendarNew();
+  }
+}
+
+function getAllPublishedPosts() {
+  const ap = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
+  const wp = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  return [...ap, ...wp]
+    .filter(p => p.title)
+    .sort((a,b) => new Date(b.ts) - new Date(a.ts));
+}
+
+function renderAllPosts() {
+  const posts = getAllPublishedPosts();
+  const tbody = document.getElementById('all-posts');
+  const empty = document.getElementById('all-posts-empty');
+  if (!tbody) return;
+  if (!posts.length) {
+    tbody.innerHTML = '';
+    if(empty) empty.style.display = '';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  tbody.innerHTML = posts.map(p => {
+    const date = new Date(p.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const isAp = (JSON.parse(localStorage.getItem('cruise_ap_log')||'[]')).some(a => a.ts === p.ts);
+    const sourceBadge = isAp
+      ? '<span style="font-size:10px;padding:2px 7px;border-radius:100px;background:rgba(76,148,178,.15);color:var(--blue);font-weight:700">Autopilot</span>'
+      : '<span style="font-size:10px;padding:2px 7px;border-radius:100px;background:var(--cream3);color:var(--ink4);font-weight:700">Manual</span>';
+    const statusBadge = p.status === 'ok'
+      ? '<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:rgba(74,222,128,.12);color:#16a34a">Live</span>'
+      : '<span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:rgba(192,48,79,.08);color:#C0304F">Failed</span>';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 16px">${statusBadge}</td>
+      <td style="padding:10px 16px;font-size:13px;font-weight:600;max-width:280px">${p.url ? `<a href="${p.url}" target="_blank" style="color:var(--amber)">${p.title}</a>` : p.title}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${p.topic || '—'}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4);text-align:center">${p.seoScore || '—'}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${date}</td>
+      <td style="padding:10px 16px">${sourceBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function calNav(dir) {
+  calOffset += dir;
+  renderCalendarNew();
+}
+
+function renderCalendarNew() {
+  const now = new Date();
+  const d = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+  const month = d.getMonth();
+  const year = d.getFullYear();
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const titleEl = document.getElementById('calTitle');
+  if (titleEl) titleEl.textContent = months[month] + ' ' + year;
+
+  const posts = getAllPublishedPosts();
+  const postsByDate = {};
+  posts.forEach(p => {
+    const key = new Date(p.ts).toDateString();
+    if (!postsByDate[key]) postsByDate[key] = [];
+    postsByDate[key].push(p);
+  });
+
+  // Get autopilot scheduled days
+  const apSettings = JSON.parse(localStorage.getItem('cruise_autopilot') || '{}');
+  const scheduledDays = apSettings.enabled ? getScheduledDaysInMonth(apSettings.frequency || '3x_week', month, year) : [];
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const startOffset = (firstDay === 0) ? 6 : firstDay - 1; // Mon-based
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+
+  let cells = '';
+  for (let i = 0; i < startOffset; i++) cells += '<div></div>';
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateObj = new Date(year, month, day);
+    const key = dateObj.toDateString();
+    const dayPosts = postsByDate[key] || [];
+    const isToday = dateObj.toDateString() === now.toDateString();
+    const isScheduled = scheduledDays.includes(day);
+    const hasPosts = dayPosts.length > 0;
+    cells += `<div style="min-height:70px;padding:6px;border-radius:8px;border:1px solid ${isToday ? 'var(--amber)' : 'var(--border)'};background:${isToday ? 'rgba(197,150,69,.06)' : hasPosts ? 'rgba(74,222,128,.05)' : 'var(--cream)'};cursor:${hasPosts ? 'pointer' : 'default'}" ${hasPosts ? `onclick="showDayPosts('${key}')"` : ''}>
+      <div style="font-size:12px;font-weight:${isToday?'800':'600'};color:${isToday?'var(--amber)':'var(--ink3)'};margin-bottom:4px">${day}</div>
+      ${hasPosts ? `<div style="font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;background:rgba(74,222,128,.2);color:#16a34a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${dayPosts[0].title?.split(' ').slice(0,3).join(' ')}...</div>` : ''}
+      ${isScheduled && !hasPosts ? '<div style="font-size:10px;color:var(--blue);opacity:.6">● scheduled</div>' : ''}
+    </div>`;
+  }
+  grid.innerHTML = cells;
+}
+
+function getScheduledDaysInMonth(freq, month, year) {
+  const days = [];
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const freqMap = { daily: [0,1,2,3,4,5,6], '3x_week': [1,3,5], weekly: [1], monthly: [] };
+  const targetDays = freqMap[freq] || [1,3,5];
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dow = new Date(year, month, d).getDay();
+    if (targetDays.includes(dow)) days.push(d);
+  }
+  return days;
+}
+
+function showDayPosts(dateKey) {
+  const posts = getAllPublishedPosts().filter(p => new Date(p.ts).toDateString() === dateKey);
+  if (!posts.length) return;
+  if (posts[0].url) window.open(posts[0].url, '_blank');
+}
+
+// ── Keyword Research ─────────────────────────────────────────────
+async function runKwResearch() {
+  const kw = document.getElementById('kwInput')?.value?.trim();
+  if (!kw) return;
+
+  const loading = document.getElementById('kw-loading');
+  const results = document.getElementById('kw-results-wrap');
+  const btn = document.getElementById('kwBtn');
+
+  if(loading) loading.style.display = '';
+  if(results) results.style.display = 'none';
+  if(btn) { btn.disabled = true; btn.textContent = 'Researching...'; }
+
+  try {
+    const prompt = `You are an SEO keyword research expert. Research the keyword: "${kw}"
+
+Provide detailed keyword analysis. Return ONLY a JSON object (no markdown, no code blocks):
+{
+  "main_keyword": "${kw}",
+  "estimated_monthly_searches": "number as string like 1200 or 500-1000",
+  "difficulty_score": "number 1-100",
+  "opportunity_score": "number 1-100",
+  "search_intent": "informational|commercial|navigational|transactional",
+  "related_keywords": [
+    { "keyword": "...", "volume": "...", "difficulty": 30, "intent": "informational" }
+  ],
+  "content_ideas": [
+    { "title": "...", "angle": "..." }
+  ],
+  "quick_wins": ["keyword1", "keyword2", "keyword3"]
+}
+
+Include 8 related keywords and 6 content ideas. Focus on UK search trends if relevant.`;
+
+    const res = await fetch('/api/ai-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const raw = data.content?.map(x => x.text || '').join('') || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const kd = JSON.parse(clean);
+
+    // Render stats
+    document.getElementById('kw-stat-vol').textContent = kd.estimated_monthly_searches || '—';
+    document.getElementById('kw-stat-diff').textContent = (kd.difficulty_score || '—') + (kd.difficulty_score ? '/100' : '');
+    document.getElementById('kw-stat-opp').textContent = (kd.opportunity_score || '—') + (kd.opportunity_score ? '/100' : '');
+
+    // Render keyword table
+    const tbody = document.getElementById('kw-table-body');
+    if (tbody) tbody.innerHTML = (kd.related_keywords || []).map(k => {
+      const diffColor = k.difficulty < 30 ? '#16a34a' : k.difficulty < 60 ? 'var(--amber)' : '#C0304F';
+      return `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:10px 16px;font-size:13px;font-weight:600">${k.keyword}</td>
+        <td style="padding:10px 16px;font-size:13px;text-align:center;color:var(--ink3)">${k.volume || '—'}</td>
+        <td style="padding:10px 16px;text-align:center"><span style="font-size:12px;font-weight:700;color:${diffColor}">${k.difficulty}/100</span></td>
+        <td style="padding:10px 16px;text-align:center"><span style="font-size:11px;padding:2px 8px;border-radius:100px;background:var(--cream2);color:var(--ink3)">${k.intent}</span></td>
+        <td style="padding:10px 16px;text-align:center">
+          <button class="btn" style="font-size:11px;padding:4px 10px" onclick="generateFromKeyword('${k.keyword.replace(/'/g,"\'")}')">Write post</button>
+        </td>
+      </tr>`;
+    }).join('');
+
+    // Render content ideas
+    const ideas = document.getElementById('kw-content-ideas');
+    if (ideas) ideas.innerHTML = (kd.content_ideas || []).map(idea => `
+      <div class="card" style="padding:14px 16px;cursor:pointer;hover:background:var(--cream2)" onclick="generateFromKeyword('${idea.title.replace(/'/g,"\'")}')">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">${idea.title}</div>
+        <div style="font-size:12px;color:var(--ink4)">${idea.angle}</div>
+        <div style="font-size:11px;color:var(--amber);margin-top:8px;font-weight:600">Write this post →</div>
+      </div>`).join('');
+
+    // Quick win suggestions
+    const sugg = document.getElementById('kw-suggestions');
+    if (sugg && kd.quick_wins) {
+      sugg.innerHTML = '<span style="font-size:12px;color:var(--ink4);margin-right:4px">Quick wins:</span>' +
+        kd.quick_wins.map(w => `<span class="tone-chip" style="cursor:pointer" onclick="document.getElementById('kwInput').value='${w.replace(/'/g,"\'")}';runKwResearch()">${w}</span>`).join('');
+    }
+
+    if(results) results.style.display = '';
+  } catch(e) {
+    toast('Keyword research failed: ' + e.message, false);
+  }
+
+  if(loading) loading.style.display = 'none';
+  if(btn) { btn.disabled = false; btn.textContent = 'Research ✦'; }
+}
+
+function generateFromKeyword(kw) {
+  nav(null, 'engine');
+  setTimeout(() => {
+    const inp = document.getElementById('kwInput2') || document.getElementById('genKeyword');
+    if (inp) inp.value = kw;
+    // Try to set the generator input
+    const genInp = document.querySelector('#view-engine input[type="text"], #view-engine input:not([type])');
+    if (genInp) genInp.value = kw;
+  }, 100);
+}
+
+// ── Update publishToWP to log seoScore ───────────────────────────
+const _origAddWPLog = typeof addWPLog === 'function' ? addWPLog : null;
+
+// ── Call renderAllPosts when posts view shown ────────────────────
+const _origNav = nav;
+function nav(el, id) {
+  _origNav(el, id);
+  if (id === 'posts') { setTimeout(renderAllPosts, 50); }
+  if (id === 'dashboard') { setTimeout(renderDashQueue, 50); }
+}
+
+// ── Initialise new features ──────────────────────────────────────
+function initNewFeatures() {
+  renderDashQueue();
+  // Pre-fill keyword seeds from brand
+  const sugg = document.getElementById('kw-suggestions');
+  if (sugg && brand?.keywords?.length) {
+    sugg.innerHTML = '<span style="font-size:12px;color:var(--ink4);margin-right:4px">Try:</span>' +
+      (brand.keywords || []).slice(0,5).map(w =>
+        `<span class="tone-chip" style="cursor:pointer" onclick="document.getElementById('kwInput').value='${w}';runKwResearch()">${w}</span>`
+      ).join('');
+  }
 }
 
 // ── WordPress Connection ──
