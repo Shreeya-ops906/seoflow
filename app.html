@@ -1058,34 +1058,26 @@ function connectWP() {
   setWPLoading(true);
   clearWPAlert();
 
-  const credentials = btoa(username + ':' + password);
-  const endpoint = url + '/wp-json/wp/v2/users/me';
-
-  fetch(endpoint, {
-    headers: {
-      'Authorization': 'Basic ' + credentials,
-      'Content-Type': 'application/json'
-    }
+  fetch('/api/wp-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'test', url, username, password })
   })
-  .then(r => {
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  })
-  .then(data => {
+  .then(r => r.json().then(data => ({ ok: r.ok, data })))
+  .then(({ ok, data }) => {
+    if (!ok) throw new Error(data.error || 'Connection failed');
     const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
     localStorage.setItem(WP_KEY, JSON.stringify(wp));
     setWPLoading(false);
     showWPConnected(wp);
-    toast('WordPress connected successfully!', true);
+    toast('WordPress connected!', true);
   })
   .catch(err => {
     setWPLoading(false);
-    if (err.message.includes('401')) {
+    if (err.message.includes('401') || err.message.includes('incorrect_password') || err.message.includes('invalid_username')) {
       wpAlert('Wrong username or application password. Double-check and try again.', 'err');
-    } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
-      wpAlert('Could not reach that URL. Check the site address is correct and the site is live.', 'err');
     } else {
-      wpAlert('Connection failed: ' + err.message + '. Make sure the WordPress REST API is enabled.', 'err');
+      wpAlert('Connection failed: ' + err.message, 'err');
     }
   });
 }
@@ -1121,31 +1113,30 @@ async function testPublish() {
   btn.disabled = true;
   btn.textContent = 'Publishing...';
 
-  const credentials = btoa(wp.username + ':' + atob(wp.password));
-
   try {
-    const r = await fetch(wp.url + '/wp-json/wp/v2/posts', {
+    const r = await fetch('/api/wp-proxy', {
       method: 'POST',
-      headers: {
-        'Authorization': 'Basic ' + credentials,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'publish',
+        url: wp.url,
+        username: wp.username,
+        password: atob(wp.password),
         title,
-        content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this post — it was created to verify your connection is working correctly.</p>',
+        content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this — it was created to verify your connection is working.</p>',
         status: 'draft'
       })
     });
 
-    if (!r.ok) throw new Error('HTTP ' + r.status);
     const post = await r.json();
+    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
 
     const resultEl = document.getElementById('wp-publish-result');
     resultEl.style.display = 'block';
     resultEl.style.background = 'var(--sage-l)';
     resultEl.style.border = '1px solid rgba(74,124,111,.2)';
     resultEl.style.color = 'var(--sage)';
-    resultEl.innerHTML = '✓ Draft post created on WordPress! <a href="' + wp.url + '/wp-admin/post.php?post=' + post.id + '&action=edit" target="_blank" style="color:var(--sage);font-weight:700;margin-left:6px">View in WordPress →</a>';
+    resultEl.innerHTML = '✓ Draft post created! <a href="' + wp.url + '/wp-admin/post.php?post=' + post.id + '&action=edit" target="_blank" style="color:var(--sage);font-weight:700;margin-left:6px">View in WordPress →</a>';
 
     addWPLog(title, wp.url, 'ok');
     toast('Post published to WordPress!', true);
