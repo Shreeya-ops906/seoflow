@@ -1188,12 +1188,10 @@ Return ONLY a JSON object with this exact structure (no markdown, no code blocks
     setTimeout(() => setGenStage('Writing content...', 'Crafting SEO-optimised paragraphs', 50), 4000);
     setTimeout(() => setGenStage('Optimising for SEO...', 'Checking keyword density and readability', 80), 8000);
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/ai-generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
