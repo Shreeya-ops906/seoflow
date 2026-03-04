@@ -130,7 +130,8 @@ Return ONLY a JSON object (no markdown, no code blocks):
         title: post.title,
         content: post.content_html,
         status: 'publish',
-        excerpt: post.meta_description
+        excerpt: post.meta_description,
+        imageQuery: trendResult.topic
       })
     });
 
