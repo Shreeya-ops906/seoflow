@@ -677,8 +677,8 @@ function applyBrand() {
   if(sbMeta) sbMeta.textContent = brand.industry + ' · ' + (brand.type||'');
   if(sbTone) sbTone.textContent = (brand.tone||'auto') + ' · active';
   if(ctxVal) ctxVal.textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
-  document.getElementById('profName').textContent = brand.name;
-  document.getElementById('profMeta').textContent = brand.industry + ' / ' + (brand.type||'');
+  const profName=document.getElementById('profName'); if(profName) profName.textContent=brand.name;
+  const profMeta=document.getElementById('profMeta'); if(profMeta) profMeta.textContent=brand.industry+' / '+(brand.type||'');
 }
 
 // ── Navigation ─────────────────────────────────
