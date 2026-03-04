@@ -84,6 +84,20 @@ export default async function handler(req) {
         }
       }
 
+      // Inject Article schema markup at end of content
+      const brandName = body.brandName || '';
+      const schemaMarkup = '<script type="application/ld+json">' + JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": title,
+        "datePublished": new Date().toISOString(),
+        "dateModified": new Date().toISOString(),
+        "author": { "@type": "Organization", "name": brandName || "Cruise SEO" },
+        "publisher": { "@type": "Organization", "name": brandName || "Cruise SEO" },
+        "description": excerpt || title
+      }) + '</script>';
+      finalContent = finalContent + '\n' + schemaMarkup;
+
       const postBody = {
         title,
         content: finalContent,

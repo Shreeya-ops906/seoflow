@@ -1090,6 +1090,11 @@ window.signOut = async function() { await window.Clerk.signOut(); window.locatio
       </div>
 
       <div class="field">
+        <label class="field-label">Booking / contact URL <span class="optional">optional</span></label>
+        <input class="field-input" id="bizBookingUrl" type="url" placeholder="https://yoursite.com/book-a-session" />
+      </div>
+
+      <div class="field">
         <label class="field-label">What do you do? <span class="optional">one sentence</span></label>
         <input class="field-input" id="bizOneLiner" type="text" placeholder="e.g. We help small businesses get found online through SEO and content marketing" oninput="updatePreview()" />
         <p class="field-hint">This becomes your brand's core message — keep it clear and specific.</p>
@@ -1775,6 +1780,8 @@ async function finishOnboarding() {
     personalities, values, goals, keywords, pillars,
     idealCustomer: document.getElementById('idealCustomer').value,
     differentiators: document.getElementById('differentiators').value,
+    bookingUrl: document.getElementById('bizBookingUrl')?.value || '',
+    booking_url: document.getElementById('bizBookingUrl')?.value || '',
   };
 
   try {
@@ -1800,6 +1807,8 @@ async function finishOnboarding() {
   // Save to storage
   try {
     await window.storage.set('brand-profile', JSON.stringify(brandProfile));
+    localStorage.setItem('seoflow_brand', JSON.stringify(brandProfile));
+    localStorage.setItem('cruise_brand', JSON.stringify(brandProfile));
   } catch(e) {}
 
   showCompleteScreen();
