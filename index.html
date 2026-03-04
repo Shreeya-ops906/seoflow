@@ -3,528 +3,212 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SEOFlow — Blogs on autopilot. Rankings that climb.</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>Cruise SEO — Set it. Forget it. Rank.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,600&family=Cabinet+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue:   #00e5ff;
-  --blue2:  #00bcd4;
-  --blue3:  #006070;
-  --blue-t: rgba(0,229,255,.10);
-  --blue-b: rgba(0,229,255,.22);
-  --ink:    #0d1117;
-  --tx:     #1a2230;
-  --tx2:    #5a6a7a;
-  --tx3:    #a0aec0;
-  --white:  #ffffff;
-  --grey1:  #f4f7fb;
-  --grey2:  #edf1f7;
-  --bdr:    #dde4ee;
-  --bdr2:   #c8d2e0;
-  --green:  #00c853;
-  --amber:  #ffab00;
-  --r:      10px;
-  --r2:     18px;
+  --cream:#FAF8F4;--cream2:#F2EFE8;--cream3:#E8E2D6;
+  --surface:#FFFFFF;--ink:#1C1714;--ink2:#3D3830;--ink3:#6B6458;--ink4:#9B9088;
+  --amber:#4c94b2;--amber-l:#deeef7;--amber-d:#3a7a96;
+  --sage:#4A7C6F;--sage-l:#D6EDE8;
+  --border:#E8E2D6;--border2:#D4CCBB;
 }
 html{scroll-behavior:smooth}
-body{
-  font-family:'Bricolage Grotesque',system-ui,sans-serif;
-  background:#fff;color:var(--tx);
-  overflow-x:hidden;line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:"Cabinet Grotesk",Georgia,sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 
-/* ══ NAV ══════════════════════════════════ */
-nav{
-  position:sticky;top:0;z-index:200;height:62px;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 52px;background:rgba(255,255,255,.96);
-  backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);
-}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(250,248,244,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 48px}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo-sq{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--ink);display:grid;place-items:center;
-}
-.logo-sq svg{width:17px;height:17px;stroke:var(--blue);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.logo-name{font-weight:800;font-size:17px;color:var(--tx);letter-spacing:-.03em}
-.nav-links{display:flex;gap:1px}
-.nav-links a{font-size:14px;font-weight:500;color:var(--tx2);padding:6px 14px;border-radius:8px;text-decoration:none;transition:.15s}
-.nav-links a:hover{color:var(--tx);background:var(--grey1)}
-.nav-actions{display:flex;gap:8px;align-items:center}
-.nav-login{font-size:14px;font-weight:500;color:var(--tx2);text-decoration:none;padding:7px 16px;border-radius:8px;border:1px solid var(--bdr);transition:.15s}
-.nav-login:hover{border-color:var(--bdr2);color:var(--tx)}
-.nav-cta{
-  font-size:14px;font-weight:700;color:var(--ink);
-  padding:8px 20px;border-radius:8px;text-decoration:none;
-  background:var(--blue);transition:.15s;letter-spacing:-.01em;
-}
-.nav-cta:hover{background:var(--blue2)}
+.logo-mark{width:32px;height:32px;background:var(--ink);border-radius:8px;display:grid;place-items:center}
+.logo-mark svg{width:18px;height:18px;fill:none;stroke:var(--amber);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.logo-text{font-family:"Fraunces",Georgia,serif;font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+.logo-text span{color:var(--amber)}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-links a{font-size:13px;font-weight:600;color:var(--ink3);text-decoration:none;transition:.15s}
+.nav-links a:hover{color:var(--ink)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-ghost{font-size:13px;font-weight:700;color:var(--ink2);background:none;border:none;cursor:pointer;padding:8px 14px;border-radius:8px;transition:.15s;font-family:"Cabinet Grotesk",sans-serif;text-decoration:none}
+.btn-ghost:hover{background:var(--cream2)}
+.btn-primary{font-size:13px;font-weight:700;color:var(--surface);background:var(--ink);border:none;cursor:pointer;padding:9px 20px;border-radius:8px;transition:.2s;font-family:"Cabinet Grotesk",sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-primary:hover{background:var(--amber);transform:translateY(-1px)}
 
-/* ══ HERO ══════════════════════════════════ */
-.hero{
-  padding:88px 52px 0;
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:64px;align-items:end;overflow:hidden;min-height:600px;
-  background:#fff;position:relative;
-}
-/* thin blue rule left edge */
-.hero::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;
-  width:3px;background:linear-gradient(to bottom,transparent,var(--blue) 30%,var(--blue) 70%,transparent);
-}
-.hero-l{padding-bottom:80px;position:relative;z-index:1}
-.hero-tag{
-  display:inline-flex;align-items:center;gap:7px;
-  border:1.5px solid var(--blue-b);background:var(--blue-t);
-  color:var(--blue3);font-size:11px;font-weight:700;
-  letter-spacing:.07em;text-transform:uppercase;
-  padding:4px 12px;border-radius:6px;margin-bottom:28px;
-  font-family:'DM Mono',monospace;
-}
-.tag-dot{width:5px;height:5px;background:var(--blue);border-radius:50%;animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero h1{
-  font-size:clamp(44px,5.5vw,72px);
-  font-weight:800;line-height:1.01;letter-spacing:-.04em;
-  color:var(--tx);margin-bottom:22px;
-}
-.hero h1 span{
-  color:var(--blue2);
-  text-decoration:underline;
-  text-decoration-color:var(--blue);
-  text-decoration-thickness:3px;
-  text-underline-offset:6px;
-}
-.hero-p{font-size:18px;color:var(--tx2);line-height:1.68;max-width:480px;margin-bottom:36px;font-weight:500}
-.hero-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:38px}
-.btn-main{
-  font-size:15px;font-weight:700;color:var(--ink);
-  padding:13px 30px;border-radius:9px;text-decoration:none;
-  background:var(--blue);transition:.2s;letter-spacing:-.01em;
-}
-.btn-main:hover{background:var(--blue2);transform:translateY(-1px)}
-.btn-sec{
-  font-size:15px;font-weight:500;color:var(--tx2);
-  padding:13px 22px;border-radius:9px;text-decoration:none;
-  border:1.5px solid var(--bdr2);transition:.15s;
-  display:flex;align-items:center;gap:7px;
-}
-.btn-sec:hover{border-color:var(--blue);color:var(--blue3)}
-.hero-social{display:flex;align-items:center;gap:9px}
-.h-stars{color:var(--amber);font-size:14px;letter-spacing:1px}
-.h-social-txt{font-size:13px;color:var(--tx3)}
+/* HERO */
+.hero{min-height:92vh;display:flex;align-items:center;padding:80px 48px 60px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-120px;right:-80px;width:600px;height:600px;background:radial-gradient(circle,rgba(76,148,178,.08) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1100px;margin:0 auto;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.hero-label{display:inline-flex;align-items:center;gap:8px;background:var(--amber-l);border:1px solid rgba(76,148,178,.25);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:700;color:var(--amber-d);letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
+.hero-label svg{width:12px;height:12px;fill:var(--amber)}
+h1{font-family:"Fraunces",Georgia,serif;font-size:clamp(44px,5vw,68px);font-weight:700;line-height:1.05;letter-spacing:-.03em;color:var(--ink);margin-bottom:24px}
+h1 em{color:var(--amber);font-style:italic}
+.hero-sub{font-size:17px;color:var(--ink3);line-height:1.7;font-weight:400;max-width:440px;margin-bottom:40px}
+.hero-ctas{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn-hero{font-size:15px;font-weight:700;color:var(--surface);background:var(--amber);border:none;cursor:pointer;padding:14px 28px;border-radius:10px;transition:.2s;font-family:"Cabinet Grotesk",sans-serif;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn-hero:hover{background:var(--amber-d);transform:translateY(-2px);box-shadow:0 8px 24px rgba(76,148,178,.3)}
+.btn-hero-outline{font-size:14px;font-weight:700;color:var(--ink2);background:none;border:1.5px solid var(--border2);cursor:pointer;padding:13px 24px;border-radius:10px;transition:.15s;font-family:"Cabinet Grotesk",sans-serif;text-decoration:none}
+.btn-hero-outline:hover{border-color:var(--ink3);color:var(--ink)}
+.hero-trust{margin-top:36px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink4);font-weight:500}
+.stars{color:var(--amber);letter-spacing:-1px;font-size:13px}
 
-/* hero UI window */
-.hero-r{position:relative;z-index:1}
-.ui-win{
-  background:#fff;
-  border-radius:14px 14px 0 0;
-  border:1.5px solid var(--bdr);border-bottom:none;
-  overflow:hidden;
-  box-shadow:0 -8px 48px rgba(0,180,210,.1),0 -2px 16px rgba(0,0,0,.06);
-}
-.ui-titlebar{
-  background:var(--grey1);padding:11px 16px;
-  display:flex;align-items:center;gap:6px;
-  border-bottom:1px solid var(--bdr);
-}
-.ui-dot{width:10px;height:10px;border-radius:50%}
-.ui-url{
-  margin-left:8px;background:#fff;border-radius:5px;
-  border:1px solid var(--bdr);
-  padding:3px 12px;font-size:10px;color:var(--tx3);
-  font-family:'DM Mono',monospace;flex:1;max-width:200px;
-}
-.ui-body{padding:18px}
-.ui-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.ui-hd-title{font-size:13px;font-weight:700;color:var(--tx);letter-spacing:-.01em}
-.ui-gen-btn{
-  background:var(--blue-t);border:1px solid var(--blue-b);
-  color:var(--blue3);font-size:10px;font-weight:700;
-  padding:4px 10px;border-radius:5px;font-family:'DM Mono',monospace;
-}
-.ui-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.ui-m{background:var(--grey1);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px}
-.ui-m-val{font-size:19px;font-weight:800;color:var(--tx);line-height:1;letter-spacing:-.02em}
-.ui-m-up{font-size:9px;font-weight:700;color:var(--green);margin-left:2px}
-.ui-m-lbl{font-size:9px;color:var(--tx3);margin-top:2px;font-family:'DM Mono',monospace}
-.ui-table{background:#fff;border:1px solid var(--bdr);border-radius:9px;overflow:hidden}
-.ui-t-hd{
-  display:grid;grid-template-columns:66px 1fr 56px;
-  padding:6px 12px;background:var(--grey1);border-bottom:1px solid var(--bdr);
-  font-size:8px;font-weight:700;color:var(--tx3);
-  text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;
-}
-.ui-t-row{display:grid;grid-template-columns:66px 1fr 56px;padding:8px 12px;border-bottom:1px solid var(--bdr);font-size:10px;align-items:center}
-.ui-t-row:last-child{border-bottom:none}
-.ui-badge{font-size:8px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;font-family:'DM Mono',monospace}
-.ui-badge.live{background:rgba(0,200,83,.1);color:#00a84a}
-.ui-badge.sched{background:rgba(255,171,0,.1);color:#cc8800}
-.ui-post{color:var(--tx2);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ui-date{color:var(--tx3);font-family:'DM Mono',monospace;font-size:9px}
+/* HERO VISUAL */
+.hero-visual{position:relative}
+.browser-frame{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 24px 64px rgba(28,23,20,.12);overflow:hidden}
+.browser-bar{height:40px;background:var(--cream2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#FF5F57}.dot-y{background:#FEBC2E}.dot-g{background:#28C840}
+.browser-url{margin-left:10px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:4px 10px;font-size:11px;color:var(--ink4);font-family:monospace;flex:1;max-width:200px}
+.dash-inner{padding:20px}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.dash-title{font-family:"Fraunces",serif;font-size:14px;font-weight:600;color:var(--ink)}
+.dash-tag{font-size:10px;font-weight:700;background:var(--sage-l);color:var(--sage);padding:3px 8px;border-radius:4px;font-family:monospace}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:12px}
+.stat-n{font-family:"Fraunces",serif;font-size:20px;font-weight:700;color:var(--ink)}
+.stat-n span{font-size:11px;color:var(--sage);font-family:"Cabinet Grotesk",sans-serif;font-weight:700}
+.stat-l{font-size:10px;color:var(--ink4);font-weight:500;margin-top:2px}
+.posts-list{display:flex;flex-direction:column;gap:8px}
+.post-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--cream);border:1px solid var(--border);border-radius:8px}
+.post-status{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;white-space:nowrap}
+.live{background:var(--sage-l);color:var(--sage)}
+.sched{background:#FDF6D4;color:#8B6914}
+.post-title{font-size:11px;color:var(--ink2);font-weight:600;flex:1}
+.post-date{font-size:10px;color:var(--ink4);font-family:monospace}
 
-/* ══ TRUST BAR ══════════════════════════════ */
-.trust-bar{
-  background:var(--grey1);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);
-  padding:20px 52px;display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap;
-}
-.trust-lbl{font-size:11px;color:var(--tx3);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase}
-.trust-div{width:1px;height:14px;background:var(--bdr2)}
-.trust-co{font-size:13px;font-weight:600;color:var(--tx3)}
+/* TRUST BAR */
+.trust-bar{background:var(--cream2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:20px 48px;display:flex;align-items:center;gap:0}
+.trust-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink4);white-space:nowrap;margin-right:40px}
+.trust-logos{display:flex;align-items:center;gap:48px;flex-wrap:wrap}
+.trust-logos span{font-size:13px;font-weight:700;color:var(--ink3);opacity:.6;font-family:"Fraunces",serif;font-style:italic}
 
-/* ══ SECTIONS ════════════════════════════ */
-section{padding:96px 52px;background:#fff}
-section.grey{background:var(--grey1)}
-.wrap{max-width:1100px;margin:0 auto}
-.eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  font-size:11px;font-weight:700;color:var(--blue3);
-  text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;
-  font-family:'DM Mono',monospace;
-}
-.eyebrow::before{content:'';width:18px;height:2.5px;background:var(--blue);border-radius:2px}
-.sh{font-size:clamp(28px,3.6vw,46px);font-weight:800;line-height:1.08;letter-spacing:-.035em;color:var(--tx);margin-bottom:14px}
-.ss{font-size:17px;color:var(--tx2);line-height:1.7;max-width:520px;font-weight:500}
+/* SECTIONS */
+section{padding:96px 48px}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-label{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--amber);margin-bottom:16px}
+.section-label::before{content:"";width:20px;height:1.5px;background:var(--amber);display:block}
+h2{font-family:"Fraunces",Georgia,serif;font-size:clamp(32px,4vw,48px);font-weight:700;line-height:1.1;letter-spacing:-.03em;color:var(--ink);margin-bottom:16px}
+h2 em{font-style:italic;color:var(--amber)}
+.section-sub{font-size:16px;color:var(--ink3);line-height:1.7;max-width:520px}
 
-/* ══ HOW IT WORKS ════════════════════════ */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:54px}
-.step{
-  background:#fff;border:1.5px solid var(--bdr);
-  border-radius:var(--r2);padding:34px;
-  transition:.22s;position:relative;
-}
-.step::after{
-  content:'';position:absolute;
-  inset:0;border-radius:var(--r2);
-  border:1.5px solid var(--blue);
-  opacity:0;transition:.22s;
-}
-.step:hover::after{opacity:1}
-.step:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,180,210,.1)}
-.step-n{
-  width:38px;height:38px;border-radius:9px;
-  background:var(--ink);display:grid;place-items:center;
-  font-family:'DM Mono',monospace;font-size:13px;font-weight:700;color:var(--blue);
-  margin-bottom:20px;
-}
-.step h3{font-size:17px;font-weight:700;color:var(--tx);margin-bottom:9px;letter-spacing:-.02em}
-.step p{font-size:14px;color:var(--tx2);line-height:1.7;font-weight:500}
+/* HOW IT WORKS */
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:56px}
+.how-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;position:relative;transition:.2s}
+.how-card:hover{border-color:var(--border2);box-shadow:0 8px 32px rgba(28,23,20,.06);transform:translateY(-2px)}
+.how-num{font-family:"Fraunces",serif;font-size:48px;font-weight:700;color:var(--cream3);line-height:1;margin-bottom:16px;position:absolute;top:24px;right:24px}
+.how-icon{width:44px;height:44px;background:var(--amber-l);border-radius:10px;display:grid;place-items:center;margin-bottom:20px}
+.how-icon svg{width:22px;height:22px;stroke:var(--amber);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.how-card h3{font-family:"Fraunces",serif;font-size:20px;font-weight:600;color:var(--ink);margin-bottom:10px;letter-spacing:-.01em}
+.how-card p{font-size:14px;color:var(--ink3);line-height:1.7}
 
-/* ══ NUMBERS ════════════════════════════ */
-.numbers-strip{
-  background:var(--ink);padding:60px 52px;
-}
-.numbers-grid{display:grid;grid-template-columns:repeat(4,1fr);max-width:1100px;margin:0 auto}
-.num{text-align:center;padding:20px 16px;border-right:1px solid rgba(255,255,255,.07)}
-.num:last-child{border-right:none}
-.num-big{font-size:54px;font-weight:800;color:#fff;line-height:1;letter-spacing:-.04em}
-.num-big b{color:var(--blue);font-weight:800}
-.num-lbl{font-size:13px;color:rgba(255,255,255,.35);margin-top:7px;font-weight:500}
+/* NUMBERS */
+.numbers{background:var(--ink);padding:72px 48px}
+.numbers-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:40px}
+.num-item{text-align:center}
+.num-big{font-family:"Fraunces",serif;font-size:52px;font-weight:700;color:var(--surface);letter-spacing:-.04em;line-height:1}
+.num-big span{color:var(--amber)}
+.num-label{font-size:13px;color:rgba(250,248,244,.5);margin-top:8px;font-weight:500}
 
-/* ══ SPLIT SECTIONS ════════════════════ */
-.split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
-.split.flip{direction:rtl}
-.split.flip>*{direction:ltr}
-.split-copy h2{font-size:clamp(24px,3vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1.1;color:var(--tx);margin-bottom:14px}
-.split-copy p{font-size:15px;color:var(--tx2);line-height:1.75;margin-bottom:22px;font-weight:500}
-.checks{list-style:none;display:flex;flex-direction:column;gap:11px}
-.checks li{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--tx2);font-weight:500}
-.ck{
-  width:20px;height:20px;border-radius:5px;flex-shrink:0;
-  background:var(--blue-t);border:1px solid var(--blue-b);
-  display:grid;place-items:center;margin-top:1px;
-}
-.ck svg{width:11px;height:11px;stroke:var(--blue3);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-/* light panels for splits */
-.light-panel{
-  background:#fff;border:1.5px solid var(--bdr);
-  border-radius:var(--r2);padding:22px;
-  box-shadow:0 4px 28px rgba(0,0,0,.05);
-}
-.lp-hd{display:flex;justify-content:space-between;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--bdr);margin-bottom:16px}
-.lp-title{font-size:12px;font-weight:700;color:var(--tx);letter-spacing:-.01em}
-.lp-live{
-  display:flex;align-items:center;gap:5px;
-  background:rgba(0,200,83,.08);color:#009940;
-  font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;
-  font-family:'DM Mono',monospace;
-}
-.lp-live-dot{width:5px;height:5px;background:#00c853;border-radius:50%;animation:blink 2s infinite}
-.trend-r{
-  display:flex;align-items:center;gap:11px;
-  padding:9px 11px;background:var(--grey1);
-  border:1px solid var(--bdr);border-radius:8px;margin-bottom:6px;
-}
-.trend-r:last-child{margin-bottom:0}
-.t-kw{font-size:12px;font-weight:600;color:var(--tx);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.t-bar-bg{width:72px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;flex-shrink:0}
-.t-bar-fill{height:100%;background:var(--blue);border-radius:2px}
-.t-vol{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;width:52px;text-align:right;flex-shrink:0}
-.post-r{
-  display:flex;gap:12px;align-items:flex-start;
-  padding:12px;background:var(--grey1);
-  border:1px solid var(--bdr);border-radius:9px;margin-bottom:7px;
-}
-.post-r:last-child{margin-bottom:0}
-.post-score{
-  width:34px;height:34px;border-radius:7px;
-  background:var(--blue-t);border:1px solid var(--blue-b);
-  display:grid;place-items:center;
-  font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--blue3);flex-shrink:0;
-}
-.post-ttl{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:3px;letter-spacing:-.01em}
-.post-meta{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace}
-.post-tag{display:inline-block;margin-top:5px;background:rgba(0,200,83,.08);border:1px solid rgba(0,200,83,.2);color:#009940;font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;font-family:'DM Mono',monospace}
-.post-tag.rev{background:rgba(255,171,0,.08);border-color:rgba(255,171,0,.2);color:#cc8800}
+/* SPLIT SECTIONS */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.split.reverse{direction:rtl}
+.split.reverse>*{direction:ltr}
+.split-text h2{margin-bottom:12px}
+.split-text p{font-size:15px;color:var(--ink3);line-height:1.75;margin-bottom:24px}
+.split-points{display:flex;flex-direction:column;gap:12px}
+.split-point{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--ink2);font-weight:500}
+.split-point::before{content:"✦";color:var(--amber);font-size:12px;margin-top:2px;flex-shrink:0}
+.split-visual{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;box-shadow:0 12px 40px rgba(28,23,20,.08)}
 
-/* ══ INTERACTIVE DEMO ════════════════════
-   Fully light — white + blue accent, NO dark bg
-════════════════════════════════════════ */
-.demo-section{background:var(--grey1);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr)}
-.demo-shell{
-  background:#fff;border:1.5px solid var(--bdr);
-  border-radius:var(--r2);margin-top:48px;
-  overflow:hidden;
-  box-shadow:0 4px 40px rgba(0,180,210,.08);
-}
-.demo-tabbar{
-  display:flex;background:var(--grey1);
-  border-bottom:1.5px solid var(--bdr);overflow-x:auto;
-}
-.demo-tab{
-  padding:14px 22px;font-size:13px;font-weight:600;
-  color:var(--tx3);cursor:pointer;white-space:nowrap;
-  border-bottom:2.5px solid transparent;transition:.15s;
-  font-family:'DM Mono',monospace;flex-shrink:0;
-}
-.demo-tab:hover{color:var(--tx2)}
-.demo-tab.on{color:var(--blue3);border-bottom-color:var(--blue);background:#fff}
-.demo-pane{display:none;padding:32px;min-height:360px}
-.demo-pane.on{display:flex;gap:36px;align-items:flex-start}
-.dp-left{flex:1;min-width:0}
-.dp-right{width:300px;flex-shrink:0}
+/* KEYWORD PANEL */
+.kw-list{display:flex;flex-direction:column;gap:10px}
+.kw-row{display:flex;align-items:center;gap:12px}
+.kw-label{font-size:13px;font-weight:600;color:var(--ink2);width:200px;flex-shrink:0}
+.kw-bar-wrap{flex:1;height:7px;background:var(--cream2);border-radius:4px;overflow:hidden}
+.kw-bar{height:100%;background:linear-gradient(90deg,var(--amber),var(--amber-d));border-radius:4px}
+.kw-vol{font-size:11px;color:var(--ink4);font-family:monospace;width:50px;text-align:right}
 
-.dp-title{font-size:16px;font-weight:700;color:var(--tx);margin-bottom:4px;letter-spacing:-.02em}
-.dp-sub{font-size:13px;color:var(--tx3);margin-bottom:22px;font-weight:500}
+/* CONTENT PANEL */
+.content-queue{display:flex;flex-direction:column;gap:10px}
+.cq-item{background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px}
+.cq-icon{width:36px;height:36px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;font-size:16px;flex-shrink:0}
+.cq-body{flex:1}
+.cq-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.cq-meta{font-size:11px;color:var(--ink4)}
+.cq-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px}
 
-/* form elements — light */
-.df-group{margin-bottom:14px}
-.df-label{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-family:'DM Mono',monospace}
-.df-input{
-  width:100%;background:#fff;border:1.5px solid var(--bdr2);
-  border-radius:8px;padding:10px 14px;
-  font-size:14px;color:var(--tx);font-family:'Bricolage Grotesque',sans-serif;
-  outline:none;transition:.15s;
-}
-.df-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-t)}
-.df-input::placeholder{color:var(--tx3)}
-.df-select{
-  width:100%;background:#fff;border:1.5px solid var(--bdr2);border-radius:8px;
-  padding:10px 14px;font-size:14px;color:var(--tx);
-  font-family:'Bricolage Grotesque',sans-serif;outline:none;
-  appearance:none;cursor:pointer;transition:.15s;
-}
-.df-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-t)}
-.df-btn{
-  background:var(--blue);color:var(--ink);
-  font-size:13px;font-weight:700;padding:10px 22px;
-  border-radius:8px;border:none;cursor:pointer;
-  font-family:'Bricolage Grotesque',sans-serif;
-  transition:.15s;letter-spacing:-.01em;margin-top:4px;
-}
-.df-btn:hover{background:var(--blue2)}
-.df-btn-outline{
-  background:#fff;color:var(--tx2);
-  font-size:13px;font-weight:600;padding:10px 20px;
-  border-radius:8px;border:1.5px solid var(--bdr2);cursor:pointer;
-  font-family:'Bricolage Grotesque',sans-serif;transition:.15s;
-}
-.df-btn-outline:hover{border-color:var(--blue);color:var(--blue3)}
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.plan{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:32px;position:relative;transition:.2s}
+.plan:hover{box-shadow:0 12px 40px rgba(28,23,20,.08)}
+.plan.featured{background:var(--ink);border-color:var(--ink)}
+.plan-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink4);margin-bottom:12px}
+.plan.featured .plan-label{color:rgba(250,248,244,.4)}
+.plan-name{font-family:"Fraunces",serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:8px}
+.plan.featured .plan-name{color:var(--surface)}
+.plan-price{font-family:"Fraunces",serif;font-size:42px;font-weight:700;color:var(--ink);letter-spacing:-.04em;line-height:1;margin-bottom:6px}
+.plan.featured .plan-price{color:var(--surface)}
+.plan-price sup{font-size:20px;vertical-align:top;margin-top:8px}
+.plan-price sub{font-size:14px;font-weight:400;color:var(--ink4)}
+.plan.featured .plan-price sub{color:rgba(250,248,244,.4)}
+.plan-desc{font-size:13px;color:var(--ink3);margin-bottom:24px;line-height:1.6}
+.plan.featured .plan-desc{color:rgba(250,248,244,.5)}
+.plan-divider{height:1px;background:var(--border);margin-bottom:24px}
+.plan.featured .plan-divider{background:rgba(250,248,244,.1)}
+.plan-features{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.plan-feature{font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:10px;font-weight:500}
+.plan.featured .plan-feature{color:rgba(250,248,244,.8)}
+.plan-feature::before{content:"✓";color:var(--sage);font-weight:700;font-size:12px}
+.plan.featured .plan-feature::before{color:var(--amber)}
+.plan-btn{width:100%;padding:13px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:"Cabinet Grotesk",sans-serif;text-align:center;text-decoration:none;display:block;transition:.2s;border:1.5px solid var(--border2);background:none;color:var(--ink)}
+.plan-btn:hover{border-color:var(--ink);background:var(--cream)}
+.plan.featured .plan-btn{background:var(--amber);border-color:var(--amber);color:var(--surface)}
+.plan.featured .plan-btn:hover{background:var(--amber-d);border-color:var(--amber-d)}
+.popular-tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--amber);color:var(--surface);font-size:10px;font-weight:700;padding:4px 14px;border-radius:100px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap}
 
-/* side preview card */
-.side-card{
-  background:var(--grey1);border:1.5px solid var(--bdr);
-  border-radius:var(--r2);padding:18px;
-}
-.side-card-lbl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;font-family:'DM Mono',monospace}
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:48px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px}
+.testi-stars{color:var(--amber);font-size:14px;margin-bottom:14px;letter-spacing:1px}
+.testi-quote{font-family:"Fraunces",serif;font-size:17px;font-weight:400;color:var(--ink2);line-height:1.65;font-style:italic;margin-bottom:20px}
+.testi-author{display:flex;align-items:center;gap:12px}
+.testi-avatar{width:36px;height:36px;border-radius:50%;background:var(--cream2);border:1px solid var(--border);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink3);font-family:"Fraunces",serif;flex-shrink:0}
+.testi-name{font-size:13px;font-weight:700;color:var(--ink)}
+.testi-role{font-size:11px;color:var(--ink4);margin-top:2px}
 
-/* trend rows in demo */
-.d-trend-row{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 11px;background:#fff;border:1.5px solid var(--bdr);
-  border-radius:8px;margin-bottom:6px;
-  opacity:0;transition:opacity .3s;
-}
-.d-trend-row.vis{opacity:1}
-.d-tkw{font-size:12px;font-weight:700;color:var(--tx);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.d-tbar{width:68px;height:4px;background:var(--bdr);border-radius:2px;overflow:hidden;flex-shrink:0}
-.d-tfill{height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 1s ease}
-.d-tvol{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;width:46px;text-align:right;flex-shrink:0}
+/* FAQ */
+.faq-list{margin-top:48px;display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-item:last-child{border-bottom:none}
+.faq-q{padding:20px 24px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700;color:var(--ink);transition:.15s;user-select:none}
+.faq-q:hover{background:var(--cream2)}
+.faq-q svg{width:18px;height:18px;stroke:var(--ink3);transition:.3s;flex-shrink:0}
+.faq-item.open .faq-q svg{transform:rotate(45deg);stroke:var(--amber)}
+.faq-a{display:none;padding:0 24px 20px;font-size:14px;color:var(--ink3);line-height:1.75}
+.faq-item.open .faq-a{display:block}
 
-/* generated content area */
-.gen-box{
-  background:var(--grey1);border:1.5px solid var(--bdr);
-  border-radius:var(--r);padding:16px;margin-bottom:14px;
-}
-.gen-box-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:8px;letter-spacing:-.01em}
-.gen-box-body{font-size:13px;color:var(--tx2);line-height:1.68;min-height:90px;font-weight:500}
-.gen-box-body.typing::after{content:'▌';color:var(--blue);animation:cur .6s infinite}
-@keyframes cur{0%,100%{opacity:1}50%{opacity:0}}
-.gen-score-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bdr)}
-.gen-score-lbl{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;white-space:nowrap}
-.gen-score-track{flex:1;height:5px;background:var(--bdr);border-radius:3px;overflow:hidden}
-.gen-score-fill{height:100%;background:var(--blue);border-radius:3px;width:0;transition:width 1.2s ease .3s}
-.gen-score-num{font-size:12px;font-weight:700;color:var(--blue3);font-family:'DM Mono',monospace;width:28px;text-align:right}
+/* CTA BAND */
+.cta-band{background:var(--cream2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:96px 48px;text-align:center}
+.cta-band h2{margin-bottom:12px}
+.cta-band p{font-size:16px;color:var(--ink3);margin-bottom:36px}
+.cta-band .btn-hero{font-size:16px;padding:16px 36px}
 
-/* schedule rows */
-.sched-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:11px 14px;background:#fff;border:1.5px solid var(--bdr);
-  border-radius:9px;margin-bottom:7px;
-}
-.sched-left{display:flex;align-items:center;gap:10px}
-.sched-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sched-txt{font-size:12px;font-weight:700;color:var(--tx);letter-spacing:-.01em}
-.sched-sub{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;margin-top:2px}
-.sched-badge{font-size:10px;font-weight:700;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px}
-.sched-badge.q{background:rgba(255,171,0,.1);color:#cc8800}
-.sched-badge.ok{background:rgba(0,200,83,.1);color:#009940}
-.activate-btn{
-  width:100%;background:rgba(0,200,83,.1);
-  border:1.5px solid rgba(0,200,83,.25);
-  color:#009940;font-size:13px;font-weight:700;
-  padding:12px;border-radius:9px;cursor:pointer;
-  font-family:'Bricolage Grotesque',sans-serif;transition:.15s;margin-top:8px;
-}
-.activate-btn:hover{background:rgba(0,200,83,.18)}
+/* FOOTER */
+footer{background:var(--ink);padding:48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.footer-logo .logo-text{color:var(--cream)}
+.footer-logo .logo-text span{color:var(--amber)}
+.footer-links{display:flex;gap:28px}
+.footer-links a{font-size:12px;color:rgba(250,248,244,.4);text-decoration:none;transition:.15s}
+.footer-links a:hover{color:rgba(250,248,244,.8)}
+.footer-copy{font-size:11px;color:rgba(250,248,244,.25)}
 
-/* results chart */
-.chart-lbl{font-size:10px;color:var(--tx3);font-family:'DM Mono',monospace;margin-bottom:10px}
-.chart-bars{display:flex;align-items:flex-end;gap:8px;height:90px}
-.bar-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1}
-.bar-block{width:100%;background:var(--blue);border-radius:4px 4px 0 0;transition:height 1s ease;min-height:4px}
-.bar-label{font-size:9px;color:var(--tx3);font-family:'DM Mono',monospace;white-space:nowrap}
-.rank-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:8px 12px;background:var(--grey1);border:1px solid var(--bdr);
-  border-radius:7px;margin-bottom:5px;
-}
-.rank-kw{font-size:12px;color:var(--tx2);font-weight:600}
-.rank-pos{font-size:11px;font-weight:700;font-family:'DM Mono',monospace;padding:2px 8px;border-radius:4px}
-.rank-pos.g{background:rgba(0,200,83,.1);color:#009940}
-.rank-pos.b{background:var(--blue-t);color:var(--blue3)}
-
-/* ══ FEATURES ════════════════════════════ */
-.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:52px}
-.feat{
-  background:#fff;border:1.5px solid var(--bdr);
-  border-radius:var(--r2);padding:28px;transition:.2s;
-}
-.feat:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,180,210,.08)}
-.feat-ic{
-  width:44px;height:44px;border-radius:11px;
-  background:var(--blue-t);border:1px solid var(--blue-b);
-  display:grid;place-items:center;font-size:20px;margin-bottom:16px;
-}
-.feat h3{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:7px;letter-spacing:-.02em}
-.feat p{font-size:13px;color:var(--tx2);line-height:1.65;font-weight:500}
-
-/* ══ PRICING ════════════════════════════ */
-.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px}
-.plan{background:#fff;border:1.5px solid var(--bdr);border-radius:var(--r2);padding:30px;position:relative;transition:.2s}
-.plan:hover{box-shadow:0 8px 28px rgba(0,0,0,.07)}
-.plan.pop{border:2px solid var(--blue)}
-.pop-badge{
-  position:absolute;top:-11px;left:50%;transform:translateX(-50%);
-  background:var(--ink);color:var(--blue);
-  font-size:9px;font-weight:700;padding:3px 14px;border-radius:100px;
-  font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;
-}
-.plan-tier{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;font-family:'DM Mono',monospace}
-.plan-amt{font-size:48px;font-weight:800;color:var(--tx);line-height:1;letter-spacing:-.04em}
-.plan-amt sup{font-size:20px;vertical-align:super}
-.plan-amt sub{font-size:13px;color:var(--tx3);font-weight:500;letter-spacing:0}
-.plan-desc{font-size:14px;color:var(--tx2);margin:10px 0 18px;font-weight:500}
-.plan-rule{height:1px;background:var(--bdr);margin:16px 0}
-.perks{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:26px}
-.perks li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx2);font-weight:500}
-.pck{width:18px;height:18px;border-radius:5px;background:var(--blue-t);display:grid;place-items:center;flex-shrink:0}
-.pck svg{width:10px;height:10px;stroke:var(--blue3);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.perks li.off{color:var(--tx3)}
-.perks li.off .pck{background:var(--grey2)}
-.perks li.off .pck svg{stroke:var(--tx3)}
-.plan-btn{display:block;text-align:center;padding:12px;border-radius:9px;font-weight:700;font-size:14px;text-decoration:none;transition:.15s;letter-spacing:-.01em}
-.plan-btn.solid{background:var(--ink);color:#fff}
-.plan-btn.solid:hover{background:#1e2a3a}
-.plan-btn.line{border:1.5px solid var(--bdr2);color:var(--tx2)}
-.plan-btn.line:hover{border-color:var(--blue);color:var(--blue3)}
-
-/* ══ TESTIMONIALS ════════════════════════ */
-.testi-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:52px}
-.tcard{background:var(--grey1);border:1.5px solid var(--bdr);border-radius:var(--r2);padding:28px;display:flex;flex-direction:column;transition:.2s}
-.tcard:hover{border-color:var(--bdr2)}
-.tcard.big{grid-row:span 2}
-.t-stars{color:var(--amber);font-size:13px;letter-spacing:2px;margin-bottom:13px}
-.t-q{font-size:15px;color:var(--tx);line-height:1.72;flex:1;margin-bottom:20px;font-weight:500}
-.tcard.big .t-q{font-size:16px}
-.t-who{display:flex;align-items:center;gap:10px;border-top:1px solid var(--bdr);padding-top:14px;margin-top:auto}
-.t-av{width:36px;height:36px;border-radius:50%;background:var(--ink);color:var(--blue);display:grid;place-items:center;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;flex-shrink:0}
-.t-name{font-size:13px;font-weight:700;color:var(--tx);letter-spacing:-.01em}
-.t-role{font-size:11px;color:var(--tx3)}
-
-/* ══ FAQ ════════════════════════════════ */
-.faq-list{max-width:700px;margin-top:46px;display:flex;flex-direction:column;gap:3px}
-.fq{background:#fff;border-radius:10px;border:1.5px solid var(--bdr);overflow:hidden}
-.fq-q{padding:17px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:15px;color:var(--tx);user-select:none;transition:.15s;letter-spacing:-.01em}
-.fq-q:hover{color:var(--blue3)}
-.fq-ico{width:22px;height:22px;border-radius:6px;background:var(--grey1);border:1px solid var(--bdr);display:grid;place-items:center;flex-shrink:0;font-size:14px;color:var(--tx3);transition:.3s}
-.fq.on .fq-ico{transform:rotate(45deg);background:var(--blue-t);border-color:var(--blue-b);color:var(--blue3)}
-.fq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;font-size:14px;color:var(--tx2);line-height:1.72;padding:0 20px;font-weight:500}
-.fq.on .fq-a{max-height:200px;padding:0 20px 18px}
-
-/* ══ CTA BAND ════════════════════════════ */
-/* light blue background — NOT dark */
-.cta-band{
-  background:var(--blue-t);
-  border-top:1.5px solid var(--blue-b);
-  border-bottom:1.5px solid var(--blue-b);
-  padding:96px 52px;text-align:center;
-}
-.cta-band h2{font-size:clamp(30px,4.5vw,56px);font-weight:800;color:var(--tx);letter-spacing:-.04em;line-height:1.06;max-width:580px;margin:0 auto 14px}
-.cta-band h2 em{font-style:normal;color:var(--blue3);text-decoration:underline;text-decoration-color:var(--blue);text-underline-offset:5px;text-decoration-thickness:3px}
-.cta-band p{font-size:17px;color:var(--tx2);max-width:420px;margin:0 auto 34px;font-weight:500}
-.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-
-/* ══ FOOTER ════════════════════════════ */
-footer{background:var(--ink);padding:52px 52px 28px}
-.foot-top{display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:22px}
-.foot-tag{font-size:13px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.65;max-width:240px;font-weight:500}
-.foot-cols{display:flex;gap:48px;flex-wrap:wrap}
-.fcol h5{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;font-family:'DM Mono',monospace}
-.fcol a{display:block;font-size:13px;color:rgba(255,255,255,.35);text-decoration:none;margin-bottom:8px;transition:.15s;font-weight:500}
-.fcol a:hover{color:rgba(255,255,255,.8)}
-.foot-bottom{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.2);flex-wrap:wrap;gap:8px;font-family:'DM Mono',monospace}
-
-/* ══ REVEAL ════════════════════════════ */
-.rv{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .55s ease}
+/* REVEAL ANIMATIONS */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
 .rv.in{opacity:1;transform:none}
-.d1{transition-delay:.08s}.d2{transition-delay:.16s}.d3{transition-delay:.24s}
 
-/* ══ RESPONSIVE ════════════════════════ */
 @media(max-width:900px){
-  nav{padding:0 16px}.nav-links{display:none}
-  .hero{grid-template-columns:1fr;padding:56px 16px 0;min-height:auto}.hero-r{display:none}
-  .steps,.feat-grid,.price-grid{grid-template-columns:1fr}
-  .split,.split.flip{grid-template-columns:1fr;direction:ltr}
-  .numbers-grid{grid-template-columns:1fr 1fr}
-  .testi-grid{grid-template-columns:1fr}.tcard.big{grid-row:span 1}
-  .demo-pane.on{flex-direction:column}.dp-right{width:100%}
-  section{padding:64px 16px}
-  .numbers-strip,.cta-band{padding:52px 16px}
-  .trust-bar{padding:16px;gap:16px}
-  footer{padding:36px 16px 20px}.foot-top{flex-direction:column}
+  nav{padding:0 20px}.hero{padding:60px 20px}.hero-inner{grid-template-columns:1fr;gap:40px}
+  section{padding:64px 20px}.split{grid-template-columns:1fr}.numbers-inner{grid-template-columns:repeat(2,1fr)}
+  .how-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr}.trust-bar{padding:20px}.footer-links{display:none}
 }
 </style>
 </head>
@@ -533,655 +217,311 @@ footer{background:var(--ink);padding:52px 52px 28px}
 <!-- NAV -->
 <nav>
   <a href="/" class="logo">
-    <div class="logo-sq">
-      <svg viewBox="0 0 17 17"><polyline points="1,14 5.5,8 9.5,11 16,3"/><circle cx="16" cy="3" r="1.5" fill="var(--blue)" stroke="none"/></svg>
+    <div class="logo-mark">
+      <svg viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10"/><path d="M10 3 L10 17"/><path d="M6 17 Q10 14 14 17"/></svg>
     </div>
-    <span class="logo-name">SEOFlow</span>
+    <span class="logo-text">Cruise<span>SEO</span></span>
   </a>
   <div class="nav-links">
     <a href="#how">How it works</a>
-    <a href="#demo">Live demo</a>
     <a href="#features">Features</a>
     <a href="#pricing">Pricing</a>
   </div>
   <div class="nav-actions">
-    <a href="/app.html" class="nav-login">Log in</a>
-    <a href="/app.html" class="nav-cta">Start free →</a>
+    <a href="/auth.html" class="btn-ghost">Log in</a>
+    <a href="/auth.html?tab=signup" class="btn-primary">Start free <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 6h8M6 2l4 4-4 4"/></svg></a>
   </div>
 </nav>
 
 <!-- HERO -->
-<div class="hero">
-  <div class="hero-l">
-    <div class="hero-tag"><span class="tag-dot"></span>AI SEO autopilot</div>
-    <h1>Blogs written.<br>Published.<br><span>Ranked.</span></h1>
-    <p class="hero-p">SEOFlow scans what your customers are searching for, writes SEO-optimised posts in your brand voice, and publishes them to your website — every week, automatically.</p>
-    <div class="hero-btns">
-      <a href="/app.html" class="btn-main">Get started free</a>
-      <a href="#demo" class="btn-sec">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="7" cy="7" r="5.5"/><polyline points="5.5,4.5 8.5,7 5.5,9.5"/></svg>
-        Try the demo
-      </a>
-    </div>
-    <div class="hero-social">
-      <span class="h-stars">★★★★★</span>
-      <span class="h-social-txt">Trusted by 500+ UK businesses</span>
-    </div>
-  </div>
-  <div class="hero-r">
-    <div class="ui-win">
-      <div class="ui-titlebar">
-        <div class="ui-dot" style="background:#ff5f57"></div>
-        <div class="ui-dot" style="background:#febc2e"></div>
-        <div class="ui-dot" style="background:#28c840"></div>
-        <div class="ui-url">seoflow.site/app</div>
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-label"><svg viewBox="0 0 12 12"><path d="M6 1l1 3h3l-2.5 2 1 3L6 7.5 3.5 9l1-3L2 4h3z"/></svg> AI SEO Autopilot</div>
+      <h1>Blogs written.<br>Published.<br><em>Ranked.</em></h1>
+      <p class="hero-sub">Cruise SEO scans what your customers search for, writes SEO-optimised posts in your brand voice, and publishes them — every week, automatically.</p>
+      <div class="hero-ctas">
+        <a href="/auth.html?tab=signup" class="btn-hero">Get started free <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg></a>
+        <a href="#how" class="btn-hero-outline">See how it works</a>
       </div>
-      <div class="ui-body">
-        <div class="ui-hd"><span class="ui-hd-title">Content Dashboard</span><span class="ui-gen-btn">+ Generate</span></div>
-        <div class="ui-metrics">
-          <div class="ui-m"><div class="ui-m-val">8,240<span class="ui-m-up">↑31%</span></div><div class="ui-m-lbl">Organic visitors</div></div>
-          <div class="ui-m"><div class="ui-m-val">134<span class="ui-m-up">↑18%</span></div><div class="ui-m-lbl">Keywords ranking</div></div>
-          <div class="ui-m"><div class="ui-m-val">47<span class="ui-m-up">↑12%</span></div><div class="ui-m-lbl">Posts published</div></div>
-        </div>
-        <div class="ui-table">
-          <div class="ui-t-hd"><span>Status</span><span>Post title</span><span>Date</span></div>
-          <div class="ui-t-row"><span class="ui-badge live">● Live</span><span class="ui-post">5 Reasons to Choose Private Tutoring</span><span class="ui-date">Mon 09:00</span></div>
-          <div class="ui-t-row"><span class="ui-badge sched">◷ Sched</span><span class="ui-post">GCSE Maths: Grade 4 to 7 in 8 Weeks</span><span class="ui-date">Wed 09:00</span></div>
-          <div class="ui-t-row"><span class="ui-badge sched">◷ Sched</span><span class="ui-post">The 11+ Exam: Complete 2025 Guide</span><span class="ui-date">Fri 09:00</span></div>
-        </div>
+      <div class="hero-trust">
+        <span class="stars">★★★★★</span>
+        <span>Trusted by 500+ UK businesses</span>
       </div>
     </div>
+    <div class="hero-visual rv">
+      <div class="browser-frame">
+        <div class="browser-bar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="browser-url">cruiseseo.app/dashboard</div>
+        </div>
+        <div class="dash-inner">
+          <div class="dash-header">
+            <span class="dash-title">Content Dashboard</span>
+            <span class="dash-tag">● autopilot on</span>
+          </div>
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-n">8,240<span>↑43%</span></div><div class="stat-l">Organic visitors</div></div>
+            <div class="stat-box"><div class="stat-n">134<span>↑119%</span></div><div class="stat-l">Keywords ranking</div></div>
+            <div class="stat-box"><div class="stat-n">47<span>↑112%</span></div><div class="stat-l">Posts published</div></div>
+          </div>
+          <div class="posts-list">
+            <div class="post-row"><span class="post-status live">Live</span><span class="post-title">5 Reasons to Choose Private Tutoring</span><span class="post-date">Mon</span></div>
+            <div class="post-row"><span class="post-status sched">Sched</span><span class="post-title">GCSE Maths: Grade 4 to 7 in 8 Weeks</span><span class="post-date">Wed</span></div>
+            <div class="post-row"><span class="post-status sched">Sched</span><span class="post-title">The 11+ Exam: Complete 2025 Guide</span><span class="post-date">Fri</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
 <!-- TRUST BAR -->
 <div class="trust-bar">
-  <span class="trust-lbl">Trusted by</span>
-  <span class="trust-div"></span>
-  <span class="trust-co">Oakfield Tutors</span>
-  <span class="trust-co">Meridian Legal</span>
-  <span class="trust-co">Brightpath Digital</span>
-  <span class="trust-co">Summit Property Co.</span>
-  <span class="trust-co">Crestwood Clinic</span>
-  <span class="trust-co">Halcyon Media</span>
+  <span class="trust-label">Trusted by</span>
+  <div class="trust-logos">
+    <span>Oakfield Tutors</span><span>Meridian Legal</span><span>Brightpath Digital</span>
+    <span>Summit Property Co.</span><span>Crestwood Clinic</span><span>Halcyon Media</span>
+  </div>
 </div>
 
 <!-- HOW IT WORKS -->
 <section id="how">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">How it works</div></div>
-    <h2 class="sh rv">Up and running in 10 minutes.</h2>
-    <p class="ss rv">No technical skills needed. No copywriter required. Connect once — content flows forever.</p>
-    <div class="steps">
-      <div class="step rv"><div class="step-n">01</div><h3>Tell us about your business</h3><p>Enter your name, industry, and website URL. SEOFlow builds a brand profile and content strategy for your exact audience automatically.</p></div>
-      <div class="step rv d1"><div class="step-n">02</div><h3>Connect your website</h3><p>Link your WordPress site in one click. Secure API — no plugins, no code. Authorise in 30 seconds and you're done.</p></div>
-      <div class="step rv d2"><div class="step-n">03</div><h3>Watch your traffic grow</h3><p>SEOFlow scans trends daily, writes posts in your voice, and publishes on schedule. You watch the rankings climb.</p></div>
+  <div class="section-inner">
+    <div class="rv"><span class="section-label">How it works</span>
+    <h2>Three steps to <em>effortless</em> SEO</h2>
+    <p class="section-sub">Set up once. Cruise SEO handles everything else — research, writing, publishing, ranking.</p></div>
+    <div class="how-grid">
+      <div class="how-card rv">
+        <div class="how-num">01</div>
+        <div class="how-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M8 8h5M8 16h4"/></svg></div>
+        <h3>Tell us about your business</h3>
+        <p>Answer a few questions about your industry, audience, and brand voice. Takes 10 minutes. Our AI builds your content strategy from scratch.</p>
+      </div>
+      <div class="how-card rv" style="transition-delay:.1s">
+        <div class="how-num">02</div>
+        <div class="how-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3>We write and publish weekly</h3>
+        <p>Cruise SEO scans trending searches, writes SEO-optimised articles in your brand voice, and publishes them directly to your WordPress site.</p>
+      </div>
+      <div class="how-card rv" style="transition-delay:.2s">
+        <div class="how-num">03</div>
+        <div class="how-icon"><svg viewBox="0 0 24 24"><polyline points="22,7 13.5,15.5 8.5,10.5 2,17"/><polyline points="16,7 22,7 22,13"/></svg></div>
+        <h3>Watch your rankings climb</h3>
+        <p>Track keyword positions, organic traffic, and published posts from one clean dashboard. No spreadsheets. No agencies. Just results.</p>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- NUMBERS -->
-<div class="numbers-strip">
-  <div class="numbers-grid">
-    <div class="num rv"><div class="num-big">3<b>×</b></div><div class="num-lbl">average traffic growth in 90 days</div></div>
-    <div class="num rv d1"><div class="num-big">500<b>+</b></div><div class="num-lbl">UK businesses on SEOFlow</div></div>
-    <div class="num rv d2"><div class="num-big">0<b>h</b></div><div class="num-lbl">per week spent writing content</div></div>
-    <div class="num rv d3"><div class="num-big">94<b>%</b></div><div class="num-lbl">average content quality score</div></div>
+<div class="numbers">
+  <div class="numbers-inner">
+    <div class="num-item rv"><div class="num-big">+<span>243</span>%</div><div class="num-label">Average traffic increase in 90 days</div></div>
+    <div class="num-item rv" style="transition-delay:.1s"><div class="num-big"><span>3</span>hrs</div><div class="num-label">Saved per week vs manual blogging</div></div>
+    <div class="num-item rv" style="transition-delay:.2s"><div class="num-big"><span>500</span>+</div><div class="num-label">UK businesses on autopilot</div></div>
+    <div class="num-item rv" style="transition-delay:.3s"><div class="num-big"><span>4.9</span>★</div><div class="num-label">Average customer rating</div></div>
   </div>
 </div>
 
-<!-- SPLIT: TRENDS -->
-<section class="grey">
-  <div class="wrap">
-    <div class="split rv">
-      <div class="split-copy">
-        <div class="eyebrow">Trend intelligence</div>
-        <h2>Always writing about what people are searching for right now.</h2>
-        <p>SEOFlow taps into Google Trends and live feeds to find rising topics in your industry every day — so your content is always timely and always relevant.</p>
-        <ul class="checks">
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Daily trend scanning across your industry and location</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Real-time keyword volume and competition data</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Automatic topic selection — no research needed</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>News-driven and seasonal content triggers built in</li>
-        </ul>
-      </div>
-      <div>
-        <div class="light-panel">
-          <div class="lp-hd"><span class="lp-title">📈 Trending now — UK Tutoring</span><span class="lp-live"><span class="lp-live-dot"></span>Live</span></div>
-          <div class="trend-r"><span class="t-kw">GCSE revision tips 2025</span><div class="t-bar-bg"><div class="t-bar-fill" style="width:92%"></div></div><span class="t-vol">12.1K/mo</span></div>
-          <div class="trend-r"><span class="t-kw">private tutor near me</span><div class="t-bar-bg"><div class="t-bar-fill" style="width:76%"></div></div><span class="t-vol">8.4K/mo</span></div>
-          <div class="trend-r"><span class="t-kw">11 plus exam preparation</span><div class="t-bar-bg"><div class="t-bar-fill" style="width:61%"></div></div><span class="t-vol">5.9K/mo</span></div>
-          <div class="trend-r"><span class="t-kw">online tutoring UK</span><div class="t-bar-bg"><div class="t-bar-fill" style="width:48%"></div></div><span class="t-vol">4.2K/mo</span></div>
-          <div class="trend-r"><span class="t-kw">A-level maths tutor</span><div class="t-bar-bg"><div class="t-bar-fill" style="width:33%"></div></div><span class="t-vol">2.8K/mo</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SPLIT: CONTENT ENGINE -->
-<section>
-  <div class="wrap">
-    <div class="split flip rv">
-      <div class="split-copy">
-        <div class="eyebrow">AI content engine</div>
-        <h2>Sounds like you. Ranked by Google.</h2>
-        <p>SEOFlow learns your brand tone and produces well-structured, genuinely helpful long-form articles — the kind Google rewards with real rankings.</p>
-        <ul class="checks">
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Brand voice matching from your business profile</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Long-form posts (800–1,500+ words) with proper structure</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Auto meta titles, descriptions, and heading tags</li>
-          <li><span class="ck"><svg viewBox="0 0 11 11"><polyline points="2,5.5 4.5,8.5 9,2.5"/></svg></span>Internal linking suggestions to boost domain authority</li>
-        </ul>
-      </div>
-      <div>
-        <div class="light-panel">
-          <div class="lp-hd"><span class="lp-title">✍️ Content queue</span><span class="lp-live"><span class="lp-live-dot"></span>3 ready</span></div>
-          <div class="post-r"><div class="post-score">94</div><div><div class="post-ttl">5 Reasons Parents Choose Private Tutoring in 2025</div><div class="post-meta">1,240 words · "private tutor UK" · Mon 09:00</div><span class="post-tag">approved ✓</span></div></div>
-          <div class="post-r"><div class="post-score">91</div><div><div class="post-ttl">GCSE Maths: How to Go From Grade 4 to Grade 7</div><div class="post-meta">980 words · "GCSE maths help" · Wed 09:00</div><span class="post-tag rev">in review</span></div></div>
-          <div class="post-r"><div class="post-score">97</div><div><div class="post-ttl">What is the 11+ Exam? A Complete 2025 Guide</div><div class="post-meta">1,480 words · "11+ exam guide" · Fri 09:00</div><span class="post-tag">approved ✓</span></div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- INTERACTIVE DEMO -->
-<section class="demo-section" id="demo">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">Interactive demo</div></div>
-    <h2 class="sh rv">See it work — right now.</h2>
-    <p class="ss rv">Walk through the full SEOFlow experience. No sign-up needed.</p>
-
-    <div class="demo-shell rv">
-      <div class="demo-tabbar">
-        <div class="demo-tab on" data-tab="setup">① Your business</div>
-        <div class="demo-tab" data-tab="trends">② Scan trends</div>
-        <div class="demo-tab" data-tab="generate">③ Write content</div>
-        <div class="demo-tab" data-tab="publish">④ Schedule</div>
-        <div class="demo-tab" data-tab="results">⑤ See results</div>
-      </div>
-
-      <!-- PANE 1: SETUP -->
-      <div class="demo-pane on" id="dp-setup">
-        <div class="dp-left">
-          <div class="dp-title">Tell us about your business</div>
-          <div class="dp-sub">SEOFlow uses this to build your brand profile and content strategy.</div>
-          <div class="df-group">
-            <div class="df-label">Business name</div>
-            <input class="df-input" id="d-biz" type="text" placeholder="e.g. Oakfield Tutors">
-          </div>
-          <div class="df-group">
-            <div class="df-label">Industry</div>
-            <select class="df-select" id="d-ind">
-              <option value="">Select your industry...</option>
-              <option value="tutoring">Education &amp; Tutoring</option>
-              <option value="legal">Legal Services</option>
-              <option value="property">Property &amp; Real Estate</option>
-              <option value="health">Health &amp; Wellness</option>
-              <option value="digital">Digital Marketing</option>
-              <option value="finance">Finance &amp; Accounting</option>
-            </select>
-          </div>
-          <div class="df-group">
-            <div class="df-label">Target location</div>
-            <input class="df-input" id="d-loc" type="text" placeholder="e.g. Birmingham, UK">
-          </div>
-          <button class="df-btn" onclick="step1()">Build my brand profile →</button>
-        </div>
-        <div class="dp-right">
-          <div class="side-card">
-            <div class="side-card-lbl">Profile preview</div>
-            <div id="profile-prev" style="font-size:13px;color:var(--tx3);line-height:1.7;font-weight:500">Fill in your details to preview your brand profile.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANE 2: TRENDS -->
-      <div class="demo-pane" id="dp-trends">
-        <div class="dp-left">
-          <div class="dp-title">Trending searches for <span id="trends-name" style="color:var(--blue3)">your business</span></div>
-          <div class="dp-sub">SEOFlow found these rising topics in your industry today.</div>
-          <div id="trends-list"></div>
-          <button class="df-btn" style="margin-top:16px" onclick="goTo('generate')">Write posts from these trends →</button>
-        </div>
-        <div class="dp-right">
-          <div class="side-card">
-            <div class="side-card-lbl">Opportunity summary</div>
-            <div id="trends-summary" style="font-size:13px;color:var(--tx2);line-height:1.75;font-weight:500"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANE 3: GENERATE -->
-      <div class="demo-pane" id="dp-generate">
-        <div class="dp-left">
-          <div class="dp-title">Writing your content</div>
-          <div class="dp-sub">Generating a post targeting your top trending keyword.</div>
-          <div class="gen-box">
-            <div class="gen-box-title" id="gen-title">Loading...</div>
-            <div class="gen-box-body" id="gen-body"></div>
-            <div class="gen-score-row">
-              <span class="gen-score-lbl">SEO score</span>
-              <div class="gen-score-track"><div class="gen-score-fill" id="gen-bar"></div></div>
-              <span class="gen-score-num" id="gen-num">–</span>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="df-btn" onclick="goTo('publish')">Approve &amp; schedule →</button>
-            <button class="df-btn-outline" onclick="loadGenerate()">↺ Regenerate</button>
-          </div>
-        </div>
-        <div class="dp-right">
-          <div class="side-card">
-            <div class="side-card-lbl">Post details</div>
-            <div id="gen-details" style="font-size:12px;color:var(--tx2);line-height:1.9;font-family:'DM Mono',monospace"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANE 4: PUBLISH -->
-      <div class="demo-pane" id="dp-publish">
-        <div class="dp-left">
-          <div class="dp-title">Schedule your content</div>
-          <div class="dp-sub">SEOFlow will publish automatically at your chosen times.</div>
-          <div id="sched-list"></div>
-          <button class="activate-btn" onclick="doPublish()">✓ Confirm &amp; activate autopilot</button>
-        </div>
-        <div class="dp-right">
-          <div class="side-card">
-            <div class="side-card-lbl">Publishing settings</div>
-            <div style="font-size:12px;color:var(--tx2);line-height:2;font-family:'DM Mono',monospace">
-              Platform: WordPress<br>
-              Schedule: Mon / Wed / Fri<br>
-              Time: 09:00 GMT<br>
-              Auto-approve: Off<br>
-              Notify on publish: On
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PANE 5: RESULTS -->
-      <div class="demo-pane" id="dp-results">
-        <div class="dp-left">
-          <div class="dp-title">Your results after 90 days</div>
-          <div class="dp-sub">Based on averages across SEOFlow customers in your industry.</div>
-          <div class="chart-lbl">Monthly organic visitors</div>
-          <div class="chart-bars" id="results-bars"></div>
-          <div id="results-ranks" style="margin-top:14px"></div>
-        </div>
-        <div class="dp-right">
-          <div class="side-card">
-            <div class="side-card-lbl">90-day summary</div>
-            <div id="results-summary" style="font-size:13px;color:var(--tx2);line-height:2;font-family:'DM Mono',monospace"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES -->
+<!-- FEATURES SPLIT 1 -->
 <section id="features">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">Everything included</div></div>
-    <h2 class="sh rv">All the tools. None of the complexity.</h2>
-    <div class="feat-grid rv">
-      <div class="feat"><div class="feat-ic">⚡</div><h3>Auto-publish on schedule</h3><p>Pick your days and times. SEOFlow formats and publishes every week — including bank holidays.</p></div>
-      <div class="feat"><div class="feat-ic">🔍</div><h3>Live keyword rankings</h3><p>Connect Google Search Console and track exactly which keywords you rank for, refreshed daily.</p></div>
-      <div class="feat"><div class="feat-ic">🌍</div><h3>Local SEO targeting</h3><p>Target specific towns, cities, or regions. Location signals woven into every post automatically.</p></div>
-      <div class="feat"><div class="feat-ic">✏️</div><h3>Full editorial control</h3><p>Review, edit, or reject every post before it goes live. Or set to fully automatic — your call.</p></div>
-      <div class="feat"><div class="feat-ic">📊</div><h3>Performance analytics</h3><p>Track traffic, rankings, and content performance. See exactly which posts drive your growth.</p></div>
-      <div class="feat"><div class="feat-ic">🔒</div><h3>Secure WordPress connection</h3><p>Connects via REST API with token auth. No plugins, no shared admin passwords, ever.</p></div>
+  <div class="section-inner">
+    <div class="split">
+      <div class="split-text rv">
+        <span class="section-label">Trend intelligence</span>
+        <h2>Always writing about what <em>people are searching</em></h2>
+        <p>Cruise SEO monitors Google trends in your industry every week and automatically targets the keywords your customers are actively searching for — not ones that were popular six months ago.</p>
+        <div class="split-points">
+          <div class="split-point">Weekly keyword research — fully automated</div>
+          <div class="split-point">Targets commercial intent keywords that convert</div>
+          <div class="split-point">Avoids duplicate and cannibalised content</div>
+        </div>
+      </div>
+      <div class="split-visual rv" style="transition-delay:.15s">
+        <div style="font-size:12px;font-weight:700;color:var(--ink4);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em">This week's opportunities</div>
+        <div class="kw-list">
+          <div class="kw-row"><span class="kw-label">GCSE revision tips</span><div class="kw-bar-wrap"><div class="kw-bar" style="width:88%"></div></div><span class="kw-vol">8.9k</span></div>
+          <div class="kw-row"><span class="kw-label">Private tutor near me</span><div class="kw-bar-wrap"><div class="kw-bar" style="width:74%"></div></div><span class="kw-vol">6.4k</span></div>
+          <div class="kw-row"><span class="kw-label">11+ exam preparation</span><div class="kw-bar-wrap"><div class="kw-bar" style="width:61%"></div></div><span class="kw-vol">5.1k</span></div>
+          <div class="kw-row"><span class="kw-label">Online tutoring UK</span><div class="kw-bar-wrap"><div class="kw-bar" style="width:52%"></div></div><span class="kw-vol">4.2k</span></div>
+          <div class="kw-row"><span class="kw-label">A-level maths help</span><div class="kw-bar-wrap"><div class="kw-bar" style="width:39%"></div></div><span class="kw-vol">3.1k</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SPLIT 2 -->
+<section style="background:var(--cream2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="split reverse">
+      <div class="split-text rv">
+        <span class="section-label">Content engine</span>
+        <h2>Reads like <em>you wrote it.</em> Ranks like an expert did.</h2>
+        <p>Our AI learns your brand voice, tone, and expertise during onboarding. Every post it writes sounds like it came from you — not a robot. Then it publishes directly to your WordPress site.</p>
+        <div class="split-points">
+          <div class="split-point">Brand voice trained during setup</div>
+          <div class="split-point">Publishes directly to WordPress — no copy-paste</div>
+          <div class="split-point">Each post reviewed before going live</div>
+        </div>
+      </div>
+      <div class="split-visual rv" style="transition-delay:.15s">
+        <div style="font-size:12px;font-weight:700;color:var(--ink4);margin-bottom:16px;text-transform:uppercase;letter-spacing:.08em">Content queue</div>
+        <div class="content-queue">
+          <div class="cq-item"><div class="cq-icon">✍️</div><div class="cq-body"><div class="cq-title">5 Reasons to Choose a Private Tutor Over Group Classes</div><div class="cq-meta">1,240 words · SEO score 94/100</div></div><span class="cq-badge" style="background:var(--sage-l);color:var(--sage)">Live</span></div>
+          <div class="cq-item"><div class="cq-icon">📅</div><div class="cq-body"><div class="cq-title">GCSE Maths: How to Jump Two Grades in 8 Weeks</div><div class="cq-meta">1,180 words · SEO score 91/100</div></div><span class="cq-badge" style="background:#FDF6D4;color:#8B6914">Wed</span></div>
+          <div class="cq-item"><div class="cq-icon">🤖</div><div class="cq-body"><div class="cq-title">The 11+ Exam: A Complete Parent's Guide for 2025</div><div class="cq-meta">Writing now...</div></div><span class="cq-badge" style="background:var(--amber-l);color:var(--amber)">In progress</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<section class="grey" id="pricing">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">Pricing</div></div>
-    <h2 class="sh rv">Simple, transparent pricing.</h2>
-    <p class="ss rv">Start free. No credit card required. Cancel anytime.</p>
-    <div class="price-grid rv">
-      <div class="plan">
-        <div class="plan-tier">Starter</div>
-        <div class="plan-amt"><sup>£</sup>0<sub>/mo</sub></div>
-        <div class="plan-desc">Try it out, completely free.</div>
-        <div class="plan-rule"></div>
-        <ul class="perks">
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>5 AI posts per month</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>1 website connected</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Manual publish</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Basic SEO scoring</li>
-          <li class="off"><span class="pck"><svg viewBox="0 0 10 10"><line x1="2.5" y1="5" x2="7.5" y2="5"/></svg></span>Auto-publish schedule</li>
-          <li class="off"><span class="pck"><svg viewBox="0 0 10 10"><line x1="2.5" y1="5" x2="7.5" y2="5"/></svg></span>Search Console</li>
-          <li class="off"><span class="pck"><svg viewBox="0 0 10 10"><line x1="2.5" y1="5" x2="7.5" y2="5"/></svg></span>Trend scanning</li>
-        </ul>
-        <a href="/app.html" class="plan-btn line">Get started free</a>
+<section id="pricing">
+  <div class="section-inner">
+    <div class="rv" style="text-align:center">
+      <span class="section-label">Pricing</span>
+      <h2>Simple, honest <em>pricing</em></h2>
+      <p class="section-sub" style="margin:0 auto">No contracts. No setup fees. Cancel any time. Start free, upgrade when you're ready to scale.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="plan rv">
+        <div class="plan-label">Starter</div>
+        <div class="plan-name">Free</div>
+        <div class="plan-price"><sup>£</sup>0<sub>/mo</sub></div>
+        <div class="plan-desc">Try it out. No card needed.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feature">2 posts per month</div>
+          <div class="plan-feature">Keyword research</div>
+          <div class="plan-feature">1 WordPress site</div>
+          <div class="plan-feature">Basic analytics</div>
+        </div>
+        <a href="/auth.html?tab=signup" class="plan-btn">Get started free</a>
       </div>
-      <div class="plan pop">
-        <div class="pop-badge">Most popular</div>
-        <div class="plan-tier">Growth</div>
-        <div class="plan-amt"><sup>£</sup>49<sub>/mo</sub></div>
-        <div class="plan-desc">The full autopilot experience.</div>
-        <div class="plan-rule"></div>
-        <ul class="perks">
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>30 AI posts per month</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>3 websites connected</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Auto-publish on schedule</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Advanced SEO scoring</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Search Console integration</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Daily trend scanning</li>
-          <li class="off"><span class="pck"><svg viewBox="0 0 10 10"><line x1="2.5" y1="5" x2="7.5" y2="5"/></svg></span>Priority support</li>
-        </ul>
-        <a href="/app.html" class="plan-btn solid">Start 14-day free trial</a>
+      <div class="plan featured rv" style="transition-delay:.1s">
+        <div class="popular-tag">Most popular</div>
+        <div class="plan-label">Growth</div>
+        <div class="plan-name">Growth</div>
+        <div class="plan-price"><sup>£</sup>49<sub>/mo</sub></div>
+        <div class="plan-desc">For small businesses serious about ranking.</div>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feature">8 posts per month</div>
+          <div class="plan-feature">Full keyword strategy</div>
+          <div class="plan-feature">3 WordPress sites</div>
+          <div class="plan-feature">Full analytics dashboard</div>
+          <div class="plan-feature">Priority support</div>
+        </div>
+        <a href="/auth.html?tab=signup" class="plan-btn">Start 14-day free trial</a>
       </div>
-      <div class="plan">
-        <div class="plan-tier">Agency</div>
-        <div class="plan-amt"><sup>£</sup>149<sub>/mo</sub></div>
+      <div class="plan rv" style="transition-delay:.2s">
+        <div class="plan-label">Agency</div>
+        <div class="plan-name">Agency</div>
+        <div class="plan-price"><sup>£</sup>149<sub>/mo</sub></div>
         <div class="plan-desc">For agencies managing multiple clients.</div>
-        <div class="plan-rule"></div>
-        <ul class="perks">
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Unlimited posts</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Unlimited websites</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Auto-publish on schedule</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Advanced SEO scoring</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Search Console integration</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Daily trend scanning</li>
-          <li><span class="pck"><svg viewBox="0 0 10 10"><polyline points="2,5 4,7.5 8,2"/></svg></span>Priority support + onboarding</li>
-        </ul>
-        <a href="/app.html" class="plan-btn line">Get started</a>
+        <div class="plan-divider"></div>
+        <div class="plan-features">
+          <div class="plan-feature">Unlimited posts</div>
+          <div class="plan-feature">Unlimited sites</div>
+          <div class="plan-feature">White-label reports</div>
+          <div class="plan-feature">API access</div>
+          <div class="plan-feature">Dedicated account manager</div>
+        </div>
+        <a href="/auth.html?tab=signup" class="plan-btn">Get started</a>
       </div>
     </div>
   </div>
 </section>
 
 <!-- TESTIMONIALS -->
-<section id="testimonials">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">Customer stories</div></div>
-    <h2 class="sh rv">Real results. Real businesses.</h2>
-    <div class="testi-grid rv">
-      <div class="tcard big">
-        <div class="t-stars">★★★★★</div>
-        <p class="t-q">"I used to spend every Sunday writing blog posts. SEOFlow does it for me now — and the posts are honestly better than mine were. Our organic traffic has doubled in three months. I genuinely wish I'd found this sooner."</p>
-        <div class="t-who"><div class="t-av">NP</div><div><div class="t-name">Naomi P.</div><div class="t-role">Director, Oakfield Tutors · Birmingham</div></div></div>
-      </div>
-      <div class="tcard">
-        <div class="t-stars">★★★★★</div>
-        <p class="t-q">"Set it up on a Friday. By Monday two posts were live. One hit page 1 for a local keyword within a week. I couldn't believe how fast it worked."</p>
-        <div class="t-who"><div class="t-av">DT</div><div><div class="t-name">Daniel T.</div><div class="t-role">Founder, Meridian Legal · London</div></div></div>
-      </div>
-      <div class="tcard">
-        <div class="t-stars">★★★★★</div>
-        <p class="t-q">"We manage 14 client sites. SEOFlow replaced two freelance writers and does a more consistent job. Saving £2,000+ a month."</p>
-        <div class="t-who"><div class="t-av">KR</div><div><div class="t-name">Kieran R.</div><div class="t-role">MD, Brightpath Digital · Manchester</div></div></div>
-      </div>
+<section style="background:var(--cream2);border-top:1px solid var(--border)">
+  <div class="section-inner">
+    <div class="rv" style="text-align:center">
+      <span class="section-label">Testimonials</span>
+      <h2>What our customers <em>say</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card rv"><div class="testi-stars">★★★★★</div><div class="testi-quote">"We went from page 4 to page 1 for our main keyword in 11 weeks. I genuinely didn't have to do anything — Cruise SEO just handled it."</div><div class="testi-author"><div class="testi-avatar">N</div><div><div class="testi-name">Naomi P.</div><div class="testi-role">Director, Oakfield Tutors · Birmingham</div></div></div></div>
+      <div class="testi-card rv" style="transition-delay:.1s"><div class="testi-stars">★★★★★</div><div class="testi-quote">"As a one-person legal practice I had no time for content marketing. Now I get enquiries every week from people who found my blog on Google."</div><div class="testi-author"><div class="testi-avatar">D</div><div><div class="testi-name">Daniel T.</div><div class="testi-role">Founder, Meridian Legal · London</div></div></div></div>
+      <div class="testi-card rv"><div class="testi-stars">★★★★★</div><div class="testi-quote">"We manage 12 client sites and Cruise SEO has replaced half our content team. The quality is genuinely good — clients can't tell the difference."</div><div class="testi-author"><div class="testi-avatar">K</div><div><div class="testi-name">Kieran R.</div><div class="testi-role">MD, Brightpath Digital · Manchester</div></div></div></div>
+      <div class="testi-card rv" style="transition-delay:.1s"><div class="testi-stars">★★★★★</div><div class="testi-quote">"Set it up on a Friday afternoon, forgot about it. Two months later my organic traffic had doubled. This is exactly what small businesses need."</div><div class="testi-author"><div class="testi-avatar">S</div><div><div class="testi-name">Sarah M.</div><div class="testi-role">Owner, Crestwood Clinic · Leeds</div></div></div></div>
     </div>
   </div>
 </section>
 
 <!-- FAQ -->
-<section class="grey" id="faq">
-  <div class="wrap">
-    <div class="rv"><div class="eyebrow">FAQ</div></div>
-    <h2 class="sh rv">Got questions?</h2>
+<section>
+  <div class="section-inner" style="max-width:720px">
+    <div class="rv" style="text-align:center">
+      <span class="section-label">FAQ</span>
+      <h2>Common <em>questions</em></h2>
+    </div>
     <div class="faq-list rv">
-      <div class="fq"><div class="fq-q">Will the content sound like my brand? <span class="fq-ico">+</span></div><div class="fq-a">Yes. During onboarding SEOFlow builds a brand profile from your business details and tone preferences. Every post matches your voice and audience — not a generic AI template.</div></div>
-      <div class="fq"><div class="fq-q">Which platforms do you support? <span class="fq-ico">+</span></div><div class="fq-a">SEOFlow connects to WordPress via the REST API — which powers over 40% of all websites. Wix, Squarespace, and Webflow support is on the roadmap.</div></div>
-      <div class="fq"><div class="fq-q">Can I review posts before they go live? <span class="fq-ico">+</span></div><div class="fq-a">Yes. Every post enters a review queue by default. Approve, edit, or reject with one click. Once you trust the quality, switch to fully automatic — most users do within the first fortnight.</div></div>
-      <div class="fq"><div class="fq-q">How many posts per week does it publish? <span class="fq-ico">+</span></div><div class="fq-a">You set the schedule. Most users publish 3 times a week. Growth plan is up to 30 posts/month; Agency is unlimited.</div></div>
-      <div class="fq"><div class="fq-q">Will Google penalise my site for AI content? <span class="fq-ico">+</span></div><div class="fq-a">No. Google evaluates content quality and helpfulness — not how it was produced. SEOFlow generates original, well-structured, genuinely useful articles. That's what Google ranks.</div></div>
-      <div class="fq"><div class="fq-q">Is there a free trial? <span class="fq-ico">+</span></div><div class="fq-a">The Starter plan is free forever — no credit card needed. Growth and Agency plans include a 14-day free trial.</div></div>
+      <div class="faq-item open">
+        <div class="faq-q" onclick="toggleFaq(this)">Does it really publish automatically to my WordPress site?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">Yes — once you connect your WordPress site during onboarding, Cruise SEO publishes posts directly. No copy-paste, no logging in to WordPress. Each post is queued for your review before going live if you prefer.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Will the content sound like it was written by a robot?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">No — during onboarding you share your brand voice, tone, and expertise. Our AI is trained specifically on your style, so posts read like they came from you. Many customers' clients can't tell the difference.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">How long until I see results on Google?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">Most customers see measurable keyword movement within 6–10 weeks. Significant traffic increases typically appear at the 90-day mark. SEO compounds over time — the longer you run it, the better the results.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Do I need any technical knowledge?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">None at all. If you can answer questions about your business and connect a WordPress site (we walk you through it step by step), you're done. We handle all the technical SEO, writing, and publishing.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Can I cancel any time?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">Yes, always. No contracts, no cancellation fees. Cancel from your dashboard in one click and you won't be charged again. Your published content stays live on your site regardless.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">What if I want to edit a post before it goes live?<svg viewBox="0 0 18 18"><path d="M9 3v12M3 9h12" stroke-width="2"/></svg></div>
+        <div class="faq-a">Every post appears in your dashboard before publishing. You can read, edit, approve or reject it. Most customers approve posts as-is, but the option is always there.</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
+<!-- CTA BAND -->
 <div class="cta-band">
-  <h2>Your competitors are<br>already doing <em>this.</em></h2>
-  <p>Start your free trial today. No credit card required. First post live in under 10 minutes.</p>
-  <div class="cta-btns">
-    <a href="/app.html" class="btn-main">Get started free</a>
-    <a href="#demo" class="btn-sec">Try the demo</a>
+  <div class="rv">
+    <h2>Ready to put your SEO <em>on autopilot?</em></h2>
+    <p>Join 500+ UK businesses ranking on autopilot. Free to start, no card required.</p>
+    <a href="/auth.html?tab=signup" class="btn-hero">Get started free — it's free <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 7h10M7 2l5 5-5 5"/></svg></a>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="foot-top">
-    <div>
-      <a href="/" class="logo">
-        <div class="logo-sq"><svg viewBox="0 0 17 17"><polyline points="1,14 5.5,8 9.5,11 16,3"/><circle cx="16" cy="3" r="1.5" fill="var(--blue)" stroke="none"/></svg></div>
-        <span class="logo-name" style="color:#fff">SEOFlow</span>
-      </a>
-      <p class="foot-tag">The SEO autopilot for small businesses and agencies. Scans trends, writes posts, publishes them — while you sleep.</p>
-    </div>
-    <div class="foot-cols">
-      <div class="fcol"><h5>Product</h5><a href="#how">How it works</a><a href="#demo">Live demo</a><a href="#features">Features</a><a href="#pricing">Pricing</a></div>
-      <div class="fcol"><h5>Company</h5><a href="#">About</a><a href="#">Blog</a><a href="#">Contact</a></div>
-      <div class="fcol"><h5>Legal</h5><a href="#">Privacy</a><a href="#">Terms</a></div>
-    </div>
+  <div class="footer-logo logo">
+    <div class="logo-mark"><svg viewBox="0 0 20 20" fill="none" stroke="#4c94b2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 L10 3 L17 10"/><path d="M10 3 L10 17"/><path d="M6 17 Q10 14 14 17"/></svg></div>
+    <span class="logo-text">Cruise<span>SEO</span></span>
   </div>
-  <div class="foot-bottom"><span>© 2025 SEOFlow Ltd. All rights reserved.</span><span>Made in the UK 🇬🇧</span></div>
+  <div class="footer-links">
+    <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a><a href="#">Blog</a>
+  </div>
+  <span class="footer-copy">© 2025 Cruise SEO Ltd</span>
 </footer>
 
 <script>
-/* SCROLL REVEAL */
-const obs = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('in') }), {threshold:.07,rootMargin:'0px 0px -30px 0px'});
+// Reveal on scroll
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:.1});
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 
-/* FAQ */
-document.querySelectorAll('.fq-q').forEach(q => {
-  q.addEventListener('click', () => {
-    const p = q.parentElement, o = p.classList.contains('on');
-    document.querySelectorAll('.fq').forEach(f => f.classList.remove('on'));
-    if(!o) p.classList.add('on');
-  });
-});
-
-/* DEMO TABS */
-document.querySelectorAll('.demo-tab').forEach(t => t.addEventListener('click', () => goTo(t.dataset.tab)));
-
-function goTo(id) {
-  document.querySelectorAll('.demo-tab').forEach(t => t.classList.toggle('on', t.dataset.tab === id));
-  document.querySelectorAll('.demo-pane').forEach(p => p.classList.toggle('on', p.id === 'dp-' + id));
-  if(id==='trends')   loadTrends();
-  if(id==='generate') loadGenerate();
-  if(id==='publish')  loadPublish();
-  if(id==='results')  loadResults();
-}
-
-/* Industry data */
-const IND = {
-  tutoring:{
-    trends:[{kw:'GCSE revision tips 2025',vol:'12.1K',p:92},{kw:'private tutor near me',vol:'8.4K',p:76},{kw:'11 plus exam preparation',vol:'5.9K',p:61},{kw:'online tutoring UK',vol:'4.2K',p:47},{kw:'A-level maths tutor',vol:'2.8K',p:33}],
-    title:'GCSE Revision Tips 2025: The Ultimate Guide for UK Students',
-    intro:'With GCSE exams approaching, thousands of UK students are searching for the best revision strategies. In this guide, we break down proven techniques to help move from Grade 4 to Grade 7 — and why working with a private tutor can make all the difference...',
-    keywords:'"GCSE revision" · "private tutor UK" · "exam prep"',
-    ranks:[{kw:'GCSE revision tips 2025',pos:'#3',g:true},{kw:'private tutor near me',pos:'#7',g:false},{kw:'11 plus preparation',pos:'#4',g:true}],
-    before:420,after:1380,summary:'Posts published: 36\nKeywords ranking: 94\nTraffic increase: +228%\nNew leads/mo: ~47'
-  },
-  legal:{
-    trends:[{kw:'employment law advice UK',vol:'9.8K',p:88},{kw:'landlord tenant dispute',vol:'6.2K',p:67},{kw:'small claims court guide',vol:'4.9K',p:54},{kw:'contract review solicitor',vol:'3.4K',p:41},{kw:'personal injury claim',vol:'2.1K',p:28}],
-    title:'Employment Law in the UK: What Every Business Owner Must Know in 2025',
-    intro:'UK employment law changed significantly in 2024, and many small business owners are unaware of their new obligations. From zero-hours contracts to flexible working rights, this guide covers everything you need to stay compliant...',
-    keywords:'"employment law UK" · "business legal advice" · "contracts"',
-    ranks:[{kw:'employment law advice UK',pos:'#5',g:false},{kw:'landlord tenant dispute',pos:'#2',g:true},{kw:'small claims guide',pos:'#6',g:false}],
-    before:310,after:1050,summary:'Posts published: 36\nKeywords ranking: 78\nTraffic increase: +239%\nNew leads/mo: ~31'
-  },
-  property:{
-    trends:[{kw:'buy to let mortgage rates',vol:'11.2K',p:90},{kw:'house prices UK 2025',vol:'7.8K',p:72},{kw:'first time buyer guide',vol:'6.1K',p:63},{kw:'property investment UK',vol:'4.3K',p:49},{kw:'rental yield calculator',vol:'2.9K',p:35}],
-    title:'Buy-to-Let in 2025: Is It Still Worth It in the UK?',
-    intro:'With rising mortgage rates and new rental regulations, many property investors are questioning whether buy-to-let remains viable. This guide breaks down the numbers, risks, and opportunities for UK landlords in 2025...',
-    keywords:'"buy to let 2025" · "property investment" · "rental yield"',
-    ranks:[{kw:'buy to let mortgage rates',pos:'#4',g:true},{kw:'first time buyer guide',pos:'#3',g:true},{kw:'house prices UK 2025',pos:'#8',g:false}],
-    before:280,after:980,summary:'Posts published: 36\nKeywords ranking: 86\nTraffic increase: +250%\nNew leads/mo: ~39'
-  },
-  health:{
-    trends:[{kw:'weight loss tips UK',vol:'10.4K',p:87},{kw:'mental health support',vol:'7.1K',p:70},{kw:'nutrition for beginners',vol:'5.3K',p:58},{kw:'personal trainer near me',vol:'4.0K',p:44},{kw:'yoga classes beginners',vol:'2.6K',p:30}],
-    title:'The Science of Sustainable Weight Loss: What Actually Works in 2025',
-    intro:'With fad diets flooding social media, it\'s hard to know what actually works for long-term weight loss. In this evidence-based guide, we cut through the noise and share what the research really says about sustainable results...',
-    keywords:'"sustainable weight loss" · "health tips UK" · "nutrition"',
-    ranks:[{kw:'weight loss tips UK',pos:'#6',g:false},{kw:'nutrition for beginners',pos:'#2',g:true},{kw:'personal trainer near me',pos:'#5',g:false}],
-    before:350,after:1240,summary:'Posts published: 36\nKeywords ranking: 102\nTraffic increase: +254%\nNew leads/mo: ~52'
-  },
-  digital:{
-    trends:[{kw:'SEO tips for small business',vol:'13.2K',p:94},{kw:'social media marketing',vol:'8.9K',p:78},{kw:'Google Ads vs Facebook Ads',vol:'5.7K',p:60},{kw:'email marketing tips',vol:'4.1K',p:46},{kw:'content marketing strategy',vol:'3.0K',p:36}],
-    title:'SEO for Small Businesses in 2025: The Only Guide You Need',
-    intro:'If you\'re a small business owner trying to rank on Google without a huge budget, this guide is for you. We distil everything that works in 2025 — from keyword research to local SEO — into a clear, actionable playbook you can use today...',
-    keywords:'"SEO small business" · "digital marketing" · "Google ranking"',
-    ranks:[{kw:'SEO tips for small business',pos:'#2',g:true},{kw:'social media marketing',pos:'#4',g:true},{kw:'content marketing strategy',pos:'#7',g:false}],
-    before:510,after:1890,summary:'Posts published: 36\nKeywords ranking: 118\nTraffic increase: +270%\nNew leads/mo: ~63'
-  },
-  finance:{
-    trends:[{kw:'small business accounting UK',vol:'8.6K',p:85},{kw:'self assessment tax return',vol:'6.4K',p:69},{kw:'VAT registration guide',vol:'4.8K',p:55},{kw:'payroll software UK',vol:'3.2K',p:40},{kw:'business savings account',vol:'2.0K',p:27}],
-    title:'Small Business Accounting in 2025: A Plain-English Guide',
-    intro:'Keeping your finances in order doesn\'t have to be complicated. This guide walks UK small business owners through everything they need to know about accounting, tax, and cash flow management in 2025 — without the jargon...',
-    keywords:'"small business accounting" · "tax return UK" · "VAT guide"',
-    ranks:[{kw:'small business accounting UK',pos:'#3',g:true},{kw:'self assessment guide',pos:'#5',g:false},{kw:'VAT registration UK',pos:'#4',g:true}],
-    before:290,after:960,summary:'Posts published: 36\nKeywords ranking: 72\nTraffic increase: +231%\nNew leads/mo: ~28'
-  },
-};
-
-let curData = IND.tutoring;
-let curBiz = 'your business';
-
-/* Live profile preview */
-['d-biz','d-loc','d-ind'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updatePreview);
-  document.getElementById(id).addEventListener('change', updatePreview);
-});
-function updatePreview() {
-  const biz = document.getElementById('d-biz').value || 'Your business';
-  const loc = document.getElementById('d-loc').value || 'United Kingdom';
-  const sel = document.getElementById('d-ind');
-  const ind = sel.options[sel.selectedIndex]?.text || 'your industry';
-  document.getElementById('profile-prev').innerHTML =
-    `<strong style="color:var(--tx);display:block;margin-bottom:8px">${biz}</strong>` +
-    `<span style="font-family:'DM Mono',monospace;font-size:11px;line-height:2.1">` +
-    `Industry: ${ind}<br>Location: ${loc}<br>Tone: Professional, helpful<br>Frequency: 3× per week</span>`;
-}
-
-function step1() {
-  const biz = document.getElementById('d-biz').value.trim();
-  const ind = document.getElementById('d-ind').value;
-  const bEl = document.getElementById('d-biz'), iEl = document.getElementById('d-ind');
-  bEl.style.borderColor = biz ? '' : 'var(--red,#e05470)';
-  iEl.style.borderColor = ind ? '' : 'var(--red,#e05470)';
-  if(!biz || !ind) return;
-  curBiz = biz;
-  curData = IND[ind] || IND.tutoring;
-  goTo('trends');
-}
-
-function loadTrends() {
-  document.getElementById('trends-name').textContent = curBiz;
-  const list = document.getElementById('trends-list');
-  list.innerHTML = '';
-  curData.trends.forEach((t, i) => {
-    const row = document.createElement('div');
-    row.className = 'd-trend-row';
-    row.innerHTML = `<span class="d-tkw">${t.kw}</span><div class="d-tbar"><div class="d-tfill" data-w="${t.p}%"></div></div><span class="d-tvol">${t.vol}/mo</span>`;
-    list.appendChild(row);
-    setTimeout(() => {
-      row.classList.add('vis');
-      row.querySelector('.d-tfill').style.width = t.p + '%';
-    }, i * 110);
-  });
-  document.getElementById('trends-summary').innerHTML =
-    `Found <strong>${curData.trends.length} rising topics</strong> this week.<br><br>` +
-    `Top pick: <strong style="color:var(--blue3)">"${curData.trends[0].kw}"</strong> — ${curData.trends[0].vol} searches/month and climbing.<br><br>` +
-    `SEOFlow will target all of these across your next two weeks of content.`;
-}
-
-let genTimer;
-function loadGenerate() {
-  clearInterval(genTimer);
-  document.getElementById('gen-title').textContent = curData.title;
-  document.getElementById('gen-num').textContent = '–';
-  document.getElementById('gen-bar').style.width = '0';
-  document.getElementById('gen-details').innerHTML =
-    `Target keyword:<br>${curData.keywords}<br><br>Word count: ~1,240<br>Reading time: ~5 min<br>Meta title: ✓<br>Meta desc: ✓<br>Headings: ✓<br>Internal links: 3`;
-  const body = document.getElementById('gen-body');
-  body.textContent = '';
-  body.classList.add('typing');
-  const txt = curData.intro;
-  let i = 0;
-  genTimer = setInterval(() => {
-    if(i < txt.length){ body.textContent += txt[i++] }
-    else {
-      clearInterval(genTimer);
-      body.classList.remove('typing');
-      let s = 0;
-      const si = setInterval(() => {
-        s = Math.min(s+2,94);
-        document.getElementById('gen-num').textContent = s;
-        document.getElementById('gen-bar').style.width = s+'%';
-        if(s>=94) clearInterval(si);
-      }, 18);
-    }
-  }, 16);
-}
-
-function loadPublish() {
-  const sel = document.getElementById('d-ind');
-  const indTxt = sel.options[sel.selectedIndex]?.text || 'Your Industry';
-  const posts = [
-    curData.title.slice(0,50)+'…',
-    `Top 5 Tips for ${indTxt} in 2025`,
-    'Why Local Businesses Are Winning With SEO',
-  ];
-  const list = document.getElementById('sched-list');
-  list.innerHTML = '';
-  const days = ['Mon 09:00','Wed 09:00','Fri 09:00'];
-  posts.forEach((p,i) => {
-    const row = document.createElement('div');
-    row.className = 'sched-row';
-    row.innerHTML = `<div class="sched-left"><div class="sched-dot" style="background:var(--amber)"></div><div><div class="sched-txt">${p}</div><div class="sched-sub">${days[i]} · WordPress</div></div></div><div class="sched-badge q">Queued</div>`;
-    list.appendChild(row);
-  });
-}
-
-function doPublish() {
-  document.querySelectorAll('.sched-badge').forEach((b,i) => {
-    setTimeout(() => {
-      b.className = 'sched-badge ok';
-      b.textContent = '✓ Scheduled';
-      b.previousElementSibling.querySelector('.sched-dot').style.background = 'var(--green)';
-    }, i * 350);
-  });
-  setTimeout(() => goTo('results'), 1500);
-}
-
-function loadResults() {
-  const bef = curData.before, aft = curData.after;
-  const vals = [Math.round(bef*1.12), Math.round(bef + (aft-bef)*.55), aft];
-  const max = Math.max(...vals);
-  const months = ['Month 1','Month 2','Month 3'];
-  const barsEl = document.getElementById('results-bars');
-  barsEl.innerHTML = '';
-  vals.forEach((v,i) => {
-    const pct = Math.round(v/max*100);
-    const w = document.createElement('div');
-    w.className = 'bar-wrap';
-    w.innerHTML = `<div style="font-size:10px;color:var(--tx2);font-family:'DM Mono',monospace;margin-bottom:4px">${v.toLocaleString()}</div><div class="bar-block" style="height:0" data-h="${pct}%"></div><div class="bar-label">${months[i]}</div>`;
-    barsEl.appendChild(w);
-    setTimeout(() => { w.querySelector('.bar-block').style.height = pct+'%' }, i*200+100);
-  });
-  const ranksEl = document.getElementById('results-ranks');
-  ranksEl.innerHTML = '';
-  curData.ranks.forEach((r,i) => {
-    const d = document.createElement('div');
-    d.className = 'rank-row';
-    d.style.cssText = 'opacity:0;transition:opacity .3s';
-    d.innerHTML = `<span class="rank-kw">${r.kw}</span><span class="rank-pos ${r.g?'g':'b'}">${r.pos}</span>`;
-    ranksEl.appendChild(d);
-    setTimeout(() => d.style.opacity='1', i*150+400);
-  });
-  document.getElementById('results-summary').innerHTML = curData.summary.replace(/\n/g,'<br>');
+// FAQ
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if(!isOpen) item.classList.add('open');
 }
 </script>
 </body>
