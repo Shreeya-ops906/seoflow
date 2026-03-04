@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cruise SEO — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Cabinet+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>window.__clerk_publishable_key = 'pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ';</script>
+<script async crossorigin="anonymous" data-clerk-publishable-key="pk_test_dW5iaWFzZWQtcGlnbGV0LTczLmNsZXJrLmFjY291bnRzLmRldiQ" src="https://unbiased-piglet-73.clerk.accounts.dev/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" onload="initAuth()"></script>
+<script>
+function initAuth() {
+  window.Clerk.load().then(() => {
+    if (!window.Clerk.user) { window.location.href = '/auth.html'; return; }
+    if (!localStorage.getItem('cruise_onboarding_complete')) { window.location.href = '/onboarding.html'; return; }
+    const user = window.Clerk.user;
+    const name = user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'there';
+    window._cruiseName = name;
+    document.querySelectorAll('.user-name').forEach(el => el.textContent = name);
+    document.querySelectorAll('.user-initials').forEach(el => {
+      el.textContent = ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase()||name[0].toUpperCase();
+    });
+  });
+}
+window.signOut = async function() { await window.Clerk.signOut(); window.location.href = '/auth.html'; };
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FAF8F4;--cream2:#F2EFE8;--cream3:#E8E2D6;
+  --surface:#FFFFFF;--ink:#1C1714;--ink2:#3D3830;--ink3:#6B6458;--ink4:#9B9088;
+  --amber:#4c94b2;--amber-l:#deeef7;--amber-d:#3a7a96;
+  --sage:#4A7C6F;--sage-l:#D6EDE8;
+  --border:#E8E2D6;--border2:#D4CCBB;
+  --sidebar:220px;
+  --font-serif:"Fraunces",Georgia,serif;
+  --font-ui:"Cabinet Grotesk",Georgia,sans-serif;
+  --font-mono:"SF Mono","Fira Code",monospace;
+  /* Legacy compat vars for original JS */
+  --bg:var(--cream);--bg2:var(--cream2);--ac:var(--amber);--tx:var(--ink);--tx2:var(--ink2);--tx3:var(--ink3);--tx4:var(--ink4);--green:var(--sage);--green-l:var(--sage-l);
+}
+html,body{height:100%;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display:flex;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--ink);color:var(--cream);
+  display:flex;flex-direction:column;
+  height:100vh;overflow-y:auto;
+  position:sticky;top:0;
+}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(250,248,244,.08)}
+.sb-logo-inner{display:flex;align-items:center;gap:10px}
+.sb-logo-mark{width:30px;height:30px;background:var(--amber);border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+.sb-logo-mark svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sb-brand-name{font-family:var(--font-serif);font-size:15px;font-weight:600;color:var(--cream)}
+.sb-brand-name span{color:var(--amber)}
+.sb-user{padding:14px 20px;border-bottom:1px solid rgba(250,248,244,.08);display:flex;align-items:center;gap:10px}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--amber);display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--font-mono)}
+.sb-username{font-size:12px;color:rgba(250,248,244,.6);font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-nav{flex:1;padding:16px 0}
+.nav-section{padding:0 12px;margin-bottom:4px}
+.nav-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:rgba(250,248,244,.25);padding:8px 8px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;transition:.15s;color:rgba(250,248,244,.55);font-size:13px;font-weight:600;position:relative;margin-bottom:1px}
+.nav-item:hover{background:rgba(250,248,244,.06);color:rgba(250,248,244,.85)}
+.nav-item.active{background:rgba(76,148,178,.15);color:var(--cream)}
+.nav-item.active .nav-dot{background:var(--amber)}
+.nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(250,248,244,.2);flex-shrink:0}
+.nav-item svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.sb-footer{padding:16px 12px;border-top:1px solid rgba(250,248,244,.08)}
+.ap-row{display:flex;align-items:center;justify-content:space-between;padding:10px 8px;background:rgba(250,248,244,.04);border-radius:8px;cursor:pointer;border:1px solid rgba(250,248,244,.06)}
+.ap-label{font-size:11px;color:rgba(250,248,244,.4);font-family:var(--font-mono)}
+.ap-label span{color:var(--sage)}
+.toggle{width:32px;height:18px;border-radius:9px;background:rgba(250,248,244,.1);position:relative;transition:.2s;cursor:pointer;flex-shrink:0}
+.toggle.on{background:var(--sage)}
+.toggle::after{content:"";position:absolute;width:12px;height:12px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s}
+.toggle.on::after{left:17px}
+.sb-signout{width:100%;padding:8px;margin-top:8px;background:none;border:1px solid rgba(250,248,244,.08);border-radius:8px;color:rgba(250,248,244,.3);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-ui);transition:.15s}
+.sb-signout:hover{background:rgba(250,248,244,.05);color:rgba(250,248,244,.5)}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.topbar-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink4);font-family:var(--font-mono)}
+.topbar-breadcrumb .sep{opacity:.4}
+.topbar-breadcrumb .current{color:var(--ink2);font-weight:700}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.btn{font-size:12px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer;font-family:var(--font-ui);transition:.15s;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:none;color:var(--ink3);border:1.5px solid var(--border2)}
+.btn-ghost:hover{background:var(--cream2);color:var(--ink2)}
+.btn-primary{background:var(--amber);color:#fff}
+.btn-primary:hover{background:var(--amber-d)}
+
+.content{flex:1;overflow-y:auto;padding:28px;background:var(--cream)}
+.view{display:none}
+.view.active{display:block}
+
+/* STAT CARDS */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.gap-14{gap:14px}
+.gap-20{gap:20px}
+.stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:20px 22px}
+.stat-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px}
+.stat-value{font-family:var(--font-serif);font-size:28px;font-weight:700;color:var(--ink);letter-spacing:-.03em;margin-bottom:4px}
+.stat-sub{font-size:11px;color:var(--ink4);font-weight:600}
+.stat-sub.up{color:var(--sage)}
+.stat-sub.down{color:var(--amber)}
+
+/* SECTION HEADERS */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin:28px 0 14px}
+.section-hd h2{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-.02em}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;overflow:hidden}
+.table-hd{display:grid;grid-template-columns:80px 1fr 120px 100px 80px;padding:10px 18px;background:var(--cream2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4)}
+.table-row{display:grid;grid-template-columns:80px 1fr 120px 100px 80px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center;transition:.1s}
+.table-row:last-child{border-bottom:none}
+.table-row:hover{background:var(--cream)}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;display:inline-block}
+.badge-live{background:var(--sage-l);color:var(--sage)}
+.badge-sched{background:#FDF6D4;color:#8B6914}
+.badge-draft{background:var(--amber-l);color:var(--amber)}
+.badge-gen{background:var(--cream3);color:var(--ink3)}
+.col-title{font-size:13px;font-weight:600;color:var(--ink2)}
+.col-kw{font-size:11px;color:var(--ink4);margin-top:2px}
+.col-score{font-size:13px;font-weight:700;color:var(--ink);font-family:var(--font-mono)}
+.col-date{font-size:11px;color:var(--ink4);font-family:var(--font-mono)}
+.col-words{font-size:11px;color:var(--ink4);font-family:var(--font-mono)}
+
+/* CARD */
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:22px}
+
+/* PROFILE */
+.profile-section{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:16px 18px}
+.profile-sec-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px}
+.profile-chips{display:flex;flex-wrap:wrap;gap:6px}
+.pc{font-size:12px;font-weight:600;color:var(--ink2);background:var(--surface);border:1px solid var(--border2);border-radius:6px;padding:3px 10px}
+.pc.amber{background:var(--amber-l);border-color:rgba(76,148,178,.2);color:var(--amber-d)}
+.pc.sage{background:var(--sage-l);border-color:rgba(74,124,111,.2);color:var(--sage)}
+
+/* PLATFORMS */
+.pub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pub-card{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.pub-card:hover{border-color:var(--border2);background:var(--surface)}
+.pub-card.connected{border-color:rgba(74,124,111,.3);background:var(--sage-l)}
+.pub-icon{font-size:20px;width:36px;text-align:center;flex-shrink:0}
+.pub-name{font-size:13px;font-weight:700;color:var(--ink)}
+.pub-url{font-size:11px;color:var(--ink4);font-family:var(--font-mono)}
+.pub-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);margin-left:auto;flex-shrink:0}
+.pub-card.connected .pub-dot{background:var(--sage)}
+
+/* ENGINE / GENERATE */
+.engine-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
+.etab{padding:10px 18px;font-size:13px;font-weight:700;color:var(--ink4);cursor:pointer;border-bottom:2px solid transparent;transition:.15s;margin-bottom:-1px}
+.etab.on{color:var(--amber);border-bottom-color:var(--amber)}
+.gen-area{width:100%;min-height:100px;background:var(--cream);border:1.5px solid var(--border2);border-radius:10px;padding:14px 16px;font-size:14px;color:var(--ink);font-family:var(--font-ui);resize:vertical;outline:none;transition:.15s}
+.gen-area:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-l)}
+.gen-output{background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:20px;font-size:14px;color:var(--ink2);line-height:1.75;min-height:120px;white-space:pre-wrap;font-family:var(--font-ui)}
+.gen-meta{display:flex;align-items:center;gap:16px;padding:12px 16px;background:var(--cream2);border-radius:8px;margin-top:12px}
+.gen-meta-item{font-size:11px;color:var(--ink4);font-family:var(--font-mono);display:flex;align-items:center;gap:6px}
+.gen-meta-item strong{color:var(--ink2)}
+
+/* KW RESEARCH */
+.kw-input-row{display:flex;gap:10px;margin-bottom:16px}
+.kw-input{flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:9px;padding:10px 14px;font-size:14px;color:var(--ink);font-family:var(--font-ui);outline:none;transition:.15s}
+.kw-input:focus{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-l)}
+.kw-result-row{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:9px;margin-bottom:8px}
+.kw-result-term{font-size:13px;font-weight:700;color:var(--ink2);flex:1}
+.kw-result-vol{font-size:11px;color:var(--ink4);font-family:var(--font-mono);width:50px;text-align:right}
+.kw-result-diff{font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px}
+.diff-easy{background:var(--sage-l);color:var(--sage)}
+.diff-med{background:#FDF6D4;color:#8B6914}
+.diff-hard{background:var(--amber-l);color:var(--amber-d)}
+
+/* TONE CHIPS */
+.tone-chip{font-size:12px;font-weight:700;padding:7px 14px;border-radius:100px;border:1.5px solid var(--border2);color:var(--ink3);cursor:pointer;transition:.15s;background:var(--surface)}
+.tone-chip:hover{border-color:var(--amber);color:var(--amber)}
+.tone-chip.on{background:var(--amber);border-color:var(--amber);color:#fff}
+
+/* EDITOR */
+#gen-editor h2{font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--ink);margin:28px 0 10px;letter-spacing:-.02em}
+#gen-editor h3{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);margin:22px 0 8px}
+#gen-editor p{margin-bottom:16px;color:var(--ink2)}
+#gen-editor ul,#gen-editor ol{margin:0 0 16px 24px;color:var(--ink2)}
+#gen-editor li{margin-bottom:6px}
+#gen-editor strong{color:var(--ink);font-weight:700}
+#gen-editor:focus{background:var(--surface)}
+#gen-editor:focus ~ #gen-edit-hint{opacity:0}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;background:var(--ink);color:var(--cream);padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:999;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none;font-family:var(--font-ui)}
+.toast.ok{border-left:3px solid var(--sage)}
+.toast.warn{border-left:3px solid var(--amber)}
+.toast.show{transform:none;opacity:1}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--cream3);border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-inner">
+      <div class="sb-logo-mark"><svg viewBox="0 0 20 20"><path d="M3 10 L10 3 L17 10"/><path d="M10 3 L10 17"/><path d="M6 17 Q10 14 14 17"/></svg></div>
+      <span class="sb-brand-name">Cruise<span>SEO</span></span>
+    </div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-avatar user-initials">?</div>
+    <span class="sb-username user-name">Loading...</span>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="nav(this,'dashboard')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" onclick="nav(this,'posts')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M2 3h12M2 6h8M2 9h10M2 12h6"/></svg>
+        Content
+      </div>
+      <div class="nav-item" onclick="nav(this,'keywords')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="5"/><path d="M12 12l3 3"/></svg>
+        Keywords
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Create</div>
+      <div class="nav-item" onclick="nav(this,'engine')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/><path d="M4 4l8 8M12 4l-8 8" opacity=".4"/></svg>
+        Generate
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Settings</div>
+      <div class="nav-item" onclick="nav(this,'publish')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2a6 6 0 0 1 0 12M8 2a6 6 0 0 0 0 12M2 8h12"/></svg>
+        Publish
+      </div>
+      <div class="nav-item" onclick="nav(this,'profile')">
+        <div class="nav-dot"></div>
+        <svg viewBox="0 0 16 16"><path d="M2 13s0-4 6-4 6 4 6 4"/><circle cx="8" cy="6" r="3"/></svg>
+        Brand Profile
+      </div>
+    </div>
+  </nav>
+  <div class="sb-footer">
+    <div class="ap-row" onclick="toggleAP()">
+      <span class="ap-label">autopilot <span id="apTxt">on</span></span>
+      <div class="toggle on" id="apToggle"></div>
+    </div>
+    <button class="sb-signout" onclick="signOut()">Sign out</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>cruiseseo</span>
+      <span class="sep">/</span>
+      <span class="current" id="breadcrumb">dashboard</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="nav(null,'profile')">Brand profile</button>
+      <button class="btn btn-primary" onclick="nav(null,'engine')">+ Generate</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="grid-4 gap-20">
+        <div class="stat-card"><div class="stat-label">Published</div><div class="stat-value" id="stPublished"><strong>0</strong></div><div class="stat-sub up" id="stPublishedSub">via AI engine</div></div>
+        <div class="stat-card"><div class="stat-label">Scheduled</div><div class="stat-value" id="stScheduled"><strong>0</strong></div><div class="stat-sub" id="stScheduledSub">upcoming</div></div>
+        <div class="stat-card"><div class="stat-label">Keywords</div><div class="stat-value" id="stKeywords"><strong>—</strong></div><div class="stat-sub up">ranking on Google</div></div>
+        <div class="stat-card"><div class="stat-label">Autopilot</div><div class="stat-value" id="stAP" style="font-size:20px;color:var(--sage)">● Active</div><div class="stat-sub up">publishing weekly</div></div>
+      </div>
+      <div class="section-hd"><h2>Recent content</h2><button class="btn btn-ghost" onclick="nav(null,'posts')">View all</button></div>
+      <div class="table-wrap">
+        <div class="table-hd"><span>Status</span><span>Title</span><span>Keywords</span><span>SEO score</span><span>Date</span></div>
+        <div id="dash-posts"></div>
+      </div>
+      <div class="section-hd" style="margin-top:28px"><h2>Brand context</h2><button class="btn btn-ghost" onclick="nav(null,'profile')">Edit</button></div>
+      <div class="card"><span style="font-size:13px;color:var(--ink3)" id="ctxVal">Loading brand profile...</span></div>
+    </div>
+
+    <!-- POSTS -->
+    <div class="view" id="view-posts">
+      <div class="section-hd"><h2>All content</h2><button class="btn btn-primary" onclick="nav(null,'engine')">+ New post</button></div>
+      <div class="table-wrap">
+        <div class="table-hd"><span>Status</span><span>Title</span><span>Keywords</span><span>SEO score</span><span>Date</span></div>
+        <div id="all-posts"></div>
+      </div>
+    </div>
+
+    <!-- KEYWORDS -->
+    <div class="view" id="view-keywords">
+      <div class="section-hd"><h2>Keyword research</h2></div>
+      <div class="card">
+        <div class="kw-input-row">
+          <input class="kw-input" id="kwInput" placeholder="Enter a topic e.g. private tutoring London...">
+          <button class="btn btn-primary" onclick="researchKW()">Research</button>
+        </div>
+        <div id="kw-results"></div>
+      </div>
+    </div>
+
+    <!-- ENGINE -->
+    <div class="view" id="view-engine">
+
+      <!-- Step 1: Input -->
+      <div id="gen-step-input">
+        <div class="section-hd"><h2>Generate a blog post</h2></div>
+        <div class="card">
+          <div style="margin-bottom:20px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Target keyword or topic</label>
+            <input class="kw-input" id="genKeyword" placeholder="e.g. How to prepare for the 11+ exam" style="width:100%;font-size:15px;padding:13px 16px">
+          </div>
+          <div style="margin-bottom:20px">
+            <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);display:block;margin-bottom:8px">Tone <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap" id="tone-chips">
+              <div class="tone-chip on" onclick="selectTone(this,'authoritative')">Authoritative</div>
+              <div class="tone-chip" onclick="selectTone(this,'friendly')">Friendly</div>
+              <div class="tone-chip" onclick="selectTone(this,'educational')">Educational</div>
+              <div class="tone-chip" onclick="selectTone(this,'conversational')">Conversational</div>
+              <div class="tone-chip" onclick="selectTone(this,'professional')">Professional</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="runGenerate()" id="btnGen" style="font-size:15px;padding:13px 28px">
+            Generate post ✦
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Generating state -->
+      <div id="gen-step-loading" style="display:none">
+        <div class="section-hd"><h2>Writing your post...</h2></div>
+        <div class="card" style="padding:40px;text-align:center">
+          <div id="gen-progress-wrap">
+            <div style="width:48px;height:48px;border:3px solid var(--cream3);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px"></div>
+            <div style="font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:8px" id="gen-stage-title">Researching keyword...</div>
+            <div style="font-size:13px;color:var(--ink4)" id="gen-stage-sub">Analysing search intent and competition</div>
+          </div>
+          <div style="margin-top:24px;height:4px;background:var(--cream3);border-radius:2px;overflow:hidden;max-width:320px;margin-left:auto;margin-right:auto">
+            <div id="gen-progress-bar" style="height:100%;background:var(--amber);border-radius:2px;width:0%;transition:width .5s ease"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Output / editor -->
+      <div id="gen-step-output" style="display:none">
+        <div class="section-hd">
+          <h2 id="gen-post-title-display">Post title</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="resetGenerator()">← New post</button>
+            <button class="btn btn-ghost" onclick="runGenerate()" id="btnRegen">↺ Regenerate</button>
+            <button class="btn btn-primary" onclick="publishToWP()" id="btnPublishWP">Publish to WordPress ↗</button>
+          </div>
+        </div>
+
+        <!-- Meta row -->
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">Word count</div>
+            <div class="stat-value" style="font-size:22px" id="gen-word-count">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">SEO score</div>
+            <div class="stat-value" style="font-size:22px" id="gen-seo-score">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:120px;padding:14px 18px">
+            <div class="stat-label">Read time</div>
+            <div class="stat-value" style="font-size:22px" id="gen-read-time">—</div>
+          </div>
+          <div class="stat-card" style="flex:1;min-width:200px;padding:14px 18px">
+            <div class="stat-label">Meta description</div>
+            <div style="font-size:12px;color:var(--ink3);line-height:1.6;margin-top:4px" id="gen-meta-desc">—</div>
+          </div>
+        </div>
+
+        <!-- Editable post content -->
+        <div class="card" style="padding:0;overflow:hidden">
+          <div style="padding:14px 20px;background:var(--cream2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4)">Post content — editable</span>
+            <span style="font-size:11px;color:var(--ink4)" id="gen-edit-hint">Click to edit</span>
+          </div>
+          <div id="gen-editor" contenteditable="true" style="padding:28px 32px;min-height:400px;font-size:15px;color:var(--ink2);line-height:1.85;outline:none;font-family:var(--font-ui)" oninput="onEditorChange()"></div>
+        </div>
+
+        <!-- Publish result -->
+        <div id="gen-publish-result" style="display:none;margin-top:14px;padding:14px 18px;border-radius:10px;font-size:13px;font-weight:600"></div>
+      </div>
+
+    </div>
+
+    <!-- PUBLISH -->
+    <div class="view" id="view-publish">
+      <div class="section-hd"><h2>Publishing channels</h2></div>
+
+      <!-- WordPress Connect Card -->
+      <div class="card" id="wp-connect-card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <div style="width:44px;height:44px;background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;display:grid;place-items:center;font-size:22px;flex-shrink:0">🌐</div>
+          <div>
+            <div style="font-family:var(--font-serif);font-size:17px;font-weight:600;color:var(--ink)">WordPress</div>
+            <div style="font-size:12px;color:var(--ink4);margin-top:2px" id="wp-status-label">Not connected</div>
+          </div>
+          <div style="margin-left:auto">
+            <div id="wp-status-dot" style="width:10px;height:10px;border-radius:50%;background:var(--border2)"></div>
+          </div>
+        </div>
+
+        <!-- Connected state -->
+        <div id="wp-connected-state" style="display:none">
+          <div style="background:var(--sage-l);border:1px solid rgba(74,124,111,.2);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+            <span style="color:var(--sage);font-size:16px">✓</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)" id="wp-connected-url"></div>
+              <div style="font-size:11px;color:var(--ink4);margin-top:2px" id="wp-connected-user"></div>
+            </div>
+            <button onclick="disconnectWP()" style="margin-left:auto;background:none;border:1px solid var(--border2);border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--ink4);cursor:pointer;font-family:var(--font-ui)">Disconnect</button>
+          </div>
+          <!-- Test publish -->
+          <div style="margin-bottom:6px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:10px">Test publish</div>
+            <div style="display:flex;gap:10px">
+              <input id="wp-test-title" class="kw-input" placeholder="Post title e.g. How to rank on Google in 2025" style="flex:1">
+              <button class="btn btn-primary" onclick="testPublish()" id="btn-test-publish">Publish test post</button>
+            </div>
+            <div id="wp-publish-result" style="display:none;margin-top:12px;padding:12px 14px;border-radius:9px;font-size:13px;font-weight:500"></div>
+          </div>
+        </div>
+
+        <!-- Connect form -->
+        <div id="wp-connect-form">
+          <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:var(--ink3);line-height:1.6">
+            You'll need a WordPress <strong style="color:var(--ink)">Application Password</strong>. Go to your WordPress dashboard → <strong style="color:var(--ink)">Users → Profile</strong> → scroll to <strong style="color:var(--ink)">Application Passwords</strong>, type "Cruise SEO" and click Add.
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>WordPress site URL</label>
+            <input type="url" id="wp-url" class="kw-input" placeholder="https://yoursite.com" style="width:100%">
+          </div>
+          <div class="field" style="margin-bottom:14px">
+            <label>WordPress username</label>
+            <input type="text" id="wp-username" class="kw-input" placeholder="Your WordPress login username" style="width:100%">
+          </div>
+          <div class="field" style="margin-bottom:18px">
+            <label>Application password</label>
+            <input type="password" id="wp-apppass" class="kw-input" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" style="width:100%;font-family:monospace;letter-spacing:.05em">
+          </div>
+          <div id="wp-connect-alert" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px"></div>
+          <button class="btn btn-primary" onclick="connectWP()" id="btn-connect-wp" style="width:100%;justify-content:center;padding:13px">
+            <div class="spin" id="wp-spin"></div>
+            <span id="wp-btn-txt">Test connection & save</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent publishes -->
+      <div class="section-hd" style="margin-top:28px"><h2>Publish log</h2></div>
+      <div class="table-wrap" id="wp-log-wrap">
+        <div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet</div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="view" id="view-profile">
+      <div class="section-hd">
+        <h2 id="profName">Brand Profile</h2>
+        <button class="btn btn-ghost" onclick="toast('Edit profile opens in onboarding — coming in next session',true)">Edit profile</button>
+      </div>
+      <div class="grid-2 gap-14" id="profileGrid"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://api.anthropic.com/v1/messages';
+
+// ── State ──────────────────────────────────────
+let brand = null;
+let queue = [];
+let pubLog = [];
+let scheduled = [];
+let curTab = 'blog';
+let curMonth = new Date(2026, 2, 1);
+let generated = null;
+let apOn = true;
+
+const platforms = [
+  {id:'wp',  name:'WordPress', icon:'🌐', url:'yoursite.com',     connected:true,  posts:0},
+  {id:'li',  name:'LinkedIn',  icon:'💼', url:'linkedin.com',     connected:true,  posts:0},
+  {id:'tw',  name:'Twitter/X', icon:'𝕏',  url:'twitter.com',      connected:true,  posts:0},
+  {id:'ig',  name:'Instagram', icon:'◎',  url:'instagram.com',    connected:false, posts:0},
+  {id:'fb',  name:'Facebook',  icon:'⬡',  url:'facebook.com',     connected:false, posts:0},
+  {id:'gsc', name:'Search Console', icon:'◈', url:'search.google.com', connected:false, posts:0},
+];
+
+const kwData = [
+  {kw:'SEO services near me',    rank:8,  d:+3, vol:'2.4k', diff:45},
+  {kw:'local SEO marketing',     rank:12, d:+5, vol:'1.8k', diff:38},
+  {kw:'content marketing agency',rank:23, d:-1, vol:'3.1k', diff:62},
+  {kw:'small business SEO',      rank:17, d:+7, vol:'2.9k', diff:51},
+  {kw:'website ranking tips',    rank:34, d:+2, vol:'890',  diff:29},
+  {kw:'SEO audit checklist',     rank:41, d: 0, vol:'1.2k', diff:35},
+  {kw:'blog content strategy',   rank:28, d:+4, vol:'1.5k', diff:44},
+];
+
+const opps = [
+  {title:'How to rank #1 on Google Maps in 2025', vol:'3.2k', diff:'easy'},
+  {title:'SEO checklist for brand-new websites',  vol:'2.8k', diff:'easy'},
+  {title:'Local SEO vs national SEO explained',   vol:'1.9k', diff:'medium'},
+  {title:'Best time to post on LinkedIn for B2B', vol:'1.4k', diff:'easy'},
+  {title:'How long does SEO take to show results',vol:'5.1k', diff:'medium'},
+];
+
+const comps = [
+  {d:'agencyX.com',  s:82},
+  {d:'seotop.co.uk', s:76},
+  {d:'growthco.io',  s:71},
+  {d:'searchpro.com',s:65},
+];
+
+const healthChecks = [
+  {l:'Title tags optimised',        ok:true},
+  {l:'Meta descriptions present',   ok:true},
+  {l:'Site speed < 3s',             ok:true},
+  {l:'Mobile responsive',           ok:true},
+  {l:'Schema markup',               ok:false},
+  {l:'Internal linking structure',  ok:false},
+  {l:'XML sitemap submitted',       ok:true},
+  {l:'Core Web Vitals passing',     ok:false},
+];
+
+const calSeeds = {4:[{t:'blog',n:'SEO Strategy 2025'}], 7:[{t:'social',n:'LinkedIn Post'},{t:'blog',n:'Content Calendar Guide'}], 11:[{t:'article',n:'Local SEO Deep Dive'}], 14:[{t:'social',n:'Twitter Thread'}], 18:[{t:'blog',n:'Keyword Research Tips'}], 21:[{t:'social',n:'Weekly Insight'}], 25:[{t:'article',n:'On-Page SEO Checklist'}]};
+
+// ── Init ──────────────────────────────────────
+async function init() {
+  await loadBrand();
+  renderAll();
+  loadIdeas();
+}
+
+async function loadBrand() {
+  try {
+    const r = await window.storage.get('brand-profile');
+    if (r?.value) brand = JSON.parse(r.value);
+  } catch {}
+  if (!brand) brand = {
+    name:'Your Business', industry:'Marketing', type:'B2B',
+    tone:'conversational',
+    personalities:['Expert','Trustworthy','Results-driven'],
+    values:['Customer first','Quality','Integrity'],
+    goals:['Generate leads','Build brand awareness'],
+    keywords:['SEO services','content marketing','local SEO'],
+    pillars:['How-to guides','Tips & best practices'],
+    idealCustomer:'Small business owners who want to grow online',
+    differentiators:'AI-powered content at a fraction of agency cost',
+    voiceSummary:'We create expert, conversational content that helps businesses grow online — building trust and driving results through every piece we publish.',
+  };
+}
+
+function renderAll() {
+  applyBrand();
+  renderDashConnections();
+  renderSEO();
+  renderAnalytics();
+  renderPubPlatforms();
+  renderPubLog();
+  renderCalendar();
+  renderAutoPublish();
+  renderProfile();
+  updateStats();
+}
+
+function applyBrand() {
+  document.getElementById('sbName').textContent = brand.name;
+  document.getElementById('sbMeta').textContent = brand.industry + ' · ' + (brand.type||'');
+  document.getElementById('sbTone').textContent = (brand.tone||'auto') + ' · active';
+  document.getElementById('ctxVal').textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
+  document.getElementById('profName').textContent = brand.name;
+  document.getElementById('profMeta').textContent = brand.industry + ' / ' + (brand.type||'');
+}
+
+// ── Navigation ─────────────────────────────────
+function nav(el, id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.nav-item').forEach(n => { if(n.textContent.trim().toLowerCase().replace(/\s+/g,'-').includes(id)) n.classList.add('active'); });
+  document.getElementById('breadcrumb').textContent = id.replace('-',' ');
+  if (id==='analytics') setTimeout(drawChart,50);
+  if (id==='calendar') renderCalendar();
+  if (id==='profile') renderProfile();
+}
+
+// ── Content Engine ─────────────────────────────
+function setTab(el, t) {
+  document.querySelectorAll('.tab-row .tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  curTab = t;
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+async function generate() {
+  const topic   = document.getElementById('genTopic').value.trim();
+  const toneOvr = document.getElementById('genTone').value;
+  const platform= document.getElementById('genPlatform').value;
+  const kw      = document.getElementById('genKeyword').value.trim();
+
+  const btn = document.getElementById('genBtn');
+  const spinner = document.getElementById('genSpinner');
+  const icon = document.getElementById('genIcon');
+  const lb = document.getElementById('loadBar');
+
+  btn.disabled=true; icon.textContent='Generating'; spinner.style.display='block';
+  lb.classList.add('on');
+  document.getElementById('outputPanel').classList.remove('show');
+
+  const tone     = toneOvr || brand.tone || 'conversational';
+  const kws      = kw || (brand.keywords||[]).slice(0,3).join(', ');
+  const typeMap  = { blog:'a 1000-word SEO blog post', article:'a 1500-word in-depth article', social:'3 social media posts (LinkedIn, Twitter, Instagram) labelled separately', meta:'an SEO title tag (max 60 chars), meta description (max 160 chars), and 3 H2 suggestions' };
+
+  const prompt = `Write ${typeMap[curTab]} for ${brand.name}, a ${brand.industry} company.
+
+Voice: ${brand.voiceSummary||tone+' tone'}
+Audience: ${brand.idealCustomer||'small business owners'}
+Keywords to weave in naturally: ${kws}
+Platform: ${platform}
+${topic ? 'Topic: "'+topic+'"' : 'Pick the most relevant topic from the keywords above.'}
+
+Rules:
+— Tone must be ${tone}
+— First line must be the title/headline only
+— Include H2 subheadings (for blog/article)
+— End with a CTA relevant to ${brand.name}
+— Final line: META: [2-sentence meta description under 160 chars]
+
+Output content only. Start with the title.`;
+
+  try {
+    const res = await fetch(API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000, messages:[{role:'user',content:prompt}] })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    showOutput(text, platform, kws.split(',')[0].trim());
+  } catch {
+    toast('Generation failed — check connection', false);
+  } finally {
+    btn.disabled=false; icon.textContent='Generate'; spinner.style.display='none';
+    lb.classList.remove('on');
+    const fill = lb.querySelector('.load-bar-fill');
+    fill.style.animation='none'; fill.offsetHeight; fill.style.animation='';
+  }
+}
+
+function showOutput(text, platform, kw) {
+  const lines = text.split('\n').filter(l=>l.trim());
+  const title = lines[0].replace(/^#+\s*/,'').replace(/\*\*/g,'');
+  const body  = lines.slice(1).join('\n');
+  const words = text.split(/\s+/).length;
+  generated   = { title, body, full:text, type:curTab, platform, kw };
+
+  document.getElementById('outType').textContent    = curTab.toUpperCase().replace('META','META SEO');
+  document.getElementById('outTitle').textContent   = title;
+  document.getElementById('outPreview').textContent = body.slice(0,400);
+  document.getElementById('outWords').textContent   = '~'+words;
+  document.getElementById('outRead').textContent    = Math.ceil(words/200);
+  document.getElementById('outKw').textContent      = kw;
+  document.getElementById('outputPanel').classList.add('show');
+  toast('Content generated', true);
+}
+
+function doPublish() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'published', generated.type);
+  addPubLog(generated.title, generated.platform, 'ok');
+  platforms.forEach(p=>{ if(generated.platform.toLowerCase().includes(p.name.toLowerCase())) p.posts++; });
+  renderPubPlatforms();
+  toast('Published to '+generated.platform, true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function doSchedule() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'scheduled', generated.type);
+  toast('Scheduled for '+generated.platform, true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function doDraft() {
+  if (!generated) return;
+  pushQueue(generated.title, generated.platform, 'draft', generated.type);
+  toast('Saved as draft', true);
+  document.getElementById('outputPanel').classList.remove('show');
+}
+
+function copyOutput() {
+  if (!generated) return;
+  navigator.clipboard?.writeText(generated.full);
+  toast('Copied to clipboard', true);
+}
+
+// ── Queue ──────────────────────────────────────
+function pushQueue(title, platform, status, type='blog') {
+  const item = { id:Date.now(), title, platform, status, type, ts: new Date().toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) };
+  queue.unshift(item);
+  try { window.storage.set('queue', JSON.stringify(queue)); } catch {}
+  renderQueue();
+  renderDashQueue();
+  updateStats();
+}
+
+function renderQueue() {
+  const el = document.getElementById('engineQueue');
+  document.getElementById('qCount').textContent = queue.length + ' item' + (queue.length!==1?'s':'');
+  if (!queue.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">queue empty</div></div>'; return; }
+  el.innerHTML = queue.slice(0,10).map(i=>`
+    <div class="row-item">
+      <span class="row-type rt-${i.type||'blog'}">${i.type||'blog'}</span>
+      <div class="row-info"><div class="row-title">${i.title}</div><div class="row-meta">${i.platform} · ${i.ts}</div></div>
+      <span class="row-status rs-${i.status}">${i.status}</span>
+    </div>`).join('');
+}
+
+function renderDashQueue() {
+  const el = document.getElementById('dashQueue');
+  if (!queue.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no content yet</div></div>'; return; }
+  el.innerHTML = queue.slice(0,6).map(i=>`
+    <div class="row-item">
+      <span class="row-type rt-${i.type||'blog'}">${i.type||'blog'}</span>
+      <div class="row-info"><div class="row-title">${i.title}</div><div class="row-meta">${i.platform} · ${i.ts}</div></div>
+      <span class="row-status rs-${i.status}">${i.status}</span>
+    </div>`).join('');
+}
+
+// ── Stats ──────────────────────────────────────
+function updateStats() {
+  const pub = queue.filter(i=>i.status==='published').length;
+  document.getElementById('stPublished').innerHTML = `<strong>${pub}</strong>`;
+  document.getElementById('stPublishedSub').textContent = `${pub>0?'↑ '+pub+' published':''} via AI engine`;
+  document.getElementById('stKws').innerHTML = `<strong>${312+Math.floor(pub*2)}</strong>`;
+  document.getElementById('stHours').innerHTML = `<strong>${Math.round(pub*1.5)}</strong>h`;
+}
+
+// ── Ideas ──────────────────────────────────────
+async function loadIdeas() {
+  const el = document.getElementById('ideaList');
+  const kws = (brand.keywords||[]).join(', ');
+  const industry = brand.industry || 'marketing';
+  try {
+    const res = await fetch(API, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1000,
+        messages:[{role:'user', content:`Generate 5 SEO blog title ideas for a ${industry} business targeting: ${kws}. Return ONLY a JSON array of strings. No other text.`}] })
+    });
+    const data = await res.json();
+    let txt = data.content?.[0]?.text||'[]';
+    txt = txt.replace(/```json|```/g,'').trim();
+    const ideas = JSON.parse(txt);
+    el.innerHTML = ideas.map(idea=>`
+      <div class="idea-row" onclick="useIdea('${idea.replace(/'/g,"\\'")}')">
+        <div class="idea-dot"></div>
+        <div class="idea-text">${idea}</div>
+        <span class="idea-use">use →</span>
+      </div>`).join('');
+  } catch {
+    const fallback = ['10 SEO mistakes hurting your rankings','How to write blogs Google loves','Local SEO guide for trades businesses','Why content consistency drives traffic','Keyword research for non-technical founders'];
+    el.innerHTML = fallback.map(idea=>`
+      <div class="idea-row" onclick="useIdea('${idea}')">
+        <div class="idea-dot"></div>
+        <div class="idea-text">${idea}</div>
+        <span class="idea-use">use →</span>
+      </div>`).join('');
+  }
+}
+
+function useIdea(idea) {
+  nav(null,'engine');
+  document.querySelectorAll('.nav-item').forEach(n=>{ if(n.textContent.includes('Content Engine')) n.classList.add('active'); else n.classList.remove('active'); });
+  document.getElementById('genTopic').value = idea;
+  toast('Topic loaded', true);
+}
+
+// ── Calendar ───────────────────────────────────
+function renderCalendar() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent = months[curMonth.getMonth()] + ' ' + curMonth.getFullYear();
+
+  const first = new Date(curMonth.getFullYear(), curMonth.getMonth(), 1).getDay();
+  const days  = new Date(curMonth.getFullYear(), curMonth.getMonth()+1, 0).getDate();
+  const prev  = new Date(curMonth.getFullYear(), curMonth.getMonth(), 0).getDate();
+  const today = new Date();
+
+  const evts = {...calSeeds};
+  scheduled.forEach(s=>{
+    const d = new Date(s.date);
+    if(d.getMonth()===curMonth.getMonth()&&d.getFullYear()===curMonth.getFullYear()) {
+      const k = d.getDate();
+      if(!evts[k]) evts[k]=[];
+      evts[k].push({t:s.type,n:s.title||'Scheduled'});
+    }
+  });
+
+  let html='';
+  for(let i=first-1;i>=0;i--) html+=`<div class="cal-day other"><div class="cal-day-num">${prev-i}</div></div>`;
+  for(let d=1;d<=days;d++){
+    const isToday=today.getDate()===d&&today.getMonth()===curMonth.getMonth()&&today.getFullYear()===curMonth.getFullYear();
+    const es=evts[d]||[];
+    html+=`<div class="cal-day${isToday?' today':''}" onclick="openSchedOnDay(${d})">
+      <div class="cal-day-num">${d}</div>
+      ${es.slice(0,2).map(e=>`<div class="cal-event ce-${e.t}">${e.n}</div>`).join('')}
+      ${es.length>2?`<div style="font-size:9px;color:var(--tx3);font-family:var(--font-mono)">+${es.length-2}</div>`:''}
+    </div>`;
+  }
+  const rem = (first+days)%7; if(rem) for(let d=1;d<=7-rem;d++) html+=`<div class="cal-day other"><div class="cal-day-num">${d}</div></div>`;
+  document.getElementById('calDays').innerHTML = html;
+}
+
+function shiftMonth(d) { curMonth=new Date(curMonth.getFullYear(),curMonth.getMonth()+d,1); renderCalendar(); }
+
+function renderAutoPublish() {
+  document.getElementById('autoPublishList').innerHTML = platforms.slice(0,4).map(p=>`
+    <div class="pub-platform">
+      <div class="pub-icon">${p.icon}</div>
+      <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.connected?'weekly':'not connected'}</div></div>
+      <div class="toggle ${p.connected?'on':''}" onclick="this.classList.toggle('on')"></div>
+    </div>`).join('');
+}
+
+function openSchedModal() {
+  document.getElementById('mDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('schedModal').classList.add('show');
+}
+
+function openSchedOnDay(d) {
+  const dt=new Date(curMonth.getFullYear(),curMonth.getMonth(),d);
+  document.getElementById('mDate').value=dt.toISOString().split('T')[0];
+  document.getElementById('schedModal').classList.add('show');
+}
+
+function confirmSched() {
+  const title=document.getElementById('mTitle').value||'AI-generated';
+  const type=document.getElementById('mType').value;
+  const platform=document.getElementById('mPlatform').value;
+  const date=document.getElementById('mDate').value;
+  scheduled.push({title,type,platform,date});
+  document.getElementById('calPill').textContent=scheduled.length+4;
+  renderCalendar();
+  closeModal('schedModal');
+  toast('Scheduled: '+title, true);
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ── Dashboard Connections ──────────────────────
+function renderDashConnections() {
+  document.getElementById('dashConnections').innerHTML = platforms.slice(0,6).map(p=>`
+    <div class="pub-platform" style="padding:9px 14px">
+      <div class="pub-icon" style="font-size:14px">${p.icon}</div>
+      <div style="flex:1"><div class="pub-name" style="font-size:11px">${p.name}</div></div>
+      <span class="pub-status-badge ${p.connected?'psb-on':'psb-off'}">${p.connected?'live':'off'}</span>
+    </div>`).join('');
+}
+
+// ── SEO ────────────────────────────────────────
+function renderSEO() {
+  document.getElementById('kwBody').innerHTML = kwData.map(k=>{
+    const g=k.rank<=15?'good':k.rank<=30?'mid':'';
+    const dc=k.diff<40?'df-easy':k.diff<60?'df-med':'df-hard';
+    const dt=k.d>0?`<span class="delta up">+${k.d}</span>`:k.d<0?`<span class="delta dn">${k.d}</span>`:`<span style="color:var(--tx3);font-size:10px">—</span>`;
+    return `<tr>
+      <td style="font-weight:500;color:var(--tx)">${k.kw}</td>
+      <td><span class="rank-num ${g}">#${k.rank}</span></td>
+      <td>${dt}</td>
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--tx3)">${k.vol}</td>
+      <td><div class="diff-track"><div class="diff-fill ${dc}" style="width:${k.diff}%"></div></div></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('oppList').innerHTML = opps.map(o=>`
+    <div class="opp-row" onclick="loadOpp('${o.title.replace(/'/g,"\\'")}')">
+      <div class="opp-title">${o.title}</div>
+      <div class="opp-tags">
+        <span class="opp-tag ot-vol">${o.vol}/mo</span>
+        <span class="opp-tag ${o.diff==='easy'?'ot-easy':'ot-med'}">${o.diff}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('compList').innerHTML = comps.map(c=>`
+    <div class="comp-row">
+      <span class="comp-domain">${c.d}</span>
+      <div class="comp-track"><div class="comp-fill" style="width:${c.s}%"></div></div>
+      <span class="comp-score">${c.s}</span>
+    </div>`).join('');
+
+  document.getElementById('healthList').innerHTML = healthChecks.map(h=>`
+    <div class="health-check ${h.ok?'hc-ok':'hc-bad'}">
+      <span class="hc-icon" style="color:${h.ok?'var(--green)':'var(--tx3)'}">${h.ok?'✓':'✗'}</span>
+      <span class="hc-label">${h.l}</span>
+      ${!h.ok?`<span class="hc-fix" onclick="toast('Generating fix for: '+\`${h.l}\`,true)">fix</span>`:''}
+    </div>`).join('');
+}
+
+function loadOpp(title) {
+  nav(null,'engine');
+  document.getElementById('genTopic').value=title;
+  toast('Opportunity loaded', true);
+}
+
+// ── Analytics ──────────────────────────────────
+function renderAnalytics() {
+  const sources=[
+    {l:'Organic Search',s:58,c:'var(--ac)'},
+    {l:'Direct',        s:22,c:'var(--ac2)'},
+    {l:'Social Media',  s:12,c:'var(--amber)'},
+    {l:'Referral',      s: 8,c:'var(--tx2)'},
+  ];
+  document.getElementById('sourceList').innerHTML = sources.map(s=>`
+    <div class="source-row">
+      <div class="source-dot" style="background:${s.c}"></div>
+      <div class="source-label">${s.l}</div>
+      <div class="source-bar"><div class="source-fill" style="width:${s.s}%;background:${s.c}"></div></div>
+      <div class="source-pct">${s.s}%</div>
+    </div>`).join('');
+
+  const posts=[
+    {t:'10 SEO Mistakes Killing Your Traffic',   v:'1,842',d:'+34%'},
+    {t:'How to Rank on Google Maps (2025)',       v:'1,203',d:'+28%'},
+    {t:'Local SEO Guide for Small Businesses',   v:'891',  d:'+19%'},
+    {t:'Why Blog Consistency Drives Traffic',    v:'654',  d:'+12%'},
+    {t:'Content Calendar Template + Tips',       v:'412',  d:'+8%'},
+  ];
+  document.getElementById('topPostList').innerHTML = posts.map((p,i)=>`
+    <div class="top-post-row">
+      <div class="tp-n">${i+1}</div>
+      <div class="tp-info"><div class="tp-t">${p.t}</div><div class="tp-v">${p.v} sessions</div></div>
+      <div class="tp-d">${p.d}</div>
+    </div>`).join('');
+
+  const pub = queue.filter(i=>i.status==='published').length;
+  document.getElementById('roiGrid').innerHTML = [
+    {l:'Content Created',  v:String(pub)||'0',    s:'by AI engine'},
+    {l:'Time per Post',    v:'4 min',    s:'vs 3hr manual'},
+    {l:'Cost per Post',    v:'£0.08',    s:'vs £250 agency'},
+    {l:'Value Generated',  v:`£${(pub*250).toLocaleString()||'0'}`, s:'equivalent'},
+  ].map(r=>`<div class="roi-cell"><div class="roi-label">${r.l}</div><div class="roi-val">${r.v}</div><div class="roi-sub">${r.s}</div></div>`).join('');
+}
+
+function drawChart() {
+  const canvas = document.getElementById('trafficCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth||500, H=140;
+  canvas.width=W; canvas.height=H;
+  const data=[320,480,420,610,580,720,690,840,780,920,870,1050,980,1180];
+  const max=Math.max(...data);
+  const pad={t:10,r:12,b:16,l:28};
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  ctx.clearRect(0,0,W,H);
+  const pts=data.map((v,i)=>({x:pad.l+(i/(data.length-1))*pw, y:pad.t+ph-(v/max)*ph}));
+
+  // Grid lines
+  ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+  for(let i=0;i<4;i++) {
+    const y=pad.t+(ph/3)*i;
+    ctx.beginPath(); ctx.moveTo(pad.l,y); ctx.lineTo(pad.l+pw,y); ctx.stroke();
+  }
+
+  // Fill
+  const grad=ctx.createLinearGradient(0,pad.t,0,pad.t+ph);
+  grad.addColorStop(0,'rgba(194,214,240,0.12)'); grad.addColorStop(1,'rgba(194,214,240,0)');
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.lineTo(pts[pts.length-1].x,pad.t+ph); ctx.lineTo(pts[0].x,pad.t+ph); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cx=(pts[i-1].x+pts[i].x)/2; ctx.bezierCurveTo(cx,pts[i-1].y,cx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.strokeStyle='rgba(194,214,240,0.70)'; ctx.lineWidth=1.5; ctx.stroke();
+}
+
+function setChartTab(el) {
+  document.querySelectorAll('#view-analytics .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  drawChart();
+}
+
+// ── Publishing ─────────────────────────────────
+function renderPubPlatforms() {
+  document.getElementById('pubPlatformList').innerHTML = platforms.map(p=>`
+    <div class="pub-platform" onclick="togglePlatform('${p.id}')">
+      <div class="pub-icon">${p.icon}</div>
+      <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.url}</div></div>
+      <span class="pub-status-badge ${p.connected?'psb-on':'psb-off'}">${p.connected?'connected':'connect'}</span>
+    </div>`).join('');
+}
+
+function togglePlatform(id) {
+  const p=platforms.find(x=>x.id===id);
+  if(!p) return;
+  p.connected=!p.connected;
+  renderPubPlatforms();
+  renderDashConnections();
+  toast((p.connected?'Connected: ':'Disconnected: ')+p.name, p.connected);
+}
+
+function addPubLog(title, where, status) {
+  pubLog.unshift({title, where, status, time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})});
+  renderPubLog();
+}
+
+function renderPubLog() {
+  const el=document.getElementById('pubLogList');
+  if(!pubLog.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no activity yet</div></div>';return;}
+  el.innerHTML=pubLog.map(l=>`
+    <div class="log-row">
+      <div class="log-status-dot lsd-${l.status==='ok'?'ok':l.status==='err'?'err':'pnd'}"></div>
+      <div class="log-title">${l.title}</div>
+      <div class="log-where">${l.where}</div>
+      <div class="log-time">${l.time}</div>
+    </div>`).join('');
+}
+
+// ── Brand Profile ──────────────────────────────
+function renderProfile() {
+  if(!brand) return;
+  document.getElementById('profName').textContent=brand.name;
+  document.getElementById('profMeta').textContent=brand.industry+' / '+(brand.type||'');
+  document.getElementById('voiceBox').textContent=brand.voiceSummary||'No voice statement yet.';
+
+  const chips=(arr,cls)=>(arr||[]).map(v=>`<span class="pchip ${cls}">${v}</span>`).join('');
+  document.getElementById('profileGrid').innerHTML=`
+    <div class="profile-section"><div class="profile-sec-label">Voice & Tone</div><div class="profile-chips"><span class="pchip ac">${brand.tone||'conversational'}</span>${chips(brand.personalities,'ac')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Core Values</div><div class="profile-chips">${chips(brand.values,'gn')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Goals</div><div class="profile-chips">${chips(brand.goals,'am')}</div></div>
+    <div class="profile-section"><div class="profile-sec-label">Keywords</div><div class="profile-chips">${chips(brand.keywords,'')}</div></div>
+    <div class="profile-section" style="grid-column:1/-1"><div class="profile-sec-label">Ideal Customer</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">${brand.idealCustomer||'—'}</div></div>
+    <div class="profile-section" style="grid-column:1/-1"><div class="profile-sec-label">Differentiators</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">${brand.differentiators||'—'}</div></div>
+  `;
+}
+
+async function regenVoice() {
+  document.getElementById('voiceBox').textContent='Regenerating...';
+  try {
+    const res=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Write a 2-3 sentence brand voice statement for ${brand.name}, a ${brand.industry} company. Tone: ${brand.tone}. Values: ${(brand.values||[]).join(', ')}. Return only the statement, no preamble.`}]})});
+    const data=await res.json();
+    brand.voiceSummary=data.content?.[0]?.text||'';
+    document.getElementById('voiceBox').textContent=brand.voiceSummary;
+    try{await window.storage.set('brand-profile',JSON.stringify(brand));}catch{}
+    toast('Voice regenerated',true);
+  } catch { toast('Failed to regenerate',false); }
+}
+
+function testVoice() { useIdea('Why our approach is different from every other agency'); }
+
+// ── Autopilot ──────────────────────────────────
+function toggleAP() {
+  apOn=!apOn;
+  document.getElementById('apToggle').classList.toggle('on',apOn);
+  document.getElementById('apTxt').textContent=apOn?'enabled':'paused';
+  toast('Auto-pilot '+(apOn?'enabled':'paused'), apOn);
+}
+
+// ── Toast ──────────────────────────────────────
+let toastT;
+function toast(msg, ok=true) {
+  const el=document.getElementById('toastEl');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIcon').textContent=ok?'●':'◆';
+  document.getElementById('toastIcon').style.color=ok?'var(--green)':'var(--amber)';
+  el.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── Boot ───────────────────────────────────────
+window.addEventListener('load',()=>{
+  init();
+  const obs=new MutationObserver(()=>{
+    if(document.getElementById('view-analytics').classList.contains('active')) setTimeout(drawChart,50);
+  });
+  obs.observe(document.getElementById('view-analytics'),{attributes:true,attributeFilter:['class']});
+});
+</script>
+
+<script>
+// ── AI Content Generator ──────────────────────
+let selectedTone = 'authoritative';
+let generatedPostData = null;
+
+function selectTone(el, tone) {
+  document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  selectedTone = tone;
+}
+
+function resetGenerator() {
+  document.getElementById('gen-step-input').style.display = 'block';
+  document.getElementById('gen-step-loading').style.display = 'none';
+  document.getElementById('gen-step-output').style.display = 'none';
+  document.getElementById('gen-publish-result').style.display = 'none';
+  generatedPostData = null;
+}
+
+function showGenStep(step) {
+  ['input','loading','output'].forEach(s => {
+    document.getElementById('gen-step-' + s).style.display = s === step ? 'block' : 'none';
+  });
+}
+
+function setGenStage(title, sub, pct) {
+  document.getElementById('gen-stage-title').textContent = title;
+  document.getElementById('gen-stage-sub').textContent = sub;
+  document.getElementById('gen-progress-bar').style.width = pct + '%';
+}
+
+async function runGenerate() {
+  const keyword = document.getElementById('genKeyword').value.trim();
+  if (!keyword) { toast('Enter a keyword or topic first', false); return; }
+
+  showGenStep('loading');
+  setGenStage('Researching keyword...', 'Analysing search intent and competition', 10);
+
+  // Get brand context
+  const brandCtx = localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '';
+  let brandInfo = '';
+  try { 
+    const b = JSON.parse(brandCtx);
+    brandInfo = `Business: ${b.name || ''}. Industry: ${b.industry || ''}. Target audience: ${b.audience || ''}. Brand voice: ${b.voice || selectedTone}.`;
+  } catch(e) { brandInfo = `Brand tone: ${selectedTone}.`; }
+
+  const prompt = `You are an expert SEO content writer. Write a comprehensive, SEO-optimised blog post for the following:
+
+Keyword/Topic: "${keyword}"
+Tone: ${selectedTone}
+Target length: 1,000–1,200 words
+${brandInfo}
+
+Requirements:
+- Write a compelling, keyword-rich H1 title (don't include "H1:" prefix, just the title)
+- Use proper H2 and H3 subheadings throughout
+- Include the target keyword naturally 4-6 times
+- Write an engaging intro that hooks the reader in the first 2 sentences
+- Use short paragraphs (2-4 sentences max) for readability
+- Include at least one bulleted or numbered list
+- End with a strong call-to-action conclusion
+- Write in UK English
+
+Return ONLY a JSON object with this exact structure (no markdown, no code blocks):
+{
+  "title": "The full post title",
+  "meta_description": "A compelling meta description 150-160 characters",
+  "content_html": "The full post content as HTML using <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags only"
+}`;
+
+  try {
+    // Stage updates during generation
+    setTimeout(() => setGenStage('Planning structure...', 'Mapping headings and key points', 25), 1500);
+    setTimeout(() => setGenStage('Writing content...', 'Crafting SEO-optimised paragraphs', 50), 4000);
+    setTimeout(() => setGenStage('Optimising for SEO...', 'Checking keyword density and readability', 80), 8000);
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const post = JSON.parse(clean);
+
+    setGenStage('Done!', 'Your post is ready', 100);
+    await new Promise(r => setTimeout(r, 600));
+
+    // Calculate stats
+    const wordCount = post.content_html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+    const readTime = Math.ceil(wordCount / 200);
+    const seoScore = calcSeoScore(post.content_html, post.title, keyword);
+
+    generatedPostData = { ...post, keyword, wordCount, readTime, seoScore };
+
+    // Render output
+    document.getElementById('gen-post-title-display').textContent = post.title;
+    document.getElementById('gen-word-count').textContent = wordCount.toLocaleString();
+    document.getElementById('gen-seo-score').innerHTML = `<span style="color:${seoScore >= 80 ? 'var(--sage)' : seoScore >= 60 ? 'var(--amber)' : '#C0304F'}">${seoScore}/100</span>`;
+    document.getElementById('gen-read-time').textContent = readTime + ' min';
+    document.getElementById('gen-meta-desc').textContent = post.meta_description;
+    document.getElementById('gen-editor').innerHTML = post.content_html;
+
+    showGenStep('output');
+    toast('Post generated! Review and publish.', true);
+
+  } catch(err) {
+    showGenStep('input');
+    toast('Generation failed: ' + err.message, false);
+    console.error(err);
+  }
+}
+
+function calcSeoScore(html, title, keyword) {
+  let score = 50;
+  const text = html.replace(/<[^>]+>/g, ' ').toLowerCase();
+  const kw = keyword.toLowerCase();
+  const kwCount = (text.match(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+
+  if (kwCount >= 3 && kwCount <= 8) score += 15;
+  else if (kwCount >= 1) score += 8;
+  if (title.toLowerCase().includes(kw)) score += 10;
+  if (wordCount >= 900) score += 10;
+  if (html.includes('<h2>') || html.includes('<h2 ')) score += 8;
+  if (html.includes('<ul>') || html.includes('<ol>')) score += 7;
+  return Math.min(score, 100);
+}
+
+function onEditorChange() {
+  if (!generatedPostData) return;
+  const html = document.getElementById('gen-editor').innerHTML;
+  const wordCount = html.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+  const readTime = Math.ceil(wordCount / 200);
+  document.getElementById('gen-word-count').textContent = wordCount.toLocaleString();
+  document.getElementById('gen-read-time').textContent = readTime + ' min';
+  generatedPostData.content_html = html;
+  generatedPostData.wordCount = wordCount;
+}
+
+async function publishToWP() {
+  if (!generatedPostData) return;
+
+  const wpRaw = localStorage.getItem('cruise_wp_connection');
+  if (!wpRaw) {
+    toast('Connect WordPress first in the Publish tab', false);
+    return;
+  }
+  const wp = JSON.parse(wpRaw);
+
+  const btn = document.getElementById('btnPublishWP');
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
+  const resultEl = document.getElementById('gen-publish-result');
+  resultEl.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/wp-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'publish',
+        url: wp.url,
+        username: wp.username,
+        password: atob(wp.password),
+        title: generatedPostData.title,
+        content: generatedPostData.content_html,
+        status: 'publish'
+      })
+    });
+
+    const post = await r.json();
+    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
+
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'var(--sage-l)';
+    resultEl.style.border = '1px solid rgba(74,124,111,.2)';
+    resultEl.style.color = 'var(--sage)';
+    resultEl.innerHTML = `✓ Published live on WordPress! <a href="${post.link}" target="_blank" style="color:var(--sage);font-weight:700;margin-left:8px">View post →</a>`;
+
+    addWPLog(generatedPostData.title, wp.url, 'ok');
+    toast('Post published live!', true);
+
+    // Add to posts list
+    const d = new Date();
+    const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    if (typeof posts !== 'undefined') {
+      posts.unshift({
+        status: 'live',
+        title: generatedPostData.title,
+        keywords: generatedPostData.keyword,
+        score: generatedPostData.seoScore + '',
+        date: dateStr,
+        words: generatedPostData.wordCount.toLocaleString()
+      });
+      if (typeof updateStats === 'function') updateStats();
+    }
+
+  } catch(err) {
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(192,48,79,.06)';
+    resultEl.style.border = '1px solid rgba(192,48,79,.2)';
+    resultEl.style.color = '#C0304F';
+    resultEl.textContent = 'Publish failed: ' + err.message;
+    addWPLog(generatedPostData.title, wp.url, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Publish to WordPress ↗';
+}
+
+// ── WordPress Connection ──
+const WP_KEY = 'cruise_wp_connection';
+
+function loadWPState() {
+  const saved = localStorage.getItem(WP_KEY);
+  if (saved) {
+    const wp = JSON.parse(saved);
+    showWPConnected(wp);
+  }
+}
+
+function renderPublish() {
+  loadWPState();
+  renderWPLog();
+}
+
+function connectWP() {
+  const url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  const username = document.getElementById('wp-username').value.trim();
+  const password = document.getElementById('wp-apppass').value.trim();
+
+  if (!url) { wpAlert('Please enter your WordPress site URL.', 'err'); return; }
+  if (!username) { wpAlert('Please enter your WordPress username.', 'err'); return; }
+  if (!password) { wpAlert('Please enter your Application Password.', 'err'); return; }
+
+  setWPLoading(true);
+  clearWPAlert();
+
+  fetch('/api/wp-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'test', url, username, password })
+  })
+  .then(r => r.json().then(data => ({ ok: r.ok, data })))
+  .then(({ ok, data }) => {
+    if (!ok) throw new Error(data.error || 'Connection failed');
+    const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
+    localStorage.setItem(WP_KEY, JSON.stringify(wp));
+    setWPLoading(false);
+    showWPConnected(wp);
+    toast('WordPress connected!', true);
+  })
+  .catch(err => {
+    setWPLoading(false);
+    if (err.message.includes('401') || err.message.includes('incorrect_password') || err.message.includes('invalid_username')) {
+      wpAlert('Wrong username or application password. Double-check and try again.', 'err');
+    } else {
+      wpAlert('Connection failed: ' + err.message, 'err');
+    }
+  });
+}
+
+function showWPConnected(wp) {
+  document.getElementById('wp-connect-form').style.display = 'none';
+  document.getElementById('wp-connected-state').style.display = 'block';
+  document.getElementById('wp-connected-url').textContent = wp.url;
+  document.getElementById('wp-connected-user').textContent = 'Connected as ' + wp.name;
+  document.getElementById('wp-status-label').textContent = 'Connected';
+  document.getElementById('wp-status-dot').style.background = 'var(--sage)';
+}
+
+function disconnectWP() {
+  localStorage.removeItem(WP_KEY);
+  document.getElementById('wp-connect-form').style.display = 'block';
+  document.getElementById('wp-connected-state').style.display = 'none';
+  document.getElementById('wp-status-label').textContent = 'Not connected';
+  document.getElementById('wp-status-dot').style.background = 'var(--border2)';
+  document.getElementById('wp-url').value = '';
+  document.getElementById('wp-username').value = '';
+  document.getElementById('wp-apppass').value = '';
+  toast('WordPress disconnected', false);
+}
+
+async function testPublish() {
+  const saved = localStorage.getItem(WP_KEY);
+  if (!saved) { toast('Connect WordPress first', false); return; }
+  const wp = JSON.parse(saved);
+  const title = document.getElementById('wp-test-title').value.trim() || 'Test post from Cruise SEO';
+
+  const btn = document.getElementById('btn-test-publish');
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
+  try {
+    const r = await fetch('/api/wp-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'publish',
+        url: wp.url,
+        username: wp.username,
+        password: atob(wp.password),
+        title,
+        content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this — it was created to verify your connection is working.</p>',
+        status: 'draft'
+      })
+    });
+
+    const post = await r.json();
+    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
+
+    const resultEl = document.getElementById('wp-publish-result');
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'var(--sage-l)';
+    resultEl.style.border = '1px solid rgba(74,124,111,.2)';
+    resultEl.style.color = 'var(--sage)';
+    resultEl.innerHTML = '✓ Draft post created! <a href="' + wp.url + '/wp-admin/post.php?post=' + post.id + '&action=edit" target="_blank" style="color:var(--sage);font-weight:700;margin-left:6px">View in WordPress →</a>';
+
+    addWPLog(title, wp.url, 'ok');
+    toast('Post published to WordPress!', true);
+  } catch(err) {
+    const resultEl = document.getElementById('wp-publish-result');
+    resultEl.style.display = 'block';
+    resultEl.style.background = 'rgba(192,48,79,.06)';
+    resultEl.style.border = '1px solid rgba(192,48,79,.2)';
+    resultEl.style.color = '#C0304F';
+    resultEl.textContent = 'Publish failed: ' + err.message;
+    addWPLog(title, wp.url, 'err');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Publish test post';
+}
+
+function addWPLog(title, url, status) {
+  const logs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  logs.unshift({ title, url, status, time: new Date().toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) });
+  localStorage.setItem('cruise_wp_log', JSON.stringify(logs.slice(0, 20)));
+  renderWPLog();
+}
+
+function renderWPLog() {
+  const logs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
+  const el = document.getElementById('wp-log-wrap');
+  if (!logs.length) {
+    el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr 100px;padding:10px 18px;background:var(--cream2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4)">
+      <span>Status</span><span>Title</span><span>Site</span><span>Time</span>
+    </div>
+    ${logs.map(l => `
+    <div style="display:grid;grid-template-columns:60px 1fr 1fr 100px;padding:13px 18px;border-bottom:1px solid var(--border);align-items:center">
+      <span class="badge ${l.status === 'ok' ? 'badge-live' : 'badge-draft'}">${l.status === 'ok' ? 'Sent' : 'Failed'}</span>
+      <span style="font-size:13px;font-weight:600;color:var(--ink2)">${l.title}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.url.replace('https://','')}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time}</span>
+    </div>`).join('')}`;
+}
+
+function setWPLoading(on) {
+  document.getElementById('btn-connect-wp').disabled = on;
+  document.getElementById('wp-btn-txt').textContent = on ? 'Testing connection...' : 'Test connection & save';
+}
+
+function wpAlert(msg, type) {
+  const el = document.getElementById('wp-connect-alert');
+  el.style.display = 'block';
+  el.style.background = type === 'err' ? 'rgba(192,48,79,.07)' : 'var(--sage-l)';
+  el.style.border = '1px solid ' + (type === 'err' ? 'rgba(192,48,79,.2)' : 'rgba(74,124,111,.2)');
+  el.style.color = type === 'err' ? '#C0304F' : 'var(--sage)';
+  el.textContent = msg;
+}
+
+function clearWPAlert() {
+  document.getElementById('wp-connect-alert').style.display = 'none';
+}
+
+// ── Pre-fill WordPress credentials ──
+window.addEventListener('DOMContentLoaded', () => {
+  const urlEl = document.getElementById('wp-url');
+  const userEl = document.getElementById('wp-username');
+  if (urlEl && !localStorage.getItem(WP_KEY)) {
+    urlEl.value = 'https://smartxtutoring.uk';
+  }
+});
+
+// ── Override legacy CSS vars for compat ──
+document.documentElement.style.setProperty('--ac', 'var(--amber)');
+// ── Navigation ──
+function nav(el, id) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(i => {
+      if (i.getAttribute('onclick') && i.getAttribute('onclick').includes("'"+id+"'")) i.classList.add('active');
+    });
+  }
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const view = document.getElementById('view-' + id);
+  if (view) view.classList.add('active');
+  document.getElementById('breadcrumb').textContent = id;
+  if (id === 'profile') renderProfile();
+  if (id === 'dashboard') renderDashPosts();
+  if (id === 'posts') renderAllPosts();
+  if (id === 'publish') renderPublish();
+}
+// ── Autopilot ──
+function toggleAP() {
+  const t = document.getElementById('apToggle');
+  const on = t.classList.toggle('on');
+  document.getElementById('apTxt').textContent = on ? 'on' : 'off';
+  document.getElementById('apTxt').style.color = on ? 'var(--sage)' : 'var(--ink4)';
+  toast('Autopilot ' + (on ? 'enabled' : 'paused'), on);
+}
+// ── Engine tabs ──
+function switchETab(el, type) {
+  document.querySelectorAll('.etab').forEach(t => t.classList.remove('on'));
+  el.classList.add('on');
+  curTab = type;
+  document.getElementById('gen-output-wrap').style.display = 'none';
+}
+// ── Keyword research ──
+async function researchKW() {
+  const kw = document.getElementById('kwInput').value.trim();
+  if (!kw) { toast('Enter a topic first', false); return; }
+  const out = document.getElementById('kw-results');
+  out.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink4);font-size:13px">Researching keywords...</div>';
+  const industry = typeof brand !== 'undefined' ? (brand.industry || 'business') : 'business';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:600,
+        messages:[{role:'user', content:`Generate 6 SEO keyword ideas for: "${kw}" in the ${industry} industry. Return ONLY JSON array: [{"term":"...","volume":"...","difficulty":"easy|medium|hard"}]`}]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(c => c.text||'').join('');
+    const clean = text.replace(/```json|```/g,'').trim();
+    const keywords = JSON.parse(clean);
+    out.innerHTML = keywords.map(k => `
+      <div class="kw-result-row">
+        <span class="kw-result-term">${k.term}</span>
+        <span class="kw-result-diff diff-${k.difficulty}">${k.difficulty}</span>
+        <span class="kw-result-vol">${k.volume}</span>
+      </div>`).join('');
+  } catch(e) {
+    out.innerHTML = '<div style="padding:16px;color:var(--amber);font-size:13px">Could not fetch keywords. Try again.</div>';
+  }
+}
+// ── Approve post ──
+function approvePost() {
+  const title = document.getElementById('genPrompt').value.trim() || 'New post';
+  const d = new Date(); d.setDate(d.getDate() + 3);
+  const dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  const post = { status:'sched', title, keywords: title.slice(0,30), score:'91', date:dateStr, words:'1,180' };
+  if (typeof posts !== 'undefined') posts.unshift(post);
+  document.getElementById('gen-output-wrap').style.display = 'none';
+  document.getElementById('genPrompt').value = '';
+  toast('Post scheduled for ' + dateStr, true);
+  if (typeof updateStats === 'function') updateStats();
+}
+</script>
+</body>
+</html>
