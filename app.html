@@ -592,10 +592,14 @@ function renderAll() {
 }
 
 function applyBrand() {
-  document.getElementById('sbName').textContent = brand.name;
-  document.getElementById('sbMeta').textContent = brand.industry + ' · ' + (brand.type||'');
-  document.getElementById('sbTone').textContent = (brand.tone||'auto') + ' · active';
-  document.getElementById('ctxVal').textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
+  const sbName = document.getElementById('sbName');
+  const sbMeta = document.getElementById('sbMeta');
+  const sbTone = document.getElementById('sbTone');
+  const ctxVal = document.getElementById('ctxVal');
+  if(sbName) sbName.textContent = brand.name;
+  if(sbMeta) sbMeta.textContent = brand.industry + ' · ' + (brand.type||'');
+  if(sbTone) sbTone.textContent = (brand.tone||'auto') + ' · active';
+  if(ctxVal) ctxVal.textContent = brand.name + ' · ' + (brand.tone||'conversational') + ' · ' + (brand.keywords||[]).slice(0,3).join(', ');
   document.getElementById('profName').textContent = brand.name;
   document.getElementById('profMeta').textContent = brand.industry + ' / ' + (brand.type||'');
 }
@@ -1088,9 +1092,11 @@ function toggleAP() {
 let toastT;
 function toast(msg, ok=true) {
   const el=document.getElementById('toastEl');
-  document.getElementById('toastMsg').textContent=msg;
-  document.getElementById('toastIcon').textContent=ok?'●':'◆';
-  document.getElementById('toastIcon').style.color=ok?'var(--green)':'var(--amber)';
+  if(!el) return;
+  const msgEl=document.getElementById('toastMsg');
+  const iconEl=document.getElementById('toastIcon');
+  if(msgEl) msgEl.textContent=msg;
+  if(iconEl){ iconEl.textContent=ok?'●':'◆'; iconEl.style.color=ok?'var(--green)':'var(--amber)'; }
   el.classList.add('show');
   clearTimeout(toastT);
   toastT=setTimeout(()=>el.classList.remove('show'),3000);
