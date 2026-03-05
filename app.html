@@ -1077,6 +1077,11 @@ input:focus, textarea:focus, select:focus {
       <button class="sb-signout" onclick="signOut()" style="flex:1">Sign out</button>
       <button onclick="toggleDarkMode()" id="dark-mode-btn" title="Toggle dark mode" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,.4);font-size:16px;padding:0 10px;line-height:1">☽</button>
     </div>
+    <div style="padding:10px 10px 4px;text-align:center">
+      <a href="/privacy.html" target="_blank" style="font-size:10px;color:rgba(255,255,255,.2);text-decoration:none;transition:color .15s" onmouseover="this.style.color='rgba(255,255,255,.45)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Privacy Policy</a>
+      <span style="color:rgba(255,255,255,.12);margin:0 5px">·</span>
+      <a href="mailto:hello@cruiseseo.site" style="font-size:10px;color:rgba(255,255,255,.2);text-decoration:none;transition:color .15s" onmouseover="this.style.color='rgba(255,255,255,.45)'" onmouseout="this.style.color='rgba(255,255,255,.2)'">Support</a>
+    </div>
   </div>
 </aside>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -5774,6 +5779,12 @@ function initKeyboardShortcuts() {
 
 // ══ TRIAL / PLAN SYSTEM ════════════════════════════════════════════
 function initTrialSystem() {
+  // If Clerk metadata says pro, trust that over localStorage
+  const meta = window.Clerk?.user?.publicMetadata;
+  if (meta?.plan === 'pro') {
+    localStorage.setItem('cruise_plan', JSON.stringify({ type: 'pro', start: Date.now() }));
+  }
+
   let plan = JSON.parse(localStorage.getItem('cruise_plan') || 'null');
   if (!plan) {
     plan = { type: 'trial', start: Date.now() };
@@ -5782,6 +5793,21 @@ function initTrialSystem() {
   renderTrialBanner(plan);
   renderOnboardingChecklist();
   setTimeout(maybeShowOnboarding, 1500);
+
+  // Handle post-Stripe redirect — Clerk may need a moment to refresh metadata
+  if (window.location.search.includes('upgrade=success')) {
+    setTimeout(function() {
+      // Re-check Clerk metadata after redirect
+      const m = window.Clerk?.user?.publicMetadata;
+      if (m?.plan === 'pro') {
+        const p = { type: 'pro', start: Date.now() };
+        localStorage.setItem('cruise_plan', JSON.stringify(p));
+        renderTrialBanner(p);
+      }
+      toast('Welcome to Pro! Your plan is now active. ✦', true);
+      history.replaceState({}, '', window.location.pathname);
+    }, 2500);
+  }
 }
 
 function renderTrialBanner(plan) {
@@ -5800,12 +5826,18 @@ function renderTrialBanner(plan) {
 
 function openUpgradeModal() { document.getElementById('upgrade-modal').classList.add('open'); }
 function closeUpgradeModal() { document.getElementById('upgrade-modal').classList.remove('open'); }
-function activatePro() {
-  const plan = { type: 'pro', start: Date.now() };
-  localStorage.setItem('cruise_plan', JSON.stringify(plan));
+function activatePro() { startStripeCheckout(); }
+
+function startStripeCheckout() {
   closeUpgradeModal();
-  renderTrialBanner(plan);
-  toast('Pro plan activated! Unlimited posts unlocked.', true);
+  const userId = window.Clerk?.user?.id || '';
+  const email  = window.Clerk?.user?.primaryEmailAddress?.emailAddress || '';
+  const base   = 'https://buy.stripe.com/REPLACE_THIS_WITH_YOUR_PAYMENT_LINK';
+  const params = new URLSearchParams();
+  if (userId) params.set('client_reference_id', userId);
+  if (email)  params.set('prefilled_email', email);
+  const url = params.toString() ? base + '?' + params.toString() : base;
+  window.open(url, '_blank', 'noopener');
 }
 
 function checkUsageLimit() {
