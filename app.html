@@ -2338,7 +2338,7 @@ input:focus, textarea:focus, select:focus {
           <div class="empty-hero" style="padding:44px 24px">
             <div class="empty-hero-icon">🔗</div>
             <div class="empty-hero-title">No backlinks tracked yet</div>
-            <div class="empty-hero-desc">Add backlinks you've earned manually, or use the free tools above to discover your existing link profile.</div>
+            <div class="empty-hero-desc">Add backlinks you\'ve earned manually, or use the free tools above to discover your existing link profile.</div>
             <button class="btn btn-primary" onclick="showAddBacklinkModal()" style="margin-top:16px">+ Add your first backlink</button>
           </div>
         </div>
@@ -3155,7 +3155,7 @@ META: [meta description, 150-160 characters]
     const _genTitle = document.getElementById('gen-post-title-display');
     if (_genTitle) _genTitle.innerHTML = '<span style="color:var(--ink4);font-style:italic">Writing your post…</span><span id="gen-stream-cursor"></span>';
     cruiseBarStart();
-    setGenStage('Writing your post…', 'Content is streaming in — you'll see it appear live', 10);
+    setGenStage('Writing your post…', 'Content is streaming in — you\'ll see it appear live', 10);
 
     let _sTitle = '', _sMeta = '', _sShown = false;
     const _sEditor = document.getElementById('gen-editor');
@@ -6544,7 +6544,7 @@ function renderBacklinks() {
   const body = document.getElementById('bl-table-body');
   if (!body) return;
   if (blData.length === 0) {
-    body.innerHTML = '<div class="empty-hero" style="padding:44px 24px"><div class="empty-hero-icon">🔗</div><div class="empty-hero-title">No backlinks tracked yet</div><div class="empty-hero-desc">Add backlinks you've earned manually, or use the free tools above to discover your existing link profile.</div><button class="btn btn-primary" onclick="showAddBacklinkModal()" style="margin-top:16px">+ Add your first backlink</button></div>';
+    body.innerHTML = '<div class="empty-hero" style="padding:44px 24px"><div class="empty-hero-icon">🔗</div><div class="empty-hero-title">No backlinks tracked yet</div><div class="empty-hero-desc">Add backlinks you\'ve earned manually, or use the free tools above to discover your existing link profile.</div><button class="btn btn-primary" onclick="showAddBacklinkModal()" style="margin-top:16px">+ Add your first backlink</button></div>';
     return;
   }
   const badge = t => t==='nofollow'?'<span class="bl-badge nofollow">nofollow</span>':t==='guest'?'<span class="bl-badge guest">guest post</span>':'<span class="bl-badge dofollow">dofollow</span>';
@@ -6563,7 +6563,7 @@ function renderBacklinks() {
         '<td style="padding:12px 16px;font-size:13px;color:var(--ink2)">' + (bl.anchor || '—') + '</td>' +
         '<td style="padding:12px 16px;text-align:center">' + badge(bl.type) + '</td>' +
         '<td style="padding:12px 16px;font-size:12px;color:var(--ink4)">' + dt + '</td>' +
-        '<td style="padding:12px 16px;text-align:right"><button onclick="removeBacklink(' + i + ')" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px" onmouseover="this.style.background='var(--cream3)'" onmouseout="this.style.background='none'">✕</button></td>' +
+        '<td style="padding:12px 16px;text-align:right"><button onclick="removeBacklink(' + i + ')" style="background:none;border:none;color:var(--ink4);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px" onmouseover="this.style.background=\'var(--cream3)\'" onmouseout="this.style.background=\'none\'">✕</button></td>' +
         '</tr>';
     }).join('') + '</tbody></table>';
 }
@@ -6586,7 +6586,7 @@ function showAddBacklinkModal() {
     '<div style="margin-bottom:14px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:6px">Anchor text</label><input id="_bl-anc" class="kw-input" placeholder="e.g. tutoring London" style="width:100%"></div>' +
     '<div style="margin-bottom:20px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:6px">Link type</label>' +
     '<select id="_bl-type" style="padding:10px 14px;border:1.5px solid var(--border2);border-radius:8px;font-size:13px;background:var(--cream2);width:100%"><option value="dofollow">Dofollow</option><option value="nofollow">Nofollow</option><option value="guest">Guest post</option></select></div>' +
-    '<div style="display:flex;gap:10px;justify-content:flex-end"><button onclick="this.closest('[style*=fixed]').remove()" class="btn btn-ghost">Cancel</button><button onclick="commitAddBacklink()" class="btn btn-primary">Add backlink</button></div></div>';
+    '<div style="display:flex;gap:10px;justify-content:flex-end"><button onclick="this.closest(\'[style*=fixed]\').remove()" class="btn btn-ghost">Cancel</button><button onclick="commitAddBacklink()" class="btn btn-primary">Add backlink</button></div></div>';
   document.body.appendChild(div);
   _blModalEl = div;
   div.addEventListener('click', e => { if (e.target === div) div.remove(); });
@@ -6606,7 +6606,7 @@ function commitAddBacklink() {
 }
 
 function openBacklinkTool(tool) {
-  const domain = (brand && brand.website) ? brand.website.replace(/^https?:///, '') : '';
+  const domain = (brand && brand.website) ? brand.website.replace(/^https?:\/\//, '') : '';
   const urls = {
     ahrefs: 'https://ahrefs.com/backlink-checker/?input=' + encodeURIComponent(domain),
     moz: 'https://moz.com/link-explorer',
@@ -6663,12 +6663,12 @@ function loadDashInsights(force) {
     insights.push({p:'high',cls:'alert',title:'Complete your brand profile',body:'The AI uses your brand profile for every piece of content it writes. Without it, posts will be generic and miss your target audience.',action:'Set up profile',nav:'profile'});
   }
   if (posts.length === 0) {
-    insights.push({p:'high',cls:'alert',title:'Write your first SEO post',body:'You haven't published any content yet. Generate your first post to start ranking for your target keywords.',action:'Generate post →',nav:'engine'});
+    insights.push({p:'high',cls:'alert',title:'Write your first SEO post',body:'You haven\'t published any content yet. Generate your first post to start ranking for your target keywords.',action:'Generate post →',nav:'engine'});
   } else if (posts.length < 5) {
     insights.push({p:'medium',cls:'warn',title:'Build your content volume',body:posts.length + ' post' + (posts.length>1?'s':'') + ' published. Aim for 10+ to establish topical authority and appear for more keyword variations.',action:'Write more posts',nav:'engine'});
   }
   if (ranks.length === 0) {
-    insights.push({p:'high',cls:'alert',title:'Start tracking keyword rankings',body:'Without rank tracking you can't measure your SEO progress. Add your target keywords to see position estimates and trends.',action:'Track keywords →',nav:'ranks'});
+    insights.push({p:'high',cls:'alert',title:'Start tracking keyword rankings',body:'Without rank tracking you can\'t measure your SEO progress. Add your target keywords to see position estimates and trends.',action:'Track keywords →',nav:'ranks'});
   } else {
     const lowRank = ranks.filter(r => r.position > 20);
     if (lowRank.length > 2) {
@@ -6682,7 +6682,7 @@ function loadDashInsights(force) {
     insights.push({p:'medium',cls:'warn',title:'Connect WordPress for 1-click publishing',body:'Link your site to publish AI posts directly — with featured images, internal links, and schema markup added automatically.',action:'Connect site →',nav:'publish'});
   }
   if (posts.length >= 5 && !apData.enabled) {
-    insights.push({p:'low',cls:'',title:'Enable Autopilot to scale content',body:'You've built a solid base. Let Autopilot write and publish on a schedule — Google rewards consistent publishing with faster indexing.',action:'Set up autopilot →',nav:'autopilot'});
+    insights.push({p:'low',cls:'',title:'Enable Autopilot to scale content',body:'You\'ve built a solid base. Let Autopilot write and publish on a schedule — Google rewards consistent publishing with faster indexing.',action:'Set up autopilot →',nav:'autopilot'});
   }
   if (posts.length >= 3) {
     insights.push({p:'low',cls:'',title:'Build a topic cluster',body:'Group your posts into a content hub with a pillar page. This signals topical authority to Google and boosts rankings across all related terms.',action:'Build cluster',nav:'clusters'});
@@ -6690,7 +6690,7 @@ function loadDashInsights(force) {
 
   const final = insights.slice(0, 4);
   if (final.length === 0) {
-    final.push({p:'low',cls:'',title:'You're on track! Keep publishing',body:'Your SEO foundation looks solid. Maintain consistency — publish 2–4 times per week and track rankings weekly to compound your results.',action:'Generate post →',nav:'engine'});
+    final.push({p:'low',cls:'',title:'You\'re on track! Keep publishing',body:'Your SEO foundation looks solid. Maintain consistency — publish 2–4 times per week and track rankings weekly to compound your results.',action:'Generate post →',nav:'engine'});
   }
 
   body.innerHTML = final.map(ins =>
@@ -6698,7 +6698,7 @@ function loadDashInsights(force) {
     '<div class="insight-priority ' + ins.p + '">' + ins.p.toUpperCase() + ' PRIORITY</div>' +
     '<div class="insight-title">' + ins.title + '</div>' +
     '<div class="insight-body">' + ins.body + '</div>' +
-    '<button onclick="nav(null,'' + ins.nav + '')" class="btn btn-ghost" style="font-size:12px;padding:5px 12px;margin-top:auto">' + ins.action + '</button>' +
+    '<button onclick="nav(null,\'' + ins.nav + '\')" class="btn btn-ghost" style="font-size:12px;padding:5px 12px;margin-top:auto">' + ins.action + '</button>' +
     '</div>'
   ).join('');
 
