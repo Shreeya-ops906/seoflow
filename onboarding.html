@@ -1812,6 +1812,35 @@ async function finishOnboarding() {
     localStorage.setItem('cruise_brand', JSON.stringify(brandProfile));
   } catch(e) {}
 
+  // Sync brand profile to Clerk unsafeMetadata for cross-device persistence
+  try {
+    if (window.Clerk?.user) {
+      await window.Clerk.user.update({
+        unsafeMetadata: {
+          brand: {
+            name: brandProfile.name,
+            industry: brandProfile.industry,
+            type: brandProfile.type,
+            website: brandProfile.website,
+            oneLiner: brandProfile.oneLiner,
+            tagline: brandProfile.tagline,
+            tone: brandProfile.tone,
+            personalities: brandProfile.personalities,
+            values: brandProfile.values,
+            goals: brandProfile.goals,
+            keywords: brandProfile.keywords,
+            pillars: brandProfile.pillars,
+            idealCustomer: brandProfile.idealCustomer,
+            differentiators: brandProfile.differentiators,
+            bookingUrl: brandProfile.bookingUrl,
+            booking_url: brandProfile.bookingUrl,
+            voiceSummary: brandProfile.voiceSummary,
+          }
+        }
+      });
+    }
+  } catch(e) { console.warn('Brand sync to Clerk failed:', e); }
+
   showCompleteScreen();
 }
 

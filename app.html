@@ -24,6 +24,43 @@ function initAuth() {
     document.querySelectorAll('.user-initials').forEach(el => {
       el.textContent = ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase()||name[0].toUpperCase();
     });
+
+    // Restore brand profile from Clerk unsafeMetadata (cross-device)
+    const clerkBrand = user.unsafeMetadata?.brand;
+    if (clerkBrand && clerkBrand.name && !localStorage.getItem('cruise_brand')) {
+      localStorage.setItem('cruise_brand', JSON.stringify(clerkBrand));
+      localStorage.setItem('seoflow_brand', JSON.stringify(clerkBrand));
+    }
+
+    // Check for post-payment setup flow
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('trial_start') === '1') {
+      setTimeout(initConnectFlow, 800);
+    }
+    // Check for LinkedIn OAuth callback
+    if (urlParams.get('linkedin_connected') === '1') {
+      setTimeout(() => {
+        loadLinkedInFromClerk();
+        toast('LinkedIn connected successfully!', true);
+        nav(document.querySelector('.nav-item[onclick*="\'social-connect\'"]'), 'social-connect');
+      }, 600);
+    }
+    if (urlParams.get('linkedin_error') === '1') {
+      setTimeout(() => toast('LinkedIn connection failed. Please try again.', false), 600);
+      const cleanUrl = new URL(window.location.href);
+      cleanUrl.searchParams.delete('linkedin_error');
+      cleanUrl.searchParams.delete('reason');
+      window.history.replaceState({}, '', cleanUrl.toString());
+    }
+
+    // Apply plan gates for free/expired users
+    const planMeta = user.publicMetadata || {};
+    applyPlanGates(planMeta.plan || 'free');
+
+    // Start tutorial for brand-new trial users
+    if ((planMeta.plan === 'trial' || !planMeta.plan) && !localStorage.getItem('cruise_tutorial_done')) {
+      setTimeout(initTour, 1200);
+    }
   });
 }
 window.signOut = async function() { await window.Clerk.signOut(); window.location.href = '/auth.html'; };
@@ -98,7 +135,7 @@ body{font-family:var(--font-ui);background:var(--cream);color:var(--ink);display
 
 .content{flex:1;overflow-y:auto;padding:28px;background:var(--cream)}
 .view{display:none}
-.view.active{display:block}
+.view.active{display:block;position:relative}
 
 /* STAT CARDS */
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
@@ -959,6 +996,99 @@ input:focus, textarea:focus, select:focus {
   #dash-welcome-bar { flex-direction: column; align-items: flex-start; gap: 16px; }
   .dash-welcome-actions { flex-wrap: wrap; }
 }
+
+/* ── Plan Gate Locks ─────────────────────────────────────── */
+.nav-item.plan-locked { opacity: 0.45; }
+.nav-item.plan-locked::after {
+  content: "🔒";
+  font-size: 9px;
+  margin-left: auto;
+  opacity: 0.7;
+}
+.plan-gate-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(250,248,244,.92);
+  backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  border-radius: 12px;
+}
+.plan-gate-overlay .gate-icon { font-size: 40px; margin-bottom: 16px; }
+.plan-gate-overlay h3 { font-size: 20px; margin-bottom: 8px; }
+.plan-gate-overlay p { color: var(--ink4); font-size: 14px; max-width: 320px; margin-bottom: 24px; line-height: 1.6; }
+
+/* ── Tutorial Tour ───────────────────────────────────────── */
+.tour-backdrop {
+  position: fixed; inset: 0; z-index: 9990;
+  pointer-events: none;
+}
+.tour-card {
+  position: fixed;
+  z-index: 9999;
+  background: var(--ink);
+  color: var(--cream);
+  border-radius: 12px;
+  padding: 20px 22px;
+  width: 280px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.3);
+  animation: tourPop .2s ease;
+}
+@keyframes tourPop { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.tour-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.tour-card p { font-size: 12px; color: rgba(250,248,244,.65); line-height: 1.55; margin-bottom: 16px; }
+.tour-card .tour-step-num { font-size: 10px; color: var(--amber); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+.tour-card .tour-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.tour-card .tour-skip { background: none; border: none; color: rgba(250,248,244,.35); font-size: 11px; cursor: pointer; padding: 6px 0; font-family: var(--font-ui); }
+.tour-card .tour-next { background: var(--amber); color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: var(--font-ui); }
+.tour-highlight {
+  box-shadow: 0 0 0 3px var(--amber), 0 0 0 6px rgba(76,148,178,.25) !important;
+  border-radius: 8px !important;
+  transition: box-shadow .3s !important;
+  position: relative;
+  z-index: 9991;
+}
+
+/* ── Connect Tools Modal ─────────────────────────────────── */
+.connect-modal-overlay {
+  position: fixed; inset: 0; z-index: 5000;
+  background: rgba(28,23,20,.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.connect-modal-box {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 20px 80px rgba(0,0,0,.2);
+}
+.connect-stepper {
+  display: flex; gap: 0; margin-bottom: 32px;
+}
+.connect-step-dot {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative;
+}
+.connect-step-dot::after {
+  content: ''; position: absolute; top: 12px; left: 50%; width: 100%; height: 2px;
+  background: var(--border); z-index: 0;
+}
+.connect-step-dot:last-child::after { display: none; }
+.connect-step-dot .dot {
+  width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--surface); z-index: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--ink4); transition: .2s;
+}
+.connect-step-dot.active .dot { border-color: var(--amber); color: var(--amber); }
+.connect-step-dot.done .dot { background: var(--amber); border-color: var(--amber); color: #fff; }
+.connect-step-dot span { font-size: 10px; color: var(--ink4); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.connect-step-dot.active span { color: var(--amber); }
 </style>
 
 </head>
@@ -1570,6 +1700,23 @@ input:focus, textarea:focus, select:focus {
         <!-- Image picker (hidden by default) -->
         <div id="img-picker-panel" class="card" style="display:none;padding:18px 20px;margin-bottom:14px">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">Featured Image</div>
+          <!-- AI Generate row (Scale only) -->
+          <div id="img-ai-row" style="display:none;margin-bottom:12px;padding:12px 14px;background:var(--cream2);border-radius:8px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="font-size:12px;font-weight:700">✦ AI-Generated Image <span style="font-size:10px;background:var(--amber);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">Scale</span></div>
+                <div style="font-size:11px;color:var(--ink4);margin-top:2px">Generate a unique image for this post using DALL-E 3</div>
+              </div>
+              <button class="btn btn-primary" id="img-ai-btn" onclick="generateAIImage()" style="font-size:12px;white-space:nowrap">Generate ✦</button>
+            </div>
+            <!-- Pro lock overlay for AI images -->
+            <div id="img-ai-lock" style="display:none;position:absolute;inset:0;background:rgba(250,248,244,.9);border-radius:8px;display:flex;align-items:center;justify-content:center;gap:10px;flex-direction:column;padding:16px;text-align:center">
+              <div style="font-size:20px">🔒</div>
+              <div style="font-size:12px;font-weight:700">Scale plan only</div>
+              <button class="btn btn-primary" onclick="openUpgradeModal()" style="font-size:11px">Upgrade to Scale →</button>
+            </div>
+          </div>
+          <!-- Stock photo search -->
           <div style="display:flex;gap:8px;margin-bottom:12px">
             <input id="img-search-query" class="kw-input" placeholder="Search for an image (e.g. marketing, office, laptop)..." style="flex:1;font-size:13px;padding:9px 12px">
             <button class="btn btn-ghost" onclick="searchUnsplash()" style="white-space:nowrap">Search</button>
@@ -1579,7 +1726,7 @@ input:focus, textarea:focus, select:focus {
             <button class="btn btn-ghost" onclick="document.getElementById('img-picker-panel').style.display='none'" style="font-size:12px">Cancel</button>
             <button class="btn btn-primary" onclick="insertSelectedImage()" id="img-insert-btn" style="font-size:12px" disabled>Insert image</button>
           </div>
-          <div style="margin-top:8px;font-size:11px;color:var(--ink4)">Images sourced from Unsplash — free for commercial use.</div>
+          <div style="margin-top:8px;font-size:11px;color:var(--ink4)">Stock photos via Unsplash — free for commercial use.</div>
         </div>
         <!-- SERP Preview -->
         <div class="card" style="padding:18px 20px" id="serp-preview-card">
@@ -2142,10 +2289,11 @@ input:focus, textarea:focus, select:focus {
             <button class="btn btn-ghost" onclick="disconnectSocial('linkedin')" style="font-size:11px;padding:3px 10px">Disconnect</button>
           </div>
           <div id="linkedin-connect-ui">
-            <div style="font-size:12px;color:var(--ink4);margin-bottom:10px;line-height:1.5">Access Token from LinkedIn Developer portal. Also provide your Person URN (your LinkedIn ID).</div>
-            <input id="linkedin-token" class="kw-input" type="password" placeholder="Access Token..." style="width:100%;margin-bottom:6px;font-size:12px;font-family:monospace">
-            <input id="linkedin-author" class="kw-input" type="text" placeholder="Person ID (e.g. AbCdEfGhI)" style="width:100%;margin-bottom:8px;font-size:12px">
-            <button class="btn btn-primary" onclick="connectSocial('linkedin')" style="width:100%;justify-content:center;font-size:12px">Connect LinkedIn</button>
+            <div style="font-size:12px;color:var(--ink4);margin-bottom:14px;line-height:1.55">Click below to authorise CruiseSEO via LinkedIn. You'll be redirected back automatically — no copying tokens needed.</div>
+            <button class="btn btn-primary" onclick="window.location.href='/api/linkedin-auth'" style="width:100%;justify-content:center;font-size:13px;padding:10px">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;flex-shrink:0"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              Connect with LinkedIn →
+            </button>
           </div>
         </div>
         <div class="social-plat-card" id="social-card-webhook">
@@ -2263,6 +2411,36 @@ input:focus, textarea:focus, select:focus {
           <div style="font-size:13px;color:var(--ink3)" id="prof-wp-site">No WordPress site connected</div>
         </div>
       </div>
+
+      <!-- ACCOUNT & BILLING -->
+      <div class="section-hd" style="margin-top:28px"><h2>Account &amp; Billing</h2></div>
+      <div class="card" style="padding:20px 24px">
+        <div style="display:flex;flex-direction:column;gap:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+            <div>
+              <div style="font-weight:600;font-size:14px">Support</div>
+              <div style="font-size:13px;color:var(--ink4);margin-top:2px">Questions? We reply within 24 hours.</div>
+            </div>
+            <a href="mailto:hello@cruiseseo.site" class="btn btn-ghost" style="font-size:13px">hello@cruiseseo.site</a>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+            <div>
+              <div style="font-weight:600;font-size:14px">Privacy Policy</div>
+              <div style="font-size:13px;color:var(--ink4);margin-top:2px">How we collect and use your data.</div>
+            </div>
+            <a href="/privacy.html" target="_blank" class="btn btn-ghost" style="font-size:13px">View policy ↗</a>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--border);margin:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
+            <div>
+              <div style="font-weight:600;font-size:14px">Cancel subscription</div>
+              <div style="font-size:13px;color:var(--ink4);margin-top:2px">Your access continues until the end of your billing period.</div>
+            </div>
+            <button class="btn btn-ghost" style="font-size:13px;color:#C0304F;border-color:#C0304F" onclick="showCancelModal()">Cancel plan</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- RANK TRACKER -->
@@ -2357,6 +2535,77 @@ input:focus, textarea:focus, select:focus {
 
     </div>
 
+  </div>
+</div>
+
+<!-- CONNECT YOUR TOOLS MODAL (post-payment) -->
+<div class="connect-modal-overlay" id="connectToolsModal" style="display:none">
+  <div class="connect-modal-box">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:36px;margin-bottom:10px">🎉</div>
+      <h2 style="font-family:var(--font-serif);margin-bottom:6px">Welcome to CruiseSEO!</h2>
+      <p style="color:var(--ink4);font-size:14px">Your 3-day free trial has started. Let's connect your tools so you can publish content automatically.</p>
+    </div>
+    <!-- Stepper -->
+    <div class="connect-stepper" id="connectStepper">
+      <div class="connect-step-dot active" id="ctDot0"><div class="dot">1</div><span>WordPress</span></div>
+      <div class="connect-step-dot" id="ctDot1"><div class="dot">2</div><span>LinkedIn</span></div>
+      <div class="connect-step-dot" id="ctDot2"><div class="dot">✓</div><span>Done!</span></div>
+    </div>
+    <!-- Step 0: WordPress -->
+    <div id="ctStep0">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px">Connect your WordPress site</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <input class="kw-input" id="ct-wp-url" type="url" placeholder="https://yoursite.com" style="width:100%">
+        <input class="kw-input" id="ct-wp-user" type="text" placeholder="WordPress username" style="width:100%">
+        <input class="kw-input" id="ct-wp-pass" type="password" placeholder="Application password (Settings → Users → App Passwords)" style="width:100%">
+      </div>
+      <div style="font-size:11px;color:var(--ink4);margin-top:8px">Create an application password in WordPress under <strong>Users → Profile → Application Passwords</strong>.</div>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="ctNext(1)">Skip →</button>
+        <button class="btn btn-primary" onclick="ctConnectWP()">Connect WordPress</button>
+      </div>
+    </div>
+    <!-- Step 1: LinkedIn -->
+    <div id="ctStep1" style="display:none">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">Connect LinkedIn</div>
+      <p style="font-size:13px;color:var(--ink4);margin-bottom:20px;line-height:1.6">Click below to authorise CruiseSEO to post to your LinkedIn. You'll be redirected back automatically.</p>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-ghost" onclick="ctNext(2)">Skip →</button>
+        <button class="btn btn-primary" onclick="window.location.href='/api/linkedin-auth?from=setup'">Connect LinkedIn →</button>
+      </div>
+    </div>
+    <!-- Step 2: Done -->
+    <div id="ctStep2" style="display:none;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">✦</div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:8px">You're all set!</div>
+      <p style="font-size:13px;color:var(--ink4);margin-bottom:24px">Head to the Content Engine to generate your first SEO post.</p>
+      <button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onclick="ctFinish()">Go to dashboard →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOUR CARD -->
+<div class="tour-card" id="tourCard" style="display:none">
+  <div class="tour-step-num" id="tourStepNum">Step 1 of 5</div>
+  <h4 id="tourTitle"></h4>
+  <p id="tourDesc"></p>
+  <div class="tour-actions">
+    <button class="tour-skip" onclick="endTour()">Skip tour</button>
+    <button class="tour-next" id="tourNextBtn" onclick="nextTourStep()">Next →</button>
+  </div>
+</div>
+
+<!-- CANCEL SUBSCRIPTION MODAL -->
+<div class="modal-overlay" id="cancelModal" style="display:none" onclick="if(event.target===this)closeCancelModal()">
+  <div class="modal-box" style="max-width:420px;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <h2 style="margin-bottom:8px">Cancel your subscription?</h2>
+    <p style="color:var(--ink4);font-size:14px;margin-bottom:24px;line-height:1.6">You will lose access to all paid features at the end of your billing period. Your data will be kept safe.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost" onclick="closeCancelModal()">Keep my plan</button>
+      <button class="btn btn-primary" id="cancelConfirmBtn" style="background:#C0304F;border-color:#C0304F" onclick="cancelSubscription()">Yes, cancel</button>
+    </div>
   </div>
 </div>
 
@@ -4976,20 +5225,35 @@ function addPostImage() {
   }
 }
 
-function searchUnsplash() {
-  const q = (document.getElementById('img-search-query')?.value || '').trim().replace(/s+/g, ',');
+async function searchUnsplash() {
+  const q = (document.getElementById('img-search-query')?.value || '').trim();
   if (!q) return;
   const grid = document.getElementById('img-picker-grid');
   if (!grid) return;
   _selectedImageUrl = null;
   document.getElementById('img-insert-btn').disabled = true;
-  grid.innerHTML = '';
-  // Use Lorem Picsum for reliable free stock photos
-  var seeds = [q, q + '-2', q + '-3', q + '-4', q + '-5', q + '-6'];
-  grid.innerHTML = seeds.map(function(s, i) {
-    var url = 'https://picsum.photos/seed/' + encodeURIComponent(s.replace(/[^a-z0-9]/gi, '-').slice(0, 30)) + '/800/450';
-    return '<img src="' + url + '" class="img-pick-item" loading="lazy" onclick="selectImage(this,\'' + url + '\')" alt="Stock photo ' + (i + 1) + '" onerror="this.parentElement && this.parentElement.removeChild(this)">';
-  }).join('');
+  grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink4);font-size:13px">Searching...</div>';
+  try {
+    const res = await fetch('/api/image-search?q=' + encodeURIComponent(q) + '&count=6');
+    const data = await res.json();
+    const urls = data.urls || [];
+    if (!urls.length) {
+      grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink4);font-size:13px">No photos found. Try a different search term.</div>';
+      return;
+    }
+    grid.innerHTML = urls.map(function(photo, i) {
+      const url = photo.regular || photo.small || photo.thumb || photo;
+      const full = photo.full || url;
+      const credit = photo.credit ? ' · Photo by ' + photo.credit + ' on Unsplash' : '';
+      return '<img src="' + url + '" data-full="' + full + '" class="img-pick-item" loading="lazy" onclick="selectImage(this,this.dataset.full)" alt="Stock photo ' + (i + 1) + credit + '" title="' + credit.replace(/^ · /,'') + '">';
+    }).join('');
+  } catch(e) {
+    // Fallback to Picsum if API unavailable
+    grid.innerHTML = [1,2,3,4,5,6].map(function(i) {
+      var url = 'https://picsum.photos/seed/' + encodeURIComponent(q) + i + '/800/450';
+      return '<img src="' + url + '" class="img-pick-item" loading="lazy" onclick="selectImage(this,this.src)" alt="Stock photo ' + i + '">';
+    }).join('');
+  }
 }
 
 function selectImage(imgEl, url) {
@@ -5273,7 +5537,7 @@ function loadSocialState() {
       if (connUi) connUi.style.display = '';
       if (connFrm) connFrm.style.display = 'none';
       if (dot) dot.style.background = 'var(--sage)';
-      if (lbl) lbl.textContent = 'Connected';
+      if (lbl) lbl.textContent = (p === 'linkedin' && cred.name) ? ('Connected as ' + cred.name) : 'Connected';
       if (card) card.classList.add('connected');
     } else {
       if (connUi) connUi.style.display = 'none';
@@ -6718,6 +6982,268 @@ function loadDashInsights(force) {
     if (id === 'autopilot') setTimeout(renderApCalendar, 100);
   };
 })();
+
+// ══════════════════════════════════════════════════════════════════
+// ── Plan Gates (Feature 2) ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+const LOCKED_VIEWS = ['engine','grader','audit','clusters','competitor','social','social-connect','ranks','backlinks','autopilot','publish'];
+
+function applyPlanGates(plan) {
+  const isLocked = (plan === 'free' || plan === 'expired' || !plan);
+  // Show/hide AI image row based on plan
+  const aiRow = document.getElementById('img-ai-row');
+  if (aiRow) {
+    if (plan === 'scale') {
+      aiRow.style.display = '';
+      const lock = document.getElementById('img-ai-lock');
+      if (lock) lock.style.display = 'none';
+    } else if (plan === 'pro' || plan === 'trial') {
+      aiRow.style.display = '';
+      const lock = document.getElementById('img-ai-lock');
+      if (lock) lock.style.display = 'flex';
+    }
+  }
+  if (!isLocked) return;
+  // Dim locked nav items
+  document.querySelectorAll('.nav-item[onclick]').forEach(function(el) {
+    const onclick = el.getAttribute('onclick') || '';
+    const m = onclick.match(/nav\(this,'([^']+)'\)/);
+    if (m && LOCKED_VIEWS.includes(m[1])) {
+      el.classList.add('plan-locked');
+    }
+  });
+  // Insert upgrade overlay into each locked view
+  const cta = plan === 'expired' ? 'Your trial has ended' : 'Upgrade to unlock';
+  const btnLabel = plan === 'expired' ? 'Start Pro — $49/mo' : 'Start free trial';
+  LOCKED_VIEWS.forEach(function(viewId) {
+    const viewEl = document.getElementById('view-' + viewId);
+    if (!viewEl || viewEl.querySelector('.plan-gate-overlay')) return;
+    const names = {engine:'Content Engine',grader:'Content Grader',audit:'Site Audit',clusters:'Topic Clusters',competitor:'Competitor Analysis',social:'Social Snippets','social-connect':'Social Media',ranks:'Rank Tracker',backlinks:'Backlink Monitor',autopilot:'Autopilot',publish:'Publish'};
+    const overlay = document.createElement('div');
+    overlay.className = 'plan-gate-overlay';
+    overlay.innerHTML = '<div class="gate-icon">🔒</div><h3>' + cta + '</h3><p>' + (names[viewId] || viewId) + ' is available on paid plans. Start your 3-day free trial — no charge until day 4.</p><button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onclick="openUpgradeModal()">' + btnLabel + ' →</button>';
+    viewEl.style.position = 'relative';
+    viewEl.appendChild(overlay);
+  });
+}
+
+// Override nav() to intercept locked views
+(function() {
+  const _origNav = typeof nav === 'function' ? nav : null;
+  window._planLockedNav = function(el, id) {
+    if (LOCKED_VIEWS.includes(id)) {
+      const planEl = document.getElementById('view-' + id);
+      if (planEl && planEl.querySelector('.plan-gate-overlay')) {
+        // Navigate there to show the overlay (it looks better than just a modal)
+        if (_origNav) _origNav(el, id);
+        return;
+      }
+    }
+    if (_origNav) _origNav(el, id);
+  };
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// ── Tutorial Tour (Feature 3) ───────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+const TOUR_STEPS = [
+  { nav: 'dashboard', title: 'Your command centre', desc: 'See your posting history, SEO health score, and quick-access actions all in one place.' },
+  { nav: 'engine',    title: 'Generate SEO content', desc: 'Enter a keyword and let the AI write a full, publish-ready SEO blog post in seconds.' },
+  { nav: 'publish',   title: 'Publish directly to WordPress', desc: 'Connect your WordPress site here. Once connected, posts publish with one click.' },
+  { nav: 'ranks',     title: 'Track your rankings', desc: 'Add target keywords and get AI-estimated Google positions — spot your best opportunities.' },
+  { nav: 'dashboard', title: 'You\'re all set! ✦', desc: 'Head to the Content Engine to generate your first post. Your 3-day trial has started — enjoy!' },
+];
+let _tourStep = 0;
+
+function initTour() {
+  if (localStorage.getItem('cruise_tutorial_done')) return;
+  _tourStep = 0;
+  showTourStep(0);
+}
+
+function showTourStep(idx) {
+  const card = document.getElementById('tourCard');
+  if (!card) return;
+  if (idx >= TOUR_STEPS.length) { endTour(); return; }
+  const step = TOUR_STEPS[idx];
+  document.getElementById('tourStepNum').textContent = 'Step ' + (idx + 1) + ' of ' + TOUR_STEPS.length;
+  document.getElementById('tourTitle').textContent = step.title;
+  document.getElementById('tourDesc').textContent = step.desc;
+  const isLast = idx === TOUR_STEPS.length - 1;
+  document.getElementById('tourNextBtn').textContent = isLast ? 'Finish tour ✦' : 'Next →';
+  // Remove previous highlights
+  document.querySelectorAll('.tour-highlight').forEach(function(el) { el.classList.remove('tour-highlight'); });
+  // Navigate to the step view
+  const navEl = document.querySelector('.nav-item[onclick*="\''+step.nav+'\'"]');
+  if (navEl) {
+    nav(navEl, step.nav);
+    navEl.classList.add('tour-highlight');
+    // Position card near the nav item
+    const rect = navEl.getBoundingClientRect();
+    card.style.left = (rect.right + 16) + 'px';
+    card.style.top = Math.max(20, rect.top - 20) + 'px';
+    card.style.bottom = 'auto';
+    card.style.right = 'auto';
+  }
+  card.style.display = '';
+  _tourStep = idx;
+}
+
+function nextTourStep() {
+  showTourStep(_tourStep + 1);
+}
+
+function endTour() {
+  document.getElementById('tourCard').style.display = 'none';
+  document.querySelectorAll('.tour-highlight').forEach(function(el) { el.classList.remove('tour-highlight'); });
+  localStorage.setItem('cruise_tutorial_done', 'true');
+  nav(document.querySelector('.nav-item[onclick*="\'dashboard\'"]'), 'dashboard');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ── Connect Your Tools Modal (Feature 5) ────────────────────────
+// ══════════════════════════════════════════════════════════════════
+function initConnectFlow() {
+  const modal = document.getElementById('connectToolsModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  ctGoTo(0);
+}
+
+function ctGoTo(step) {
+  [0,1,2].forEach(function(i) {
+    const el = document.getElementById('ctStep' + i);
+    if (el) el.style.display = (i === step) ? '' : 'none';
+    const dot = document.getElementById('ctDot' + i);
+    if (dot) {
+      dot.classList.remove('active','done');
+      if (i < step) dot.classList.add('done');
+      if (i === step) dot.classList.add('active');
+    }
+  });
+}
+
+function ctNext(step) { ctGoTo(step); }
+
+async function ctConnectWP() {
+  const url = document.getElementById('ct-wp-url')?.value.trim();
+  const user = document.getElementById('ct-wp-user')?.value.trim();
+  const pass = document.getElementById('ct-wp-pass')?.value.trim();
+  if (!url || !user || !pass) { toast('Please fill in all WordPress fields', false); return; }
+  // Reuse existing WP connection logic
+  document.getElementById('wp-url') && (document.getElementById('wp-url').value = url);
+  document.getElementById('wp-username') && (document.getElementById('wp-username').value = user);
+  document.getElementById('wp-apppass') && (document.getElementById('wp-apppass').value = pass);
+  await connectWP();
+  ctNext(1);
+}
+
+function ctFinish() {
+  const modal = document.getElementById('connectToolsModal');
+  if (modal) modal.style.display = 'none';
+  // Clean trial_start from URL
+  const url = new URL(window.location.href);
+  url.searchParams.delete('trial_start');
+  window.history.replaceState({}, '', url.toString());
+  nav(document.querySelector('.nav-item[onclick*="\'dashboard\'"]'), 'dashboard');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ── LinkedIn Token Loader (after OAuth callback) ─────────────────
+// ══════════════════════════════════════════════════════════════════
+function loadLinkedInFromClerk() {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const lipay = urlParams.get('lipay');
+    if (!lipay) return;
+    const data = JSON.parse(atob(decodeURIComponent(lipay)));
+    if (data.accessToken && data.authorId) {
+      const social = JSON.parse(localStorage.getItem('cruise_social') || '{}');
+      social.linkedin = { accessToken: data.accessToken, authorId: data.authorId, name: data.name || '' };
+      localStorage.setItem('cruise_social', JSON.stringify(social));
+      // Also persist to Clerk unsafeMetadata (non-sensitive fields only)
+      if (window.Clerk?.user) {
+        const existing = window.Clerk.user.unsafeMetadata || {};
+        window.Clerk.user.update({
+          unsafeMetadata: Object.assign({}, existing, {
+            linkedin: { authorId: data.authorId, name: data.name, connectedAt: new Date().toISOString() }
+          })
+        }).catch(function(){});
+      }
+    }
+    // Clean URL params
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('linkedin_connected');
+    cleanUrl.searchParams.delete('lipay');
+    window.history.replaceState({}, '', cleanUrl.toString());
+  } catch(e) { console.warn('LinkedIn token load failed:', e); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ── AI Image Generation — DALL-E 3 (Feature 6) ─────────────────
+// ══════════════════════════════════════════════════════════════════
+async function generateAIImage() {
+  const plan = JSON.parse(localStorage.getItem('cruise_plan') || '{}');
+  if (plan.type !== 'scale') { openUpgradeModal(); return; }
+  const btn = document.getElementById('img-ai-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
+  const keyword = generatedPostData?.keyword || document.getElementById('img-search-query')?.value || 'professional blog';
+  try {
+    const res = await fetch('/api/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: 'Professional, editorial-style blog hero image for an article about: ' + keyword + '. Clean, modern, high quality, no text.' }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) throw new Error(data.error || 'No image returned');
+    // Add to picker grid as first item (selected)
+    const grid = document.getElementById('img-picker-grid');
+    if (grid) {
+      const img = document.createElement('img');
+      img.src = data.url;
+      img.className = 'img-pick-item selected';
+      img.alt = 'AI-generated image';
+      img.title = 'AI-generated with DALL-E 3';
+      img.onclick = function() { selectImage(this, this.src); };
+      grid.prepend(img);
+      selectImage(img, data.url);
+    }
+    toast('AI image generated!', true);
+  } catch(e) {
+    toast('Image generation failed: ' + e.message, false);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate ✦'; }
+  }
+}
+
+// ── Cancel Subscription ─────────────────────────────────────────
+function showCancelModal() {
+  document.getElementById('cancelModal').style.display = 'flex';
+}
+function closeCancelModal() {
+  document.getElementById('cancelModal').style.display = 'none';
+}
+async function cancelSubscription() {
+  const btn = document.getElementById('cancelConfirmBtn');
+  btn.textContent = 'Cancelling...';
+  btn.disabled = true;
+  try {
+    const userId = window.Clerk?.user?.id || '';
+    const res = await fetch('/api/cancel-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to cancel');
+    closeCancelModal();
+    toast('Subscription cancelled. Access continues until end of billing period.', true);
+  } catch(e) {
+    btn.textContent = 'Yes, cancel';
+    btn.disabled = false;
+    toast('Could not cancel: ' + e.message, false);
+  }
+}
 
 // Initial insights load on startup
 setTimeout(loadDashInsights, 800);
