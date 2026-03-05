@@ -1,8 +1,8 @@
 // /api/image-search.js
-// Proxies Unsplash photo search — keeps the API key server-side.
+// Proxies Pexels photo search — keeps the API key server-side.
 //
 // Required Vercel env var:
-//   UNSPLASH_ACCESS_KEY — from unsplash.com/developers (free, 50 req/hr)
+//   PEXELS_API_KEY — from pexels.com/api (free, 200 req/hr, commercial use allowed)
 //
 // Usage: GET /api/image-search?q=marketing+agency&count=6
 
@@ -25,8 +25,8 @@ export default async function handler(req) {
 
   const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
-  // Fallback: picsum if no API key configured
-  if (!process.env.UNSPLASH_ACCESS_KEY) {
+  // Fallback: picsum if no API key configured yet
+  if (!process.env.PEXELS_API_KEY) {
     const urls = Array.from({ length: count }, (_, i) => ({
       regular: `https://picsum.photos/seed/${encodeURIComponent(q)}${i}/800/450`,
       full:    `https://picsum.photos/seed/${encodeURIComponent(q)}${i}/1600/900`,
@@ -37,21 +37,21 @@ export default async function handler(req) {
 
   try {
     const searchRes = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=${count}&orientation=landscape`,
-      { headers: { 'Authorization': `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` } }
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=${count}&orientation=landscape`,
+      { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
     );
 
     if (!searchRes.ok) {
-      throw new Error('Unsplash API error: ' + searchRes.status);
+      throw new Error('Pexels API error: ' + searchRes.status);
     }
 
     const data = await searchRes.json();
-    const results = (data.results || []).map(photo => ({
-      thumb:   photo.urls?.thumb,
-      regular: photo.urls?.regular,
-      full:    photo.urls?.full,
-      credit:  photo.user?.name || null,
-      credit_url: photo.user?.links?.html || null,
+    const results = (data.photos || []).map(photo => ({
+      thumb:   photo.src?.medium,
+      regular: photo.src?.large,
+      full:    photo.src?.original,
+      credit:  photo.photographer || null,
+      credit_url: photo.photographer_url || null,
     }));
 
     return new Response(JSON.stringify({ urls: results }), { headers: CORS });
