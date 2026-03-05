@@ -1088,21 +1088,28 @@ input:focus, textarea:focus, select:focus {
 
 <!-- UPGRADE MODAL -->
 <div class="modal-overlay" id="upgrade-modal" onclick="if(event.target===this)closeUpgradeModal()">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:740px">
     <button class="modal-close" onclick="closeUpgradeModal()">×</button>
-    <h2 style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--ink);margin:0 0 6px">Upgrade to Pro</h2>
-    <p style="font-size:13px;color:var(--ink4);margin:0">Unlock unlimited AI content, advanced analytics, and PDF reports.</p>
-    <div class="plan-cards">
+    <h2 style="font-family:var(--font-serif);font-size:22px;font-weight:600;color:var(--ink);margin:0 0 6px">Choose your plan</h2>
+    <p style="font-size:13px;color:var(--ink4);margin:0">3-day free trial on all paid plans — card required, cancel before day 3 to pay nothing.</p>
+    <div class="plan-cards" style="grid-template-columns:1fr 1fr 1fr">
       <div class="plan-card">
         <div class="plan-card-name">Free Trial</div>
         <div class="plan-card-price">$0 <span>/ 3 days</span></div>
-        <ul><li>50 AI posts total</li><li>1 WordPress site</li><li>Core SEO tools</li><li>Basic audit</li></ul>
+        <ul><li>50 posts (trial only)</li><li>1 WordPress site</li><li>Core SEO tools</li><li>Basic audit</li></ul>
       </div>
       <div class="plan-card featured">
         <div class="plan-card-name">Pro</div>
         <div class="plan-card-price">$49 <span>/ month</span></div>
-        <ul><li>Unlimited AI posts</li><li>3 WordPress sites</li><li>Full SEO suite</li><li>PDF reports</li><li>GSC integration</li><li>Priority support</li></ul>
-        <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center" onclick="activatePro()">Upgrade now →</button>
+        <ul><li>15 AI posts / month</li><li>3 WordPress sites</li><li>Full SEO suite</li><li>PDF reports</li><li>GSC integration</li><li>Priority support</li></ul>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center" onclick="startStripeCheckout('pro')">Start free trial →</button>
+      </div>
+      <div class="plan-card" style="border-color:var(--amber);position:relative">
+        <div style="position:absolute;top:-1px;right:14px;background:var(--amber);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:0 0 8px 8px;text-transform:uppercase;letter-spacing:.08em">Best value</div>
+        <div class="plan-card-name" style="color:var(--amber)">Scale</div>
+        <div class="plan-card-price">$149 <span>/ month</span></div>
+        <ul><li>60 AI posts / month</li><li>10 WordPress sites</li><li>Bulk post generation</li><li>Everything in Pro</li><li>Team seats <span style="font-size:10px;color:var(--ink4)">(coming soon)</span></li></ul>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center" onclick="startStripeCheckout('scale')">Start free trial →</button>
       </div>
     </div>
   </div>
@@ -1476,6 +1483,30 @@ input:focus, textarea:focus, select:focus {
           <button class="btn btn-primary" onclick="runGenerate()" id="btnGen" style="font-size:15px;padding:13px 28px">
             Generate post ✦
           </button>
+        </div>
+      </div>
+
+      <!-- Bulk generation (Scale plan) -->
+      <div id="bulk-gen-section" style="display:none;margin-top:16px">
+        <div class="card" style="position:relative">
+          <div id="bulk-gen-lock" style="display:none;position:absolute;inset:0;background:rgba(255,255,255,.85);border-radius:14px;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+            <div style="font-size:22px">🔒</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink)">Scale plan only</div>
+            <div style="font-size:12px;color:var(--ink4);margin-bottom:4px">Generate up to 10 posts at once</div>
+            <button class="btn btn-primary" style="font-size:12px;padding:7px 18px" onclick="openUpgradeModal()">Upgrade to Scale →</button>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)">Bulk generate</div>
+              <div style="font-size:12px;color:var(--ink4)">Enter one keyword per line — generates posts sequentially</div>
+            </div>
+            <span style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;background:var(--amber);color:#fff;padding:3px 9px;border-radius:100px">Scale</span>
+          </div>
+          <textarea id="bulk-keywords" style="width:100%;height:110px;box-sizing:border-box;padding:10px 12px;border:1.5px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--font-ui);background:var(--cream2);color:var(--ink);resize:vertical;line-height:1.6" placeholder="best coffee grinders 2025&#10;how to make cold brew at home&#10;aeropress vs french press"></textarea>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+            <button class="btn btn-primary" onclick="runBulkGenerate()" id="btnBulkGen" style="font-size:13px;padding:9px 20px">Generate all ✦</button>
+            <span id="bulk-gen-status" style="font-size:12px;color:var(--ink4)"></span>
+          </div>
         </div>
       </div>
 
@@ -3191,6 +3222,46 @@ META: [meta description, 150-160 characters]
   }
 }
 
+// ── Bulk generation (Scale plan) ───────────────────────────────────────────
+function initBulkGenSection() {
+  const plan = JSON.parse(localStorage.getItem('cruise_plan') || '{}');
+  const isScale = plan.type === 'scale';
+  const section = document.getElementById('bulk-gen-section');
+  const lock    = document.getElementById('bulk-gen-lock');
+  if (!section) return;
+  section.style.display = 'block';
+  if (lock) lock.style.display = isScale ? 'none' : 'flex';
+}
+
+async function runBulkGenerate() {
+  const plan = JSON.parse(localStorage.getItem('cruise_plan') || '{}');
+  if (plan.type !== 'scale') { openUpgradeModal(); return; }
+
+  const raw = (document.getElementById('bulk-keywords')?.value || '').trim();
+  if (!raw) { toast('Enter at least one keyword', false); return; }
+
+  const keywords = raw.split('\n').map(k => k.trim()).filter(Boolean).slice(0, 10);
+  const btn    = document.getElementById('btnBulkGen');
+  const status = document.getElementById('bulk-gen-status');
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+
+  for (let i = 0; i < keywords.length; i++) {
+    const kw = keywords[i];
+    if (status) status.textContent = `${i + 1}/${keywords.length} — ${kw}`;
+    document.getElementById('genKeyword').value = kw;
+    try {
+      await runGenerate();
+      await new Promise(r => setTimeout(r, 1200)); // brief pause between requests
+    } catch(e) {
+      console.error('Bulk gen error for:', kw, e);
+    }
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Generate all ✦'; }
+  if (status) status.textContent = `Done — ${keywords.length} posts generated`;
+  toast('Bulk generation complete ✦', true);
+}
+
 function calcSeoScore(html, title, keyword) {
   let score = 50;
   const text = html.replace(/<[^>]+>/g, ' ').toLowerCase();
@@ -3323,7 +3394,7 @@ function initAutopilot() {
   const monthCount = [...apLogs, ...wpLogs].filter(l => l.ts && new Date(l.ts) >= thisMonth).length;
   const usageEl = document.getElementById('sb-usage-count');
   const usageFill = document.getElementById('sb-usage-fill');
-  const MONTHLY_LIMIT = 50;
+  const MONTHLY_LIMIT = getPlanLimit();
   if (usageEl) usageEl.textContent = monthCount + '/' + MONTHLY_LIMIT;
   if (usageFill) usageFill.style.width = Math.min(100, (monthCount/MONTHLY_LIMIT)*100) + '%';
   // Sync sidebar toggle with actual saved state
@@ -4515,7 +4586,7 @@ function nav(el, id) {
   if (id === 'dashboard') { renderDashRankChart(); }
   if (id === 'publish') { restoreCMSType(); }
   if (id === 'dashboard') { renderOnboardingChecklist(); }
-  if (id === 'engine') setTimeout(loadGenQuickKws, 50);
+  if (id === 'engine') { setTimeout(loadGenQuickKws, 50); initBulkGenSection(); }
   if (id === 'dashboard') { renderDashQueue(); loadDashHealth(); }
   if (id === 'posts') renderAllPosts();
   if (id === 'publish') renderPublish();
@@ -5905,9 +5976,11 @@ function renderTrialBanner(plan) {
 
 function openUpgradeModal() { document.getElementById('upgrade-modal').classList.add('open'); }
 function closeUpgradeModal() { document.getElementById('upgrade-modal').classList.remove('open'); }
-function activatePro() { startStripeCheckout(); }
+function activatePro()   { startStripeCheckout('pro');   }
+function activateScale() { startStripeCheckout('scale'); }
 
-async function startStripeCheckout() {
+async function startStripeCheckout(plan) {
+  plan = plan || 'pro';
   closeUpgradeModal();
   const userId = window.Clerk?.user?.id || '';
   const email  = window.Clerk?.user?.primaryEmailAddress?.emailAddress || '';
@@ -5916,7 +5989,7 @@ async function startStripeCheckout() {
     const res  = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, email }),
+      body: JSON.stringify({ userId, email, plan }),
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; return; }
@@ -5927,13 +6000,21 @@ async function startStripeCheckout() {
   }
 }
 
+function getPlanLimit() {
+  const plan = JSON.parse(localStorage.getItem('cruise_plan') || '{}');
+  if (plan.type === 'scale') return 60;
+  if (plan.type === 'pro')   return 15;
+  return 50; // trial
+}
+
 function checkUsageLimit() {
   const plan = JSON.parse(localStorage.getItem('cruise_plan') || '{}');
-  if (plan.type === 'pro') return true;
+  const limit = getPlanLimit();
   const ap = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]');
   const wp = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
-  const total = ap.length + wp.length;
-  if (total >= 50) { openUpgradeModal(); return false; }
+  const thisMonth = new Date(); thisMonth.setDate(1); thisMonth.setHours(0,0,0,0);
+  const monthCount = [...ap, ...wp].filter(l => l.ts && new Date(l.ts) >= thisMonth).length;
+  if (monthCount >= limit) { openUpgradeModal(); return false; }
   return true;
 }
 

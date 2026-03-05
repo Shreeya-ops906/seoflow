@@ -111,30 +111,41 @@ export default async function handler(req) {
     if (event.type === 'checkout.session.completed') {
       // client_reference_id = Clerk user ID (set from the checkout flow)
       const clerkUserId = obj.client_reference_id;
+      // plan_type is set in session metadata by create-checkout.js ('pro' or 'scale')
+      const planType = obj.metadata?.plan_type || 'pro';
 
       if (clerkUserId) {
-        // If subscription has a trial, mark as 'trial'; otherwise mark as 'pro'
-        const hasTrial = obj.subscription != null; // subscription created = trial started
+        // If subscription has a trial, mark as 'trial'; otherwise mark as paid plan
+        const hasTrial = obj.subscription != null;
         await clerkUpdateUser(
           clerkUserId,
-          { plan: hasTrial ? 'trial' : 'pro', plan_since: new Date().toISOString() },
+          { plan: hasTrial ? 'trial' : planType, plan_type: planType, plan_since: new Date().toISOString() },
           { stripe_customer_id: obj.customer, stripe_subscription_id: obj.subscription }
         );
-        // Tag Stripe customer with clerk_user_id for future subscription events
         if (obj.customer) {
           await tagStripeCustomer(obj.customer, clerkUserId);
+          // Store plan_type on Stripe customer for post-trial invoice events
+          await fetch(`https://api.stripe.com/v1/customers/${obj.customer}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `metadata[plan_type]=${encodeURIComponent(planType)}`,
+          });
         }
       }
     }
 
-    // Trial ended and first invoice paid → upgrade to pro
+    // Trial ended and first invoice paid → activate paid plan
     if (event.type === 'invoice.payment_succeeded') {
       const customerId = obj.customer;
       if (customerId) {
         const customer = await getStripeCustomer(customerId);
         const clerkUserId = customer.metadata?.clerk_user_id;
+        const planType    = customer.metadata?.plan_type || 'pro';
         if (clerkUserId) {
-          await clerkUpdateUser(clerkUserId, { plan: 'pro', plan_since: new Date().toISOString() }, null);
+          await clerkUpdateUser(clerkUserId, { plan: planType, plan_since: new Date().toISOString() }, null);
         }
       }
     }
