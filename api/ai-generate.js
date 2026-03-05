@@ -7,8 +7,9 @@ export default async function handler(req) {
 
   try {
     const body = await req.json();
+    const { messages, max_tokens, stream } = body;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -17,15 +18,28 @@ export default async function handler(req) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
-        messages: body.messages,
+        max_tokens: max_tokens || 4000,
+        stream: stream ? true : false,
+        messages,
       }),
     });
 
-    const data = await res.json();
+    // Stream passthrough: pipe Anthropic SSE directly to client
+    if (stream && anthropicRes.ok) {
+      return new Response(anthropicRes.body, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-cache',
+          'X-Accel-Buffering': 'no',
+        },
+      });
+    }
 
+    const data = await anthropicRes.json();
     return new Response(JSON.stringify(data), {
-      status: res.status,
+      status: anthropicRes.status,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
