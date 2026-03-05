@@ -2810,7 +2810,9 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 
 // ── Dashboard Connections ──────────────────────
 function renderDashConnections() {
-  document.getElementById('dashConnections').innerHTML = platforms.slice(0,6).map(p=>`
+  const el = document.getElementById('dashConnections');
+  if (!el) return;
+  el.innerHTML = platforms.slice(0,6).map(p=>`
     <div class="pub-platform" style="padding:9px 14px">
       <div class="pub-icon" style="font-size:14px">${p.icon}</div>
       <div style="flex:1"><div class="pub-name" style="font-size:11px">${p.name}</div></div>
@@ -3038,7 +3040,8 @@ window.addEventListener('load',()=>{
   const obs=new MutationObserver(()=>{
     if(document.getElementById('view-analytics').classList.contains('active')) setTimeout(drawChart,50);
   });
-  obs.observe(document.getElementById('view-analytics'),{attributes:true,attributeFilter:['class']});
+  const analyticsEl = document.getElementById('view-analytics');
+  if (analyticsEl) obs.observe(analyticsEl,{attributes:true,attributeFilter:['class']});
 });
 </script>
 
