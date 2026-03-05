@@ -1458,14 +1458,15 @@ window.signOut = async function() { await window.Clerk.signOut(); window.locatio
     <!-- COMPLETION SCREEN -->
     <div class="complete-screen" id="completeScreen">
       <div class="complete-icon">🎉</div>
-      <h2 class="complete-title">You're all set!</h2>
-      <p class="complete-sub">Your AI content engine is configured and ready. First content will be generated within the next few minutes.</p>
+      <h2 class="complete-title">Your profile is ready!</h2>
+      <p class="complete-sub">Start your <strong>3-day free trial</strong> — enter your card to begin. <strong>No charge for 3 days.</strong> $49/mo after. Cancel anytime.</p>
 
       <div class="profile-summary" id="profileSummary"></div>
 
       <div class="complete-actions">
-        <button class="btn-launch" onclick="goToDashboard()">→ Open Dashboard</button>
+        <button class="btn-launch" id="btn-start-trial" onclick="goToDashboard()">→ Start free trial — add card</button>
       </div>
+      <p style="font-size:12px;color:#9b9088;text-align:center;margin-top:12px">🔒 Secured by Stripe · Cancel before day 3 to pay nothing</p>
     </div>
 
   </div>
@@ -1857,9 +1858,31 @@ function showCompleteScreen() {
   `;
 }
 
-function goToDashboard() {
+async function goToDashboard() {
+  const btn = document.getElementById('btn-start-trial');
+  if (btn) { btn.textContent = 'Redirecting to checkout...'; btn.disabled = true; }
   localStorage.setItem('cruise_onboarding_complete', 'true');
-  window.location.href = '/app.html';
+
+  const userId = window.Clerk?.user?.id || '';
+  const email  = window.Clerk?.user?.primaryEmailAddress?.emailAddress || '';
+
+  try {
+    const res  = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, email }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+      return;
+    }
+    throw new Error(data.error || 'No checkout URL returned');
+  } catch (err) {
+    console.error('Checkout error:', err);
+    // Fallback: go straight to dashboard if checkout fails
+    window.location.href = '/app.html';
+  }
 }
 </script>
 </body>

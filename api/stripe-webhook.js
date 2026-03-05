@@ -109,19 +109,32 @@ export default async function handler(req) {
 
   try {
     if (event.type === 'checkout.session.completed') {
-      // client_reference_id = Clerk user ID (set in the payment link URL)
+      // client_reference_id = Clerk user ID (set from the checkout flow)
       const clerkUserId = obj.client_reference_id;
 
       if (clerkUserId) {
-        // Upgrade user in Clerk
+        // If subscription has a trial, mark as 'trial'; otherwise mark as 'pro'
+        const hasTrial = obj.subscription != null; // subscription created = trial started
         await clerkUpdateUser(
           clerkUserId,
-          { plan: 'pro', plan_since: new Date().toISOString() },
+          { plan: hasTrial ? 'trial' : 'pro', plan_since: new Date().toISOString() },
           { stripe_customer_id: obj.customer, stripe_subscription_id: obj.subscription }
         );
         // Tag Stripe customer with clerk_user_id for future subscription events
         if (obj.customer) {
           await tagStripeCustomer(obj.customer, clerkUserId);
+        }
+      }
+    }
+
+    // Trial ended and first invoice paid → upgrade to pro
+    if (event.type === 'invoice.payment_succeeded') {
+      const customerId = obj.customer;
+      if (customerId) {
+        const customer = await getStripeCustomer(customerId);
+        const clerkUserId = customer.metadata?.clerk_user_id;
+        if (clerkUserId) {
+          await clerkUpdateUser(clerkUserId, { plan: 'pro', plan_since: new Date().toISOString() }, null);
         }
       }
     }
@@ -137,7 +150,12 @@ export default async function handler(req) {
     }
 
     if (event.type === 'invoice.payment_failed') {
-      // Optionally notify user — for now just log
+      // Payment failed after trial — mark as free so app shows upgrade prompt
+      const customer = await getStripeCustomer(obj.customer);
+      const clerkUserId = customer.metadata?.clerk_user_id;
+      if (clerkUserId) {
+        await clerkUpdateUser(clerkUserId, { plan: 'expired' }, null);
+      }
       console.log('Payment failed for customer:', obj.customer);
     }
 
