@@ -2740,7 +2740,7 @@ function renderAllPosts() {
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${date}</td>
       <td style="padding:10px 16px">${sourceBadge}</td>
       <td style="padding:10px 12px;white-space:nowrap">
-        <button class="btn btn-ghost" onclick="openEditPost('${p.ts}',`${(p.title||'').replace(/`/g,\"'\")}`,`${(p.url||'')}`,`${(p.wpId||'')}`)" style="font-size:11px;padding:3px 10px">Edit</button>
+        <button class="btn btn-ghost" onclick="openEditPost('${p.ts}','${(p.title||'').replace(/'/g,'')}','${p.url||''}','${p.wpId||''}')" style="font-size:11px;padding:3px 10px">Edit</button>
         <button class="btn btn-ghost" onclick="document.getElementById('grader-url').value='${p.url||p.title||''}';nav(null,'grader')" style="font-size:11px;padding:3px 10px;margin-left:4px">Grade</button>
       </td>
     </tr>`;
@@ -3841,11 +3841,11 @@ const seoTips = {
   'Site Audit': { title: 'What is an SEO site audit?', body: 'A site audit crawls your entire website and flags technical issues that prevent Google from properly indexing your pages — broken links, missing meta descriptions, slow images, and more.', why: 'Fixing audit errors can improve rankings within 2–4 weeks.' },
   'Topic Clusters': { title: 'What are topic clusters?', body: 'A topic cluster is a group of interlinked content: one long-form "pillar" post and multiple "supporting" posts targeting related keywords. Internal links pass SEO authority between posts.', why: 'Sites using topic clusters see 20–40% more organic traffic.' },
   'Competitor Analysis': { title: 'Why analyse competitors?', body: 'Understanding what content your competitors rank for reveals gaps you can exploit. By targeting their weaknesses, you can outrank them for profitable keywords without guessing.', why: 'Content gap analysis is one of the highest-ROI SEO tactics.' },
-  'Social Snippets': { title: 'SEO + social media', body: 'While social signals don't directly affect rankings, they drive traffic that Google interprets as proof of relevance. More traffic = stronger ranking signals over time.', why: 'Posts shared on LinkedIn get 3x more indexed backlinks.' },
+  'Social Snippets': { title: 'SEO + social media', body: 'While social signals don\'t directly affect rankings, they drive traffic that Google interprets as proof of relevance. More traffic = stronger ranking signals over time.', why: 'Posts shared on LinkedIn get 3x more indexed backlinks.' },
   'Rank Tracker': { title: 'Why track keyword rankings?', body: 'Rank tracking tells you if your SEO efforts are working. Seeing a keyword move from position 18 to 7 tells you which content to invest in more.', why: 'Most clicks go to positions 1–3. Even moving from 10→5 doubles traffic.' },
   'Autopilot': { title: 'How autopilot helps SEO', body: 'Google rewards websites that publish consistently. Sites that post 2–4x per week index faster, rank for more keywords, and build domain authority much faster than irregular publishers.', why: 'Consistent publishing is the #1 driver of long-term organic traffic growth.' },
   'Keyword Research': { title: 'Why keyword research matters', body: 'Writing about topics nobody searches for wastes time. Keyword research finds the exact phrases your customers type into Google, with volume and competition data to prioritise wisely.', why: 'The right keyword choice can mean 10x more traffic for the same effort.' },
-  'Content Engine': { title: 'AI-powered SEO content', body: 'Each post is generated with your brand voice, target keyword, proper heading structure, and internal links built in. The AI follows Google's E-E-A-T guidelines to maximise ranking potential.', why: 'AI-assisted content published consistently outperforms sporadic manual posts.' },
+  'Content Engine': { title: 'AI-powered SEO content', body: 'Each post is generated with your brand voice, target keyword, proper heading structure, and internal links built in. The AI follows Google\'s E-E-A-T guidelines to maximise ranking potential.', why: 'AI-assisted content published consistently outperforms sporadic manual posts.' },
   'Publishing': { title: 'Why connect your CMS?', body: 'Direct publishing to your CMS removes friction and ensures content goes live immediately with the correct metadata, internal links, and schema markup that manual copy-paste often misses.', why: 'Indexed content ranks faster when published with correct technical SEO.' },
 };
 
