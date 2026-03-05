@@ -568,6 +568,21 @@ body.dark tr{background:var(--cream2)}body.dark th,body.dark td{color:var(--ink2
       </div>
     </div>
 
+    <div class="ob-overlay" id="email-outreach-modal" onclick="if(event.target===this)closeEmailModal()">
+      <div class="ob-box" style="max-width:560px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h2 style="font-family:var(--font-serif);font-size:18px;font-weight:800;color:var(--ink);margin:0">Outreach Email</h2>
+          <button class="btn btn-ghost" onclick="closeEmailModal()" style="font-size:22px;line-height:1;padding:0 8px">&#x2715;</button>
+        </div>
+        <div id="email-modal-site" style="font-size:12px;font-weight:600;color:var(--ink4);margin-bottom:12px"></div>
+        <textarea id="email-modal-body" style="width:100%;min-height:220px;font-size:13px;line-height:1.65;padding:14px;resize:vertical;font-family:inherit;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);box-sizing:border-box" readonly></textarea>
+        <div style="display:flex;gap:10px;margin-top:16px">
+          <button class="btn btn-ghost" onclick="copyEmailModal()" style="flex:1">Copy email</button>
+          <a href="#" onclick="openEmailClient();return false" class="btn btn-primary" style="flex:1;justify-content:center;text-decoration:none">Open in mail client &#x2192;</a>
+        </div>
+      </div>
+    </div>
+
     <div class="view active" id="view-dashboard">
       <div id="trial-banner-wrap"></div>
       <div id="onboarding-checklist" style="display:none" class="setup-checklist">
@@ -840,7 +855,7 @@ body.dark tr{background:var(--cream2)}body.dark th,body.dark td{color:var(--ink2
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost" onclick="resetGenerator()">← New post</button>
             <button class="btn btn-ghost" onclick="runGenerate()" id="btnRegen">↺ Regenerate</button>
-            <button class="btn btn-primary" onclick="publishToWP()" id="btnPublishWP">Publish to WordPress ↗</button>
+            <button class="btn btn-primary" onclick="publishToPost()" id="btnPublishWP">Publish to WordPress ↗</button>
           </div>
         </div>
 
@@ -3023,6 +3038,7 @@ function initNewFeatures() {
   renderDashQueue();
   syncWPPostsToLog();
   loadDashHealth();
+  updatePublishBtnLabel();
   // Update keyword count stat
   const rankData = JSON.parse(localStorage.getItem('cruise_rank_history') || '[]');
   const kwCountEl = document.getElementById('stKwCount');
@@ -4061,11 +4077,11 @@ function searchUnsplash() {
   _selectedImageUrl = null;
   document.getElementById('img-insert-btn').disabled = true;
   grid.innerHTML = '';
-  // Use Unsplash Source (6 variants via different signals)
-  const variants = [q, q+',business', q+',office', q+',professional', q+',team', q+',concept'];
-  grid.innerHTML = variants.map((v, i) => {
-    const url = `https://source.unsplash.com/800x450/?${encodeURIComponent(v)}&sig=${i+1}`;
-    return `<img src="${url}" class="img-pick-item" loading="lazy" onclick="selectImage(this, '${url}')" alt="Image option ${i+1}" onerror="this.style.display='none'">`;
+  // Use Lorem Picsum for reliable free stock photos
+  var seeds = [q, q + '-2', q + '-3', q + '-4', q + '-5', q + '-6'];
+  grid.innerHTML = seeds.map(function(s, i) {
+    var url = 'https://picsum.photos/seed/' + encodeURIComponent(s.replace(/[^a-z0-9]/gi, '-').slice(0, 30)) + '/800/450';
+    return '<img src="' + url + '" class="img-pick-item" loading="lazy" onclick="selectImage(this,\'' + url + '\')" alt="Stock photo ' + (i + 1) + '" onerror="this.parentElement && this.parentElement.removeChild(this)">';
   }).join('');
 }
 
@@ -4080,7 +4096,7 @@ function insertSelectedImage() {
   if (!_selectedImageUrl) return;
   const editor = document.getElementById('gen-editor');
   if (!editor) return;
-  const imgHtml = `<figure style="margin:0 0 24px;text-align:center"><img src="${_selectedImageUrl}" alt="${generatedPostData?.keyword || 'article image'}" style="max-width:100%;border-radius:8px;height:auto" loading="lazy" /><figcaption style="font-size:12px;color:#888;margin-top:8px">Image via Unsplash</figcaption></figure>\n`;
+  const imgHtml = `<figure style="margin:0 0 24px;text-align:center"><img src="${_selectedImageUrl}" alt="${generatedPostData?.keyword || 'article image'}" style="max-width:100%;border-radius:8px;height:auto" loading="lazy" /><figcaption style="font-size:12px;color:#888;margin-top:8px">Image via Cruise SEO</figcaption></figure>\n`;
   editor.innerHTML = imgHtml + editor.innerHTML;
   if (generatedPostData) generatedPostData.featuredImageUrl = _selectedImageUrl;
   document.getElementById('img-picker-panel').style.display = 'none';
@@ -4214,8 +4230,19 @@ Our business: ${brand.name || 'the business'} — ${brand.industry || ''}
 Keep it under 150 words, friendly, professional, and value-focused. No "I hope this email finds you well". Return just the email text.`;
   try {
     const email = await callAI(prompt, 500);
-    navigator.clipboard.writeText(email);
-    toast('Outreach email copied to clipboard!', true);
+    var modal = document.getElementById('email-outreach-modal');
+    var siteEl = document.getElementById('email-modal-site');
+    var bodyEl = document.getElementById('email-modal-body');
+    if (modal && bodyEl) {
+      if (siteEl) siteEl.textContent = 'To: ' + p.site + ' — ' + p.type;
+      bodyEl.value = email;
+      window._emailModalContent = email;
+      window._emailModalSite = p.site;
+      modal.classList.add('open');
+    } else {
+      navigator.clipboard.writeText(email);
+      toast('Email copied!', true);
+    }
   } catch(e) { toast('Failed to generate email: ' + e.message, false); }
 }
 
@@ -4545,26 +4572,100 @@ function connectCustomCMS() {
 // ══ PUBLISH TO CUSTOM CMS (extends publishToWP) ══════════════════
 async function publishToActiveCMS(postData) {
   const cmsType = localStorage.getItem('cruise_cms_type') || 'wordpress';
-  if (cmsType === 'wordpress') return null; // uses existing publishToWP()
-  const { title, content_html, meta_description } = postData;
+  if (cmsType === 'wordpress') return null;
+  const { title, content_html } = postData;
+  const post = { title, content_html, status: 'published' };
+  let credentials = {};
   if (cmsType === 'ghost') {
     const ghost = JSON.parse(localStorage.getItem('cruise_ghost') || '{}');
-    if (!ghost.url) throw new Error('Ghost not connected');
-    const r = await fetch('/api/cms-proxy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ cms: 'ghost', action: 'publish', url: ghost.url, adminKey: ghost.adminKey, title, content: content_html, excerpt: meta_description }) });
-    return await r.json();
-  }
-  if (cmsType === 'webflow') {
+    if (!ghost.url) throw new Error('Ghost not connected — set it up in the Publish tab');
+    credentials = { ghostUrl: ghost.url, adminApiKey: ghost.adminKey };
+  } else if (cmsType === 'webflow') {
     const wf = JSON.parse(localStorage.getItem('cruise_webflow') || '{}');
-    if (!wf.token) throw new Error('Webflow not connected');
-    const r = await fetch('/api/cms-proxy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ cms: 'webflow', action: 'publish', token: wf.token, collectionId: wf.collectionId, title, content: content_html }) });
-    return await r.json();
-  }
-  if (cmsType === 'custom') {
+    if (!wf.token) throw new Error('Webflow not connected — set it up in the Publish tab');
+    credentials = { collectionId: wf.collectionId, apiToken: wf.token, siteId: wf.siteId || '' };
+  } else if (cmsType === 'custom') {
     const custom = JSON.parse(localStorage.getItem('cruise_custom_cms') || '{}');
-    if (!custom.endpoint) throw new Error('Custom CMS not configured');
-    const r = await fetch('/api/cms-proxy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ cms: 'custom', action: 'publish', endpoint: custom.endpoint, auth: custom.auth, titleField: custom.titleField, contentField: custom.contentField, title, content: content_html }) });
-    return await r.json();
+    if (!custom.endpoint) throw new Error('Custom CMS not configured — set it up in the Publish tab');
+    credentials = { endpoint: custom.endpoint, authType: custom.authType || 'bearer', authValue: custom.authValue || custom.auth || '' };
   }
+  const r = await fetch('/api/cms-proxy', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ cmsType, post, credentials }) });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || 'Publish failed');
+  return data;
+}
+
+// ══ PUBLISH ROUTER ══════════════════════════════════════════════════════
+async function publishToPost() {
+  const cmsType = localStorage.getItem('cruise_cms_type') || 'wordpress';
+  if (!cmsType || cmsType === 'wordpress') return publishToWP();
+  if (!generatedPostData) { toast('Generate a post first', false); return; }
+  const btn = document.getElementById('btnPublishWP');
+  const resultEl = document.getElementById('gen-publish-result');
+  const cmsLabels = { ghost: 'Ghost', webflow: 'Webflow', custom: 'Custom CMS' };
+  const label = cmsLabels[cmsType] || cmsType;
+  if (btn) { btn.disabled = true; btn.textContent = 'Publishing...'; }
+  if (resultEl) resultEl.style.display = 'none';
+  try {
+    const result = await publishToActiveCMS(generatedPostData);
+    if (resultEl) {
+      resultEl.style.display = 'block';
+      resultEl.style.background = 'var(--sage-l)';
+      resultEl.style.border = '1px solid rgba(74,124,111,.2)';
+      resultEl.style.color = 'var(--sage)';
+      resultEl.innerHTML = '✓ Published to ' + label + '!' +
+        (result && result.url ? ' <a href="' + result.url + '" target="_blank" style="color:var(--sage);font-weight:700;margin-left:8px">View post →</a>' : '');
+    }
+    toast('Post published to ' + label + '!', true);
+    if (result && result.url) postAutoSocial(generatedPostData.title, result.url);
+  } catch(err) {
+    if (resultEl) {
+      resultEl.style.display = 'block';
+      resultEl.style.background = 'rgba(192,48,79,.06)';
+      resultEl.style.border = '1px solid rgba(192,48,79,.2)';
+      resultEl.style.color = '#C0304F';
+      resultEl.textContent = 'Publish failed: ' + err.message;
+    }
+    toast(err.message, false);
+  }
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = 'Publish to ' + label + ' ↗';
+  }
+}
+
+function updatePublishBtnLabel() {
+  const btn = document.getElementById('btnPublishWP');
+  if (!btn) return;
+  const cmsType = localStorage.getItem('cruise_cms_type') || 'wordpress';
+  const labels = { ghost: 'Ghost', webflow: 'Webflow', custom: 'Custom CMS', wordpress: 'WordPress' };
+  btn.textContent = 'Publish to ' + (labels[cmsType] || 'WordPress') + ' ↗';
+}
+
+function closeEmailModal() {
+  var m = document.getElementById('email-outreach-modal');
+  if (m) m.classList.remove('open');
+}
+
+function copyEmailModal() {
+  var el = document.getElementById('email-modal-body');
+  var txt = el ? el.value : '';
+  if (!txt) return;
+  navigator.clipboard.writeText(txt)
+    .then(function() { toast('Email copied!', true); })
+    .catch(function() {
+      el.select();
+      document.execCommand('copy');
+      toast('Email copied!', true);
+    });
+}
+
+function openEmailClient() {
+  var body = window._emailModalContent || '';
+  var site = window._emailModalSite || '';
+  var subject = 'Collaboration opportunity';
+  if (site) subject = 'Collaboration opportunity with ' + site;
+  window.open('mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank');
 }
 
 // ══════════════════════════════════════════════════════════════════
