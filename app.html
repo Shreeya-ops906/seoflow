@@ -12,6 +12,10 @@
 function initAuth() {
   window.Clerk.load().then(() => {
     if (!window.Clerk.user) { window.location.href = '/auth.html'; return; }
+    // If user has a plan in Clerk metadata they've already onboarded — skip localStorage check
+    const meta = window.Clerk.user.publicMetadata;
+    const hasPlan = meta && (meta.plan === 'pro' || meta.plan === 'scale' || meta.plan === 'trial');
+    if (hasPlan) localStorage.setItem('cruise_onboarding_complete', 'true');
     if (!localStorage.getItem('cruise_onboarding_complete')) { window.location.href = '/onboarding.html'; return; }
     const user = window.Clerk.user;
     const name = user.firstName || user.emailAddresses[0]?.emailAddress?.split('@')[0] || 'there';
