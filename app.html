@@ -5907,16 +5907,24 @@ function openUpgradeModal() { document.getElementById('upgrade-modal').classList
 function closeUpgradeModal() { document.getElementById('upgrade-modal').classList.remove('open'); }
 function activatePro() { startStripeCheckout(); }
 
-function startStripeCheckout() {
+async function startStripeCheckout() {
   closeUpgradeModal();
   const userId = window.Clerk?.user?.id || '';
   const email  = window.Clerk?.user?.primaryEmailAddress?.emailAddress || '';
-  const base   = 'https://buy.stripe.com/REPLACE_THIS_WITH_YOUR_PAYMENT_LINK';
-  const params = new URLSearchParams();
-  if (userId) params.set('client_reference_id', userId);
-  if (email)  params.set('prefilled_email', email);
-  const url = params.toString() ? base + '?' + params.toString() : base;
-  window.open(url, '_blank', 'noopener');
+  toast('Redirecting to checkout…');
+  try {
+    const res  = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, email }),
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+    throw new Error(data.error || 'No checkout URL');
+  } catch (err) {
+    console.error('Checkout error:', err);
+    toast('Could not start checkout — please try again.', false);
+  }
 }
 
 function checkUsageLimit() {
