@@ -3748,9 +3748,10 @@ function renderPublish() {
 }
 
 function connectWP() {
-  const url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  let url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
+  if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
   const username = document.getElementById('wp-username').value.trim();
-  const password = document.getElementById('wp-apppass').value.trim();
+  const password = document.getElementById('wp-apppass').value.trim().replace(/\s+/g, ' ');
 
   if (!url) { wpAlert('Please enter your WordPress site URL.', 'err'); return; }
   if (!username) { wpAlert('Please enter your WordPress username.', 'err'); return; }
@@ -3766,7 +3767,7 @@ function connectWP() {
   })
   .then(r => r.json().then(data => ({ ok: r.ok, data })))
   .then(({ ok, data }) => {
-    if (!ok) throw new Error(data.error || 'Connection failed');
+    if (!ok || !data.ok) throw new Error(data.error || 'Connection failed');
     const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
     localStorage.setItem(WP_KEY, JSON.stringify(wp));
     setWPLoading(false);

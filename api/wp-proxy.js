@@ -13,7 +13,13 @@ export default async function handler(req) {
     if (action === 'test') {
       const r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers });
       const d = await r.json();
-      return new Response(JSON.stringify({ ok: r.ok, name: d.name, error: d.message }), { headers: CORS });
+      if (!r.ok) {
+        return new Response(
+          JSON.stringify({ ok: false, error: d.message || `WordPress returned ${r.status}` }),
+          { status: r.status, headers: CORS }
+        );
+      }
+      return new Response(JSON.stringify({ ok: true, name: d.name }), { headers: CORS });
     }
 
     if (action === 'publish') {
@@ -21,9 +27,9 @@ export default async function handler(req) {
       let featuredMediaId = null;
       if (imageQuery) {
         try {
-          // Use Unsplash source (no API key needed)
-          const imgQuery = encodeURIComponent(imageQuery);
-          const imgUrl = `https://source.unsplash.com/1200x630/?${imgQuery}`;
+          // Use Lorem Picsum for featured image
+          const imgSeed = encodeURIComponent(imageQuery.replace(/\s+/g, '-').slice(0, 30));
+          const imgUrl = `https://picsum.photos/seed/${imgSeed}/1200/630`;
           const imgRes = await fetch(imgUrl);
           if (imgRes.ok) {
             const imgBuffer = await imgRes.arrayBuffer();
