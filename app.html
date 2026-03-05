@@ -2360,7 +2360,7 @@ input:focus, textarea:focus, select:focus {
 <div class="toast" id="toast"></div>
 
 <script>
-const API = 'https://api.anthropic.com/v1/messages';
+const API = '/api/ai-generate';
 
 // ── State ──────────────────────────────────────
 let brand = null;
@@ -4617,9 +4617,9 @@ async function researchKW() {
   out.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink4);font-size:13px">Researching keywords...</div>';
   const industry = typeof brand !== 'undefined' ? (brand.industry || 'business') : 'business';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/ai-generate', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:600,
+      body: JSON.stringify({ max_tokens:600,
         messages:[{role:'user', content:`Generate 6 SEO keyword ideas for: "${kw}" in the ${industry} industry. Return ONLY JSON array: [{"term":"...","volume":"...","difficulty":"easy|medium|hard"}]`}]
       })
     });
