@@ -4239,7 +4239,9 @@ async function callAI(prompt, maxTokens) {
   if (!res.ok) throw new Error(data.error || 'AI request failed (' + res.status + ')');
   const raw = (data.content || []).map(x => x.text || '').join('');
   if (!raw) throw new Error('AI returned an empty response. Please try again.');
-  const cleaned = raw.replace(/```json[\s\S]*?```|```/g, '').trim();
+  // Extract content from code fence if present, otherwise use raw
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
   // Robust extraction: strip any prose before/after the JSON object or array
   const start = cleaned.search(/[{[]/);
   const end = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
