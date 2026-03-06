@@ -4715,22 +4715,71 @@ function nav(el, id) {
 
 
 
-// ── WordPress API via CruiseSEO Connect plugin ───────────────────
+// ── WordPress API — browser-direct (no proxy, no IP bans) ────────
 async function wpDirect(params) {
-  // Route all WP calls through Vercel proxy using Application Passwords
-  const payload = { ...params };
-  // Decode stored base64 password
-  if (payload.password && !/\s/.test(payload.password) && payload.password.length > 10) {
-    try { payload.password = atob(payload.password); } catch(e) {}
+  const { action, url } = params;
+  let pass = params.password || '';
+  if (pass && !/\s/.test(pass) && pass.length > 10) {
+    try { pass = atob(pass); } catch(e) {}
   }
-  const r = await fetch('/api/wp-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  const d = await r.json();
-  if (!r.ok) throw new Error(d.error || d.message || `Error ${r.status}`);
-  return d;
+  const creds = btoa((params.username || '') + ':' + pass);
+  const base = url.replace(/\/$/, '') + '/wp-json/wp/v2';
+  const h = { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + creds };
+
+  if (action === 'test') {
+    let r, txt;
+    try { r = await fetch(base + '/users/me', { headers: h }); txt = await r.text(); }
+    catch(e) { throw new Error('Cannot reach ' + url + ' — check the URL is correct.'); }
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Invalid username or Application Password.');
+      if (r.status === 403) throw new Error('CORS not enabled — add the Code Snippets snippet in WordPress first.');
+      throw new Error('Connection failed (HTTP ' + r.status + ')');
+    }
+    const d = JSON.parse(txt);
+    return { ok: true, name: d.name };
+  }
+
+  if (action === 'publish') {
+    const { title, content, status, excerpt, date } = params;
+    let brandName = '';
+    try { brandName = JSON.parse(localStorage.getItem('cruise_brand') || '{}').name || ''; } catch(e) {}
+    const schema = '<scr'+'ipt type="application/ld+json">' + JSON.stringify({
+      '@context':'https://schema.org','@type':'Article','headline':title,
+      'datePublished':new Date().toISOString(),'dateModified':new Date().toISOString(),
+      'author':{'@type':'Organization','name':brandName||'CruiseSEO'},
+      'publisher':{'@type':'Organization','name':brandName||'CruiseSEO'},
+      'description':excerpt||title
+    }) + '<\/scr'+'ipt>';
+    const body = { title, content:(content||'')+'\n'+schema, status:status||'publish', excerpt:excerpt||'' };
+    if (date) body.date = date;
+    const r = await fetch(base + '/posts', { method:'POST', headers:h, body:JSON.stringify(body) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || 'Publish failed (' + r.status + ')');
+    return { ok:true, id:d.id, link:d.link, url:d.link, title:d.title?.rendered };
+  }
+
+  if (action === 'posts') {
+    const r = await fetch(base + '/posts?per_page=20&status=publish', { headers: h });
+    const d = await r.json();
+    return { ok:true, posts: d };
+  }
+
+  if (action === 'getpost') {
+    const r = await fetch(base + '/posts/' + params.postId, { headers: h });
+    const d = await r.json();
+    return { ok:true, content:d.content?.rendered||'', title:d.title?.rendered||'' };
+  }
+
+  if (action === 'updatepost') {
+    const r = await fetch(base + '/posts/' + params.postId, {
+      method:'POST', headers:h, body:JSON.stringify({ title:params.title, content:params.content })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || 'Update failed (' + r.status + ')');
+    return { ok:true, link:d.link };
+  }
+
+  throw new Error('Unknown action');
 }
 
 // ── WordPress Connection ──
