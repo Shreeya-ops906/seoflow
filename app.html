@@ -3394,8 +3394,9 @@ async function runGenerate() {
   // Get brand context
   const brandCtx = localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '';
   let brandInfo = '';
-  try { 
-    const b = JSON.parse(brandCtx);
+  let b = {};
+  try {
+    b = JSON.parse(brandCtx) || {};
     brandInfo = `Business: ${b.name || ''}. Industry: ${b.industry || ''}. Target audience: ${b.audience || ''}. Brand voice: ${b.voice || selectedTone}.`;
   } catch(e) { brandInfo = `Brand tone: ${selectedTone}.`; }
 
