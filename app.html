@@ -3679,9 +3679,7 @@ async function publishToWP() {
     toast('Post published live!', true);
     // Auto-post to social if enabled
     if (post.link) postAutoSocial(generatedPostData.title, post.link);
-    if (post.id) {
-      injectSEOMeta(wp.url, wp.username, atob(wp.password), post.id, generatedPostData.title, generatedPostData.content_html);
-    }
+    // SEO meta injection skipped — CSK endpoint handles schema markup in content
 
     // Add to posts list
     const d = new Date();
@@ -6347,7 +6345,12 @@ function initTrialSystem() {
           applyPlanGates(planType);
           toast('Welcome! Your ' + planType + ' plan is now active. ✦', true);
         } else {
-          toast('Your plan is now active! ✦ Your card is saved — cancel anytime.', true);
+          // 'trial' — reset the trial start date so the countdown starts from today
+          var p = { type: 'trial', start: Date.now() };
+          localStorage.setItem('cruise_plan', JSON.stringify(p));
+          renderTrialBanner(p);
+          applyPlanGates('trial');
+          toast('Your 3-day free trial has started! ✦ Your card is saved — cancel anytime before day 3.', true);
         }
       };
       if (window.Clerk?.user?.reload) {

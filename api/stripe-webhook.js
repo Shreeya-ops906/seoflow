@@ -6,10 +6,14 @@
 //   STRIPE_SECRET_KEY      — from Stripe Dashboard → Developers → API Keys
 //   CLERK_SECRET_KEY       — from Clerk Dashboard → API Keys → Secret key
 //
-// Stripe webhook events to subscribe to:
-//   checkout.session.completed
-//   customer.subscription.deleted
-//   invoice.payment_failed
+// Stripe webhook events to subscribe to (Stripe Dashboard → Webhooks → Add endpoint):
+//   checkout.session.completed   — fires when user completes checkout (sets plan: trial)
+//   invoice.payment_succeeded    — fires when trial ends and payment is taken (sets plan: pro/scale)
+//   invoice.payment_failed       — fires when payment fails after trial (sets plan: expired)
+//   customer.subscription.deleted — fires when subscription is cancelled (sets plan: free)
+//
+// ⚠️  IMPORTANT: invoice.payment_succeeded MUST be subscribed to in Stripe, otherwise
+//     users stay on 'trial' plan permanently and never get upgraded to pro/scale.
 
 export const config = { runtime: 'edge' };
 
