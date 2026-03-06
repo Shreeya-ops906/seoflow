@@ -4718,7 +4718,7 @@ async function wpDirect(params) {
     const { title, content, status, excerpt, date } = params;
     let brandName = '';
     try { brandName = (JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}')).name || ''; } catch(e) {}
-    const schema = `<script type="application/ld+json">${JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":title,"datePublished":new Date().toISOString(),"dateModified":new Date().toISOString(),"author":{"@type":"Organization","name":brandName||"Cruise SEO"},"publisher":{"@type":"Organization","name":brandName||"Cruise SEO"},"description":excerpt||title})}</script>`;
+    const schema = '<scr'+'ipt type="application/ld+json">' + JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":title,"datePublished":new Date().toISOString(),"dateModified":new Date().toISOString(),"author":{"@type":"Organization","name":brandName||"Cruise SEO"},"publisher":{"@type":"Organization","name":brandName||"Cruise SEO"},"description":excerpt||title}) + '<\/scr'+'ipt>';
     const postBody = { title, content: (content||'') + '\n' + schema, status: status||'publish', excerpt: excerpt||'' };
     if (date) postBody.date = date;
     const r = await fetch(`${url}/wp-json/wp/v2/posts`, { method: 'POST', headers: authHeaders, body: JSON.stringify(postBody) });
