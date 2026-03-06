@@ -2222,26 +2222,46 @@ input:focus, textarea:focus, select:focus {
 
         <!-- Connect form -->
         <div id="wp-connect-form">
-          <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:var(--ink3);line-height:1.6">
-            You'll need a WordPress <strong style="color:var(--ink)">Application Password</strong>. Go to your WordPress dashboard → <strong style="color:var(--ink)">Users → Profile</strong> → scroll to <strong style="color:var(--ink)">Application Passwords</strong>, type "Cruise SEO" and click Add.
+          <!-- Step 1 -->
+          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px">1</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px;margin-bottom:4px">Install the CruiseSEO Connect plugin</div>
+              <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">Download the plugin, then in WordPress go to <strong>Plugins → Add New → Upload Plugin</strong> and activate it.</div>
+              <a href="/cruiseseo-connect.zip" download style="display:inline-flex;align-items:center;gap:7px;background:var(--blue);color:#fff;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none">
+                ↓ Download CruiseSEO Connect plugin
+              </a>
+            </div>
           </div>
-          <div class="field" style="margin-bottom:14px">
-            <label>WordPress site URL</label>
-            <input type="url" id="wp-url" class="kw-input" placeholder="https://yoursite.com" style="width:100%">
+          <!-- Step 2 -->
+          <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:20px">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px">2</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px;margin-bottom:4px">Copy your API key from WordPress</div>
+              <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">After activating the plugin, go to <strong>Settings → CruiseSEO Connect</strong> and copy your API key.</div>
+            </div>
           </div>
-          <div class="field" style="margin-bottom:14px">
-            <label>WordPress username</label>
-            <input type="text" id="wp-username" class="kw-input" placeholder="Your WordPress login username" style="width:100%">
+          <!-- Step 3 — enter details -->
+          <div style="display:flex;align-items:flex-start;gap:14px">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px">3</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px;margin-bottom:10px">Enter your details below</div>
+              <div class="field" style="margin-bottom:14px">
+                <label>WordPress site URL</label>
+                <input type="url" id="wp-url" class="kw-input" placeholder="https://yoursite.com" style="width:100%">
+              </div>
+              <div class="field" style="margin-bottom:18px">
+                <label>API Key</label>
+                <input type="password" id="wp-apppass" class="kw-input" placeholder="csk_••••••••••••••••" style="width:100%;font-family:monospace">
+                <input type="hidden" id="wp-username" value="apikey">
+              </div>
+              <div id="wp-connect-alert" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px"></div>
+              <button class="btn btn-primary" onclick="connectWP()" id="btn-connect-wp" style="width:100%;justify-content:center;padding:13px">
+                <div class="spin" id="wp-spin"></div>
+                <span id="wp-btn-txt">Connect WordPress</span>
+              </button>
+            </div>
           </div>
-          <div class="field" style="margin-bottom:18px">
-            <label>Application password</label>
-            <input type="password" id="wp-apppass" class="kw-input" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" style="width:100%;font-family:monospace;letter-spacing:.05em">
-          </div>
-          <div id="wp-connect-alert" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px"></div>
-          <button class="btn btn-primary" onclick="connectWP()" id="btn-connect-wp" style="width:100%;justify-content:center;padding:13px">
-            <div class="spin" id="wp-spin"></div>
-            <span id="wp-btn-txt">Test connection & save</span>
-          </button>
         </div>
       </div>
 
@@ -4692,26 +4712,28 @@ function nav(el, id) {
 
 
 
-// ── WordPress Direct API (browser-to-WP, bypasses Vercel proxy) ──
+// ── WordPress API via CruiseSEO Connect plugin ───────────────────
 async function wpDirect(params) {
-  const { action, url, username } = params;
-  let password = params.password || '';
-  // Normalize: if no spaces and looks like base64, decode it
-  if (!/\s/.test(password) && password.length > 20) {
-    try { password = atob(password); } catch(e) {}
+  const { action, url } = params;
+  // Get API key — stored as password field (base64-encoded in localStorage)
+  let apiKey = params.password || params.apiKey || '';
+  if (apiKey && !/\s/.test(apiKey) && apiKey.length > 10 && !apiKey.startsWith('csk_')) {
+    try { apiKey = atob(apiKey); } catch(e) {}
   }
-  const creds = btoa(`${username}:${password}`);
-  const authHeaders = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
+  const base = url.replace(/\/$/, '') + '/wp-json/cruiseseo/v1';
+  const h = { 'Content-Type': 'application/json', 'X-CruiseSEO-Key': apiKey };
 
   if (action === 'test') {
-    const r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers: authHeaders });
-    const text = await r.text();
-    let d = {};
-    try { d = JSON.parse(text); } catch(e) {
-      throw new Error(`WordPress returned a non-JSON response (HTTP ${r.status}). Your host may be blocking REST API requests — contact your hosting provider and ask them to whitelist /wp-json/ endpoints.`);
+    const r = await fetch(`${base}/test`, { headers: h });
+    if (!r.ok) {
+      const txt = await r.text();
+      let msg = `Connection failed (HTTP ${r.status}).`;
+      if (r.status === 401 || r.status === 403) msg = 'Invalid API key — check Settings → CruiseSEO Connect in WordPress.';
+      else if (r.status === 404) msg = 'Plugin not found — make sure CruiseSEO Connect is installed and activated.';
+      throw new Error(msg);
     }
-    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
-    return { ok: true, name: d.name || d.slug || username };
+    const d = await r.json();
+    return { ok: true, name: d.name || 'WordPress' };
   }
 
   if (action === 'publish') {
@@ -4719,31 +4741,31 @@ async function wpDirect(params) {
     let brandName = '';
     try { brandName = (JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}')).name || ''; } catch(e) {}
     const schema = '<scr'+'ipt type="application/ld+json">' + JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":title,"datePublished":new Date().toISOString(),"dateModified":new Date().toISOString(),"author":{"@type":"Organization","name":brandName||"Cruise SEO"},"publisher":{"@type":"Organization","name":brandName||"Cruise SEO"},"description":excerpt||title}) + '<\/scr'+'ipt>';
-    const postBody = { title, content: (content||'') + '\n' + schema, status: status||'publish', excerpt: excerpt||'' };
-    if (date) postBody.date = date;
-    const r = await fetch(`${url}/wp-json/wp/v2/posts`, { method: 'POST', headers: authHeaders, body: JSON.stringify(postBody) });
+    const body = { title, content: (content||'') + '\n' + schema, status: status||'publish', excerpt: excerpt||'' };
+    if (date) body.date = date;
+    const r = await fetch(`${base}/publish`, { method: 'POST', headers: h, body: JSON.stringify(body) });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
-    return { ok: true, id: d.id, link: d.link, url: d.link, title: d.title?.rendered };
+    if (!r.ok) throw new Error(d.message || `Publish failed (${r.status})`);
+    return { ok: true, id: d.id, link: d.link, url: d.link, title: d.title };
   }
 
   if (action === 'posts') {
-    const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=20&status=publish`, { headers: authHeaders });
+    const r = await fetch(`${base}/posts`, { headers: h });
     const d = await r.json();
-    return { ok: r.ok, posts: d };
+    return { ok: r.ok, posts: d.posts || [] };
   }
 
   if (action === 'getpost') {
-    const r = await fetch(`${url}/wp-json/wp/v2/posts/${params.postId}`, { headers: authHeaders });
+    const r = await fetch(`${base}/post/${params.postId}`, { headers: h });
     const d = await r.json();
-    return { ok: r.ok, content: d.content?.rendered || '', title: d.title?.rendered || '' };
+    return { ok: r.ok, content: d.content || '', title: d.title || '' };
   }
 
   if (action === 'updatepost') {
-    const r = await fetch(`${url}/wp-json/wp/v2/posts/${params.postId}`, { method: 'POST', headers: authHeaders, body: JSON.stringify({ title: params.title, content: params.content }) });
+    const r = await fetch(`${base}/post/${params.postId}`, { method: 'POST', headers: h, body: JSON.stringify({ title: params.title, content: params.content }) });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
-    return { ok: true, link: d.link, title: d.title?.rendered };
+    if (!r.ok) throw new Error(d.message || `Update failed (${r.status})`);
+    return { ok: true, link: d.link };
   }
 
   throw new Error('Unknown action');
@@ -4768,19 +4790,17 @@ function renderPublish() {
 function connectWP() {
   let url = document.getElementById('wp-url').value.trim().replace(/\/$/, '');
   if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
-  const username = document.getElementById('wp-username').value.trim();
-  const password = document.getElementById('wp-apppass').value.trim().replace(/\s+/g, ' ');
+  const password = document.getElementById('wp-apppass').value.trim();
 
   if (!url) { wpAlert('Please enter your WordPress site URL.', 'err'); return; }
-  if (!username) { wpAlert('Please enter your WordPress username.', 'err'); return; }
-  if (!password) { wpAlert('Please enter your Application Password.', 'err'); return; }
+  if (!password) { wpAlert('Please enter your API key from the CruiseSEO Connect plugin.', 'err'); return; }
 
   setWPLoading(true);
   clearWPAlert();
 
-  wpDirect({ action: 'test', url, username, password })
+  wpDirect({ action: 'test', url, username: 'apikey', password })
   .then(data => {
-    const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
+    const wp = { url, username: 'apikey', password: btoa(password), name: data.name || 'WordPress', connected: true };
     localStorage.setItem(WP_KEY, JSON.stringify(wp));
     setWPLoading(false);
     showWPConnected(wp);
@@ -4788,11 +4808,7 @@ function connectWP() {
   })
   .catch(err => {
     setWPLoading(false);
-    if (err.message.includes('401') || err.message.includes('incorrect_password') || err.message.includes('invalid_username')) {
-      wpAlert('Wrong username or application password. Double-check and try again.', 'err');
-    } else {
-      wpAlert('Connection failed: ' + err.message, 'err');
-    }
+    wpAlert('Connection failed: ' + err.message, 'err');
   });
 }
 

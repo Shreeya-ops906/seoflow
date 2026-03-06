@@ -4,5 +4,14 @@
       "path": "/api/autopilot",
       "schedule": "0 8 * * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/cruiseseo-connect.zip",
+      "headers": [
+        { "key": "Content-Type", "value": "application/zip" },
+        { "key": "Content-Disposition", "value": "attachment; filename=\"cruiseseo-connect.zip\"" }
+      ]
+    }
   ]
 }
