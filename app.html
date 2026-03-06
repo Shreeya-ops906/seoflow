@@ -2990,6 +2990,7 @@ function updateStats() {
 // ── Ideas ──────────────────────────────────────
 async function loadIdeas() {
   const el = document.getElementById('ideaList');
+  if (!el) return;
   const kws = (brand.keywords||[]).join(', ');
   const industry = brand.industry || 'marketing';
   try {
