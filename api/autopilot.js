@@ -120,19 +120,26 @@ CONTENT:
       }
     }
 
-    const wpRes = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${wpCreds}` },
-      body: JSON.stringify({
-        title,
-        content: finalContent,
-        status: 'publish',
-        excerpt
-      })
-    });
+    let wpRes, wpResText;
+    try {
+      wpRes = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${wpCreds}` },
+        body: JSON.stringify({ title, content: finalContent, status: 'publish', excerpt })
+      });
+      wpResText = await wpRes.text();
+    } catch(wpFetchErr) {
+      throw new Error(`Cannot reach WordPress at ${wpUrl}: ${wpFetchErr.message}`);
+    }
 
-    const wpPost = await wpRes.json();
-    if (!wpRes.ok) throw new Error(wpPost.message || `WordPress error ${wpRes.status}`);
+    let wpPost = {};
+    try { wpPost = JSON.parse(wpResText); } catch(e) {
+      throw new Error(`WordPress returned non-JSON (HTTP ${wpRes.status}). Response: ${wpResText.slice(0, 200)}`);
+    }
+    if (!wpRes.ok) {
+      const errMsg = wpPost.message || wpPost.error || `WordPress error`;
+      throw new Error(`${errMsg} (HTTP ${wpRes.status})`);
+    }
 
     return new Response(JSON.stringify({
       status: 'success',

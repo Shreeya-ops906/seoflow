@@ -11,15 +11,31 @@ export default async function handler(req) {
     const headers = { 'Content-Type': 'application/json', 'Authorization': `Basic ${creds}` };
 
     if (action === 'test') {
-      const r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers });
-      const d = await r.json();
-      if (!r.ok) {
+      let r, text;
+      try {
+        r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers });
+        text = await r.text();
+      } catch(fetchErr) {
         return new Response(
-          JSON.stringify({ ok: false, error: d.message || `WordPress returned ${r.status}` }),
+          JSON.stringify({ ok: false, error: `Cannot reach ${url} — verify the URL is correct and the site is online. (${fetchErr.message})` }),
+          { status: 503, headers: CORS }
+        );
+      }
+      let d = {};
+      try { d = JSON.parse(text); } catch(e) {
+        return new Response(
+          JSON.stringify({ ok: false, error: `WordPress returned a non-JSON response (HTTP ${r.status}). Make sure REST API is enabled and the URL has no extra path.` }),
+          { status: r.status || 502, headers: CORS }
+        );
+      }
+      if (!r.ok) {
+        const msg = d.message || d.error || `WordPress error`;
+        return new Response(
+          JSON.stringify({ ok: false, error: `${msg} (HTTP ${r.status})` }),
           { status: r.status, headers: CORS }
         );
       }
-      return new Response(JSON.stringify({ ok: true, name: d.name }), { headers: CORS });
+      return new Response(JSON.stringify({ ok: true, name: d.name || d.slug || username }), { headers: CORS });
     }
 
     if (action === 'publish') {
