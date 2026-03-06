@@ -3626,28 +3626,16 @@ async function publishToWP() {
   resultEl.style.display = 'none';
 
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'publish',
-        url: wp.url,
-        username: wp.username,
-        password: atob(wp.password),
-        title: generatedPostData.title,
-        content: generatedPostData.content_html,
-        status: 'publish',
-        imageQuery: generatedPostData.title.split(' ').slice(0,3).join(' '),
-        internalLinks: (() => {
-          const posts = getAllPublishedPosts().slice(0,10);
-          const b = JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}');
-          return { posts: posts.map(p=>({title:p.title,url:p.url})), bookingUrl: b.bookingUrl||b.booking_url||'' };
-        })()
-      })
+    const post = await wpDirect({
+      action: 'publish',
+      url: wp.url,
+      username: wp.username,
+      password: atob(wp.password),
+      title: generatedPostData.title,
+      content: generatedPostData.content_html,
+      status: 'publish',
+      excerpt: generatedPostData.meta_description || ''
     });
-
-    const post = await r.json();
-    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
 
     resultEl.style.display = 'block';
     resultEl.style.background = 'var(--sage-l)';
@@ -4180,11 +4168,7 @@ function nav(el, id) {
 function syncWPPostsToLog() {
   const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
   if (!wp.url) return;
-  fetch('/api/wp-proxy', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) })
-  }).then(r => r.json()).then(d => {
+  wpDirect({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) }).then(d => {
     if (d.posts?.length) {
       const logs = d.posts.map(p => ({
         title: p.title?.rendered?.replace(/&#[0-9]+;/g, c => String.fromCharCode(parseInt(c.slice(2,-1)))) || p.slug,
@@ -4377,11 +4361,7 @@ async function runAudit() {
 
   try {
     // Fetch posts from WP
-    const wpRes = await fetch('/api/wp-proxy', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) })
-    });
-    const wpData = await wpRes.json();
+    const wpData = await wpDirect({ action: 'posts', url: wp.url, username: wp.username, password: atob(wp.password) });
     const posts = wpData.posts || [];
     const postSummary = posts.slice(0,10).map(p =>
       `Title: "${p.title?.rendered}" | Has excerpt: ${!!p.excerpt?.rendered?.replace(/<[^>]+>/g,'')} | Has featured image: ${!!p.featured_media}`
@@ -4712,6 +4692,63 @@ function nav(el, id) {
 
 
 
+// ── WordPress Direct API (browser-to-WP, bypasses Vercel proxy) ──
+async function wpDirect(params) {
+  const { action, url, username } = params;
+  let password = params.password || '';
+  // Normalize: if no spaces and looks like base64, decode it
+  if (!/\s/.test(password) && password.length > 20) {
+    try { password = atob(password); } catch(e) {}
+  }
+  const creds = btoa(`${username}:${password}`);
+  const authHeaders = { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' };
+
+  if (action === 'test') {
+    const r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers: authHeaders });
+    const text = await r.text();
+    let d = {};
+    try { d = JSON.parse(text); } catch(e) {
+      throw new Error(`WordPress returned a non-JSON response (HTTP ${r.status}). Your host may be blocking REST API requests — contact your hosting provider and ask them to whitelist /wp-json/ endpoints.`);
+    }
+    if (!r.ok) throw new Error(d.message || `HTTP ${r.status}`);
+    return { ok: true, name: d.name || d.slug || username };
+  }
+
+  if (action === 'publish') {
+    const { title, content, status, excerpt, date } = params;
+    let brandName = '';
+    try { brandName = (JSON.parse(localStorage.getItem('seoflow_brand') || localStorage.getItem('cruise_brand') || '{}')).name || ''; } catch(e) {}
+    const schema = `<script type="application/ld+json">${JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":title,"datePublished":new Date().toISOString(),"dateModified":new Date().toISOString(),"author":{"@type":"Organization","name":brandName||"Cruise SEO"},"publisher":{"@type":"Organization","name":brandName||"Cruise SEO"},"description":excerpt||title})}</script>`;
+    const postBody = { title, content: (content||'') + '\n' + schema, status: status||'publish', excerpt: excerpt||'' };
+    if (date) postBody.date = date;
+    const r = await fetch(`${url}/wp-json/wp/v2/posts`, { method: 'POST', headers: authHeaders, body: JSON.stringify(postBody) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
+    return { ok: true, id: d.id, link: d.link, url: d.link, title: d.title?.rendered };
+  }
+
+  if (action === 'posts') {
+    const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=20&status=publish`, { headers: authHeaders });
+    const d = await r.json();
+    return { ok: r.ok, posts: d };
+  }
+
+  if (action === 'getpost') {
+    const r = await fetch(`${url}/wp-json/wp/v2/posts/${params.postId}`, { headers: authHeaders });
+    const d = await r.json();
+    return { ok: r.ok, content: d.content?.rendered || '', title: d.title?.rendered || '' };
+  }
+
+  if (action === 'updatepost') {
+    const r = await fetch(`${url}/wp-json/wp/v2/posts/${params.postId}`, { method: 'POST', headers: authHeaders, body: JSON.stringify({ title: params.title, content: params.content }) });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
+    return { ok: true, link: d.link, title: d.title?.rendered };
+  }
+
+  throw new Error('Unknown action');
+}
+
 // ── WordPress Connection ──
 const WP_KEY = 'cruise_wp_connection';
 
@@ -4741,14 +4778,8 @@ function connectWP() {
   setWPLoading(true);
   clearWPAlert();
 
-  fetch('/api/wp-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action: 'test', url, username, password })
-  })
-  .then(r => r.json().then(data => ({ ok: r.ok, data })))
-  .then(({ ok, data }) => {
-    if (!ok || !data.ok) throw new Error(data.error || 'Connection failed');
+  wpDirect({ action: 'test', url, username, password })
+  .then(data => {
     const wp = { url, username, password: btoa(password), name: data.name || username, connected: true };
     localStorage.setItem(WP_KEY, JSON.stringify(wp));
     setWPLoading(false);
@@ -4797,22 +4828,15 @@ async function testPublish() {
   btn.textContent = 'Publishing...';
 
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'publish',
-        url: wp.url,
-        username: wp.username,
-        password: atob(wp.password),
-        title,
-        content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this — it was created to verify your connection is working.</p>',
-        status: 'draft'
-      })
+    const post = await wpDirect({
+      action: 'publish',
+      url: wp.url,
+      username: wp.username,
+      password: atob(wp.password),
+      title,
+      content: '<p>This is a test post published automatically by <strong>Cruise SEO</strong>. You can delete this — it was created to verify your connection is working.</p>',
+      status: 'draft'
     });
-
-    const post = await r.json();
-    if (!r.ok) throw new Error(post.error || 'HTTP ' + r.status);
 
     const resultEl = document.getElementById('wp-publish-result');
     resultEl.style.display = 'block';
@@ -5016,13 +5040,7 @@ async function profConnectWP() {
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   if (btn) { btn.disabled = true; btn.textContent = 'Connecting...'; }
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'test', url, username: user, password: pass })
-    });
-    const data = await r.json();
-    if (!r.ok) throw new Error(data.error || 'Connection failed');
+    const data = await wpDirect({ action: 'test', url, username: user, password: pass });
     const wpData = { url, username: user, password: btoa(pass), name: data.name || user };
     localStorage.setItem('cruise_wp_connection', JSON.stringify(wpData));
     // Also sync to the main publish view fields
@@ -5620,13 +5638,7 @@ async function publishClusterPostNow() {
   const resultEl = document.getElementById('cluster-gen-result');
   if (resultEl) resultEl.textContent = 'Publishing...';
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'publish', url: wp.url, username: wp.username, password: wp.password, title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'publish', excerpt: _clusterGenData.meta_description })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Publish failed');
+    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'publish', excerpt: _clusterGenData.meta_description });
     if (resultEl) resultEl.innerHTML = `<span style="color:var(--sage)">✓ Published! <a href="${d.url}" target="_blank" style="color:var(--amber)">View post ↗</a></span>`;
     const log = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
     log.unshift({ title: _clusterGenData.title, url: d.url, status: 'ok', ts: new Date().toISOString(), topic: 'cluster' });
@@ -5647,13 +5659,7 @@ async function scheduleClusterPost() {
   const resultEl = document.getElementById('cluster-gen-result');
   if (resultEl) resultEl.textContent = 'Scheduling...';
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'publish', url: wp.url, username: wp.username, password: wp.password, title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'future', date: schedDate, excerpt: _clusterGenData.meta_description })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Schedule failed');
+    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'future', date: schedDate, excerpt: _clusterGenData.meta_description });
     if (resultEl) resultEl.innerHTML = `<span style="color:var(--sage)">✓ Scheduled for ${new Date(dtVal).toLocaleString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>`;
     toast('Post scheduled!', true);
   } catch(e) {
@@ -6579,11 +6585,7 @@ function openEditPost(ts, title, url, wpId) {
   // Try to load current content from WP
   const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
   if (wp.url && wpId) {
-    fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'getpost', url: wp.url, username: wp.username, password: wp.password, postId: wpId })
-    }).then(r => r.json()).then(d => {
+    wpDirect({ action: 'getpost', url: wp.url, username: wp.username, password: atob(wp.password), postId: wpId }).then(d => {
       if (d.content && contentArea) contentArea.value = d.content;
     }).catch(() => { if (contentArea) contentArea.value = '<!-- Paste or write post content here -->'; });
   } else {
@@ -6612,13 +6614,8 @@ async function saveEditPost() {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Updating...'; }
   if (statusEl) statusEl.textContent = 'Sending to WordPress...';
   try {
-    const r = await fetch('/api/wp-proxy', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ action: 'updatepost', url: wp.url, username: wp.username, password: wp.password, postId: wpId, title, content })
-    });
-    const d = await r.json();
-    if (!r.ok || !d.ok) throw new Error(d.error || 'Update failed');
+    const d = await wpDirect({ action: 'updatepost', url: wp.url, username: wp.username, password: atob(wp.password), postId: wpId, title, content });
+    if (!d.ok) throw new Error('Update failed');
     if (statusEl) statusEl.innerHTML = `<span style="color:var(--sage)">✓ Updated on WordPress — <a href="${d.link || ''}" target="_blank" style="color:var(--amber)">view post ↗</a></span>`;
     toast('Post updated on WordPress!', true);
   } catch(err) {
