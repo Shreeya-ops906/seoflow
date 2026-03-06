@@ -4219,11 +4219,13 @@ async function callAI(prompt, maxTokens) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'AI request failed (' + res.status + ')');
   const raw = (data.content || []).map(x => x.text || '').join('');
-  const cleaned = raw.replace(/```json\n?|```\n?/g, '').trim();
+  if (!raw) throw new Error('AI returned an empty response. Please try again.');
+  const cleaned = raw.replace(/```json[\s\S]*?```|```/g, '').trim();
   // Robust extraction: strip any prose before/after the JSON object or array
   const start = cleaned.search(/[{[]/);
   const end = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
-  return (start >= 0 && end > start) ? cleaned.slice(start, end + 1) : cleaned;
+  if (start < 0 || end <= start) throw new Error('AI did not return valid JSON. Response: ' + cleaned.slice(0, 120));
+  return cleaned.slice(start, end + 1);
 }
 
 async function callAIStream(prompt, onChunk, maxTokens) {
@@ -4316,7 +4318,7 @@ Return ONLY a JSON object:
 }`;
 
     const raw = await callAI(prompt, 1500);
-    const d = JSON.parse(raw);
+    let d; try { d = JSON.parse(raw); } catch(pe) { throw new Error('Grader parse failed: ' + raw.slice(0,100)); }
 
     const overall = document.getElementById('gr-overall');
     overall.textContent = d.overall + '/100';
@@ -4383,7 +4385,7 @@ Perform a comprehensive SEO audit and return ONLY a JSON object:
 }`;
 
     const raw = await callAI(prompt, 2000);
-    const d = JSON.parse(raw);
+    let d; try { d = JSON.parse(raw); } catch(pe) { throw new Error('Audit parse failed: ' + raw.slice(0,100)); }
 
     const scoreEl = document.getElementById('aud-score');
     scoreEl.textContent = d.health_score + '/100';
@@ -4464,7 +4466,7 @@ Return ONLY JSON:
 }`;
 
     const raw = await callAI(prompt, 2500);
-    clusterData = JSON.parse(raw);
+    try { clusterData = JSON.parse(raw); } catch(pe) { throw new Error('Cluster parse failed: ' + raw.slice(0,100)); }
 
     document.getElementById('cluster-pillar-title').textContent = clusterData.pillar?.title || '';
     document.getElementById('cluster-pillar-desc').textContent = clusterData.pillar?.description || '';
@@ -4530,7 +4532,7 @@ Return ONLY JSON:
 }`;
 
     const raw = await callAI(prompt, 2000);
-    const d = JSON.parse(raw);
+    let d; try { d = JSON.parse(raw); } catch(pe) { throw new Error('Competitor parse failed: ' + raw.slice(0,100)); }
 
     document.getElementById('comp-strengths').innerHTML = (d.strengths||[]).map(s => issueItem(s, 'warn')).join('');
     document.getElementById('comp-gaps').innerHTML = (d.content_gaps||[]).map(s => issueItem(s, 'ok')).join('');
@@ -4579,7 +4581,7 @@ Write engaging social posts for each platform. Return ONLY JSON:
 }`;
 
     const raw = await callAI(prompt, 1500);
-    const d = JSON.parse(raw);
+    let d; try { d = JSON.parse(raw); } catch(pe) { throw new Error('Snippets parse failed: ' + raw.slice(0,100)); }
 
     document.getElementById('social-twitter').textContent = d.twitter || '';
     document.getElementById('social-linkedin').textContent = d.linkedin || '';
