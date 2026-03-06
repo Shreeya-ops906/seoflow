@@ -59,15 +59,16 @@ Return ONLY a JSON object (no markdown, no explanation):
     });
 
     const trendData = await trendRes.json();
-    const trendText = trendData.content?.filter(c => c.type === 'text').map(c => c.text).join('') || '';
-    
+    const trendText = (trendRes.ok ? trendData.content?.filter(c => c.type === 'text').map(c => c.text).join('') : '') || '';
+
     let trendResult;
     try {
-      const clean = trendText.replace(/```json|```/g, '').trim();
-      trendResult = JSON.parse(clean);
+      const clean = trendText.replace(/```json[\s\S]*?```|```/g, '').trim();
+      const s = clean.search(/[{[]/), e = Math.max(clean.lastIndexOf('}'), clean.lastIndexOf(']'));
+      trendResult = JSON.parse(s >= 0 && e > s ? clean.slice(s, e + 1) : clean);
     } catch(e) {
       // Fallback topic based on keywords
-      trendResult = { 
+      trendResult = {
         topic: keywords?.[0] || brand || 'industry tips and trends',
         reason: 'Based on brand keywords',
         search_intent: 'informational'
@@ -114,9 +115,11 @@ Return ONLY a JSON object (no markdown, no code blocks):
     });
 
     const postData = await postRes.json();
+    if (!postRes.ok) throw new Error(postData.error || 'AI post generation failed (' + postRes.status + ')');
     const postRaw = postData.content?.map(c => c.text || '').join('') || '';
-    const postClean = postRaw.replace(/```json|```/g, '').trim();
-    const post = JSON.parse(postClean);
+    const postClean = postRaw.replace(/```json[\s\S]*?```|```/g, '').trim();
+    const ps = postClean.search(/[{[]/), pe = Math.max(postClean.lastIndexOf('}'), postClean.lastIndexOf(']'));
+    const post = JSON.parse(ps >= 0 && pe > ps ? postClean.slice(ps, pe + 1) : postClean);
 
     // Step 3: Publish to WordPress
     const wpCreds = btoa(`${wpUser}:${wpPass}`);
