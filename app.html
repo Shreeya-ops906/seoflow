@@ -5083,7 +5083,8 @@ async function saveProfile() {
     }
   } catch(e) { console.warn('Clerk brand sync failed:', e); }
   applyBrand();
-  document.getElementById('profName').textContent = brand.name;
+  const profNameEl = document.getElementById('profName');
+  if (profNameEl) profNameEl.textContent = brand.name;
   toast('Profile saved!', true);
 }
 
