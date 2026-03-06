@@ -3111,7 +3111,8 @@ function renderDashConnections() {
 
 // ── SEO ────────────────────────────────────────
 function renderSEO() {
-  document.getElementById('kwBody').innerHTML = kwData.map(k=>{
+  const kwBodyEl = document.getElementById('kwBody');
+  if (kwBodyEl) kwBodyEl.innerHTML = kwData.map(k=>{
     const g=k.rank<=15?'good':k.rank<=30?'mid':'';
     const dc=k.diff<40?'df-easy':k.diff<60?'df-med':'df-hard';
     const dt=k.d>0?`<span class="delta up">+${k.d}</span>`:k.d<0?`<span class="delta dn">${k.d}</span>`:`<span style="color:var(--tx3);font-size:10px">—</span>`;
@@ -3124,7 +3125,8 @@ function renderSEO() {
     </tr>`;
   }).join('');
 
-  document.getElementById('oppList').innerHTML = opps.map(o=>`
+  const oppListEl = document.getElementById('oppList');
+  if (oppListEl) oppListEl.innerHTML = opps.map(o=>`
     <div class="opp-row" onclick="loadOpp('${o.title.replace(/'/g,"\\'")}')">
       <div class="opp-title">${o.title}</div>
       <div class="opp-tags">
@@ -3133,14 +3135,16 @@ function renderSEO() {
       </div>
     </div>`).join('');
 
-  document.getElementById('compList').innerHTML = comps.map(c=>`
+  const compListEl = document.getElementById('compList');
+  if (compListEl) compListEl.innerHTML = comps.map(c=>`
     <div class="comp-row">
       <span class="comp-domain">${c.d}</span>
       <div class="comp-track"><div class="comp-fill" style="width:${c.s}%"></div></div>
       <span class="comp-score">${c.s}</span>
     </div>`).join('');
 
-  document.getElementById('healthList').innerHTML = healthChecks.map(h=>`
+  const healthListEl = document.getElementById('healthList');
+  if (healthListEl) healthListEl.innerHTML = healthChecks.map(h=>`
     <div class="health-check ${h.ok?'hc-ok':'hc-bad'}">
       <span class="hc-icon" style="color:${h.ok?'var(--green)':'var(--tx3)'}">${h.ok?'✓':'✗'}</span>
       <span class="hc-label">${h.l}</span>
@@ -3901,7 +3905,7 @@ function renderApLog() {
       <td style="padding:10px 16px"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${l.status==='ok'?'rgba(74,222,128,.12)':'rgba(192,48,79,.08)'};color:${l.status==='ok'?'#16a34a':'#C0304F'}">${l.status==='ok'?'Published':'Failed'}</span></td>
       <td style="padding:10px 16px;font-size:13px;color:var(--ink2);max-width:300px">${l.url?`<a href="${l.url}" target="_blank" style="color:var(--amber);font-weight:600">${l.title}</a>`:l.title}</td>
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${l.topic || '—'}</td>
-      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${new Date(l.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${new Date(l.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
     </tr>`).join('')}</tbody>
   </table>`;
 }
@@ -4298,6 +4302,7 @@ async function runGrader() {
   const btn = document.getElementById('grader-btn');
   const loading = document.getElementById('grader-loading');
   const results = document.getElementById('grader-results');
+  if (!btn || !loading || !results) return;
   btn.disabled = true; btn.textContent = 'Grading...';
   loading.style.display = ''; results.style.display = 'none';
 
@@ -4349,6 +4354,7 @@ async function runAudit() {
   const btn = document.getElementById('audit-btn');
   const loading = document.getElementById('audit-loading');
   const results = document.getElementById('audit-results');
+  if (!btn || !loading || !results) return;
   btn.disabled = true; btn.textContent = 'Auditing...';
   loading.style.display = ''; results.style.display = 'none';
 
@@ -4434,6 +4440,7 @@ async function runClusterBuilder() {
   const btn = document.getElementById('cluster-btn');
   const loading = document.getElementById('cluster-loading');
   const results = document.getElementById('cluster-results');
+  if (!btn || !loading || !results) return;
   btn.disabled = true; btn.textContent = 'Building...';
   loading.style.display = ''; results.style.display = 'none';
 
@@ -4473,7 +4480,7 @@ Return ONLY JSON:
     document.getElementById('cluster-count').textContent = '(' + (clusterData.supporting_posts?.length || 0) + ' posts)';
 
     const postsEl = document.getElementById('cluster-posts');
-    postsEl.innerHTML = (clusterData.supporting_posts || []).map((p, i) => `
+    if (postsEl) postsEl.innerHTML = (clusterData.supporting_posts || []).map((p, i) => `
       <div class="card" style="padding:16px">
         <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:6px">${p.title}</div>
         <div style="font-size:12px;color:var(--ink4);margin-bottom:4px">Keyword: <strong style="color:var(--blue)">${p.keyword}</strong></div>
@@ -4510,6 +4517,7 @@ async function runCompetitor() {
   const btn = document.getElementById('competitor-btn');
   const loading = document.getElementById('competitor-loading');
   const results = document.getElementById('competitor-results');
+  if (!btn || !loading || !results) return;
   btn.disabled = true; btn.textContent = 'Analysing...';
   loading.style.display = ''; results.style.display = 'none';
 
@@ -4564,6 +4572,7 @@ async function runSocialSnippets() {
   const btn = document.getElementById('social-btn');
   const loading = document.getElementById('social-loading');
   const results = document.getElementById('social-results');
+  if (!btn || !loading || !results) return;
   btn.disabled = true; btn.textContent = 'Generating...';
   loading.style.display = ''; results.style.display = 'none';
 
@@ -4821,6 +4830,7 @@ function addWPLog(title, url, status) {
 function renderWPLog() {
   const logs = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
   const el = document.getElementById('wp-log-wrap');
+  if (!el) return;
   if (!logs.length) {
     el.innerHTML = '<div style="padding:28px;text-align:center;color:var(--ink4);font-size:13px">No posts published yet</div>';
     return;
@@ -4834,7 +4844,7 @@ function renderWPLog() {
       <span class="badge ${l.status === 'ok' ? 'badge-live' : 'badge-draft'}">${l.status === 'ok' ? 'Sent' : 'Failed'}</span>
       <span style="font-size:13px;font-weight:600;color:var(--ink2)">${l.title}</span>
       <span style="font-size:11px;color:var(--ink4)">${l.url ? '<a href="'+l.url+'" target="_blank" style="color:var(--amber);font-weight:600">'+(() => { try { return new URL(l.url).hostname; } catch(e) { return l.url.replace('https://','').split('/')[0]; } })()+'</a>' : '—'}</span>
-      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time || (l.ts ? new Date(l.ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—')}</span>
+      <span style="font-size:11px;color:var(--ink4);font-family:var(--font-mono)">${l.time || (l.ts ? new Date(l.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—')}</span>
     </div>`).join('')}`;
 }
 
@@ -5076,7 +5086,7 @@ function loadDashHealth() {
     if (labelEl) labelEl.textContent = score >= 80 ? 'Site is in great SEO health' : score >= 60 ? 'A few issues to fix' : 'Site needs SEO attention';
     if (tsEl && audit.ts) {
       const d = new Date(audit.ts);
-      const fmt = d.toLocaleDateString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      const fmt = d.toLocaleString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
       tsEl.textContent = 'Last audit: ' + fmt;
       const lastRunEl = document.getElementById('audit-last-run');
       if (lastRunEl) lastRunEl.textContent = 'Last run: ' + fmt;
