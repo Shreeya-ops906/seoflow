@@ -2636,6 +2636,18 @@ input:focus, textarea:focus, select:focus {
 <script>
 const API = '/api/ai-generate';
 
+// ── Storage polyfill (wraps localStorage so window.storage.get/set calls work) ──
+window.storage = window.storage || {
+  get: function(key) {
+    try { const v = localStorage.getItem(key); return Promise.resolve(v ? { value: v } : null); }
+    catch(e) { return Promise.resolve(null); }
+  },
+  set: function(key, value) {
+    try { localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value)); } catch(e) {}
+    return Promise.resolve();
+  }
+};
+
 // ── State ──────────────────────────────────────
 let brand = null;
 let queue = [];
@@ -2705,6 +2717,13 @@ async function loadBrand() {
     const r = await window.storage.get('brand-profile');
     if (r?.value) brand = JSON.parse(r.value);
   } catch {}
+  // Also check the keys used by saveProfile() / onboarding
+  if (!brand) {
+    try {
+      const ls = localStorage.getItem('cruise_brand') || localStorage.getItem('seoflow_brand');
+      if (ls) brand = JSON.parse(ls);
+    } catch {}
+  }
   if (!brand) brand = {
     name:'Your Business', industry:'Marketing', type:'B2B',
     tone:'conversational',
@@ -4198,8 +4217,13 @@ async function callAI(prompt, maxTokens) {
     body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], max_tokens: maxTokens || 2000 })
   });
   const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'AI request failed (' + res.status + ')');
   const raw = (data.content || []).map(x => x.text || '').join('');
-  return raw.replace(/```json\n?|```\n?/g, '').trim();
+  const cleaned = raw.replace(/```json\n?|```\n?/g, '').trim();
+  // Robust extraction: strip any prose before/after the JSON object or array
+  const start = cleaned.search(/[{[]/);
+  const end = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
+  return (start >= 0 && end > start) ? cleaned.slice(start, end + 1) : cleaned;
 }
 
 async function callAIStream(prompt, onChunk, maxTokens) {
