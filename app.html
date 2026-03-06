@@ -2429,6 +2429,9 @@ input:focus, textarea:focus, select:focus {
           </div>
         </div>
       </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:20px">
+        <button class="btn btn-primary" onclick="saveProfile()" style="padding:10px 28px;font-size:14px">Save changes</button>
+      </div>
 
       <!-- ACCOUNT & BILLING -->
       <div class="section-hd" style="margin-top:28px"><h2>Account &amp; Billing</h2></div>
@@ -4852,7 +4855,7 @@ function nav(el, id) {
   if (view) view.classList.add('active');
   const crumbMap = {dashboard:'Dashboard',posts:'Content',keywords:'Keywords',engine:'Generate',grader:'Content Grader',audit:'Site Audit',clusters:'Topic Clusters',competitor:'Competitor',social:'Social Snippets',ranks:'Rank Tracker',backlinks:'Backlinks',autopilot:'Autopilot',publish:'Publish',profile:'Brand Profile','social-connect':'Social Media'};
   document.getElementById('breadcrumb').textContent = crumbMap[id] || id.replace(/-/g,' ').replace(/\b\w/g,x=>x.toUpperCase());
-  if (id === 'profile') { renderProfile(); loadProfileView(); }
+  if (id === 'profile') { loadProfileView(); }
   if (id === 'audit') { renderScoreHistory(); }
   if (id === 'social-connect') { loadSocialState(); }
   if (id === 'keywords') { setTimeout(renderKwHistory, 50); }
