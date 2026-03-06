@@ -8,7 +8,11 @@ export default async function handler(req) {
     const body = await req.json();
     const { action, url, username, password, title, content, status, excerpt, imageQuery } = body;
     const creds = btoa(`${username}:${password}`);
-    const headers = { 'Content-Type': 'application/json', 'Authorization': `Basic ${creds}` };
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${creds}`,
+      'User-Agent': 'CruiseSEO/1.0 (WordPress REST API client)'
+    };
 
     if (action === 'test') {
       let r, text;
@@ -23,8 +27,12 @@ export default async function handler(req) {
       }
       let d = {};
       try { d = JSON.parse(text); } catch(e) {
+        let hint = `WordPress returned a non-JSON response (HTTP ${r.status}).`;
+        if (r.status === 403) hint += ' Your site is blocking REST API requests — fix: go to WordPress → Plugins and temporarily disable Wordfence / iThemes Security / All In One WP Security, then try again. If using Cloudflare, check WAF rules are not blocking /wp-json/.';
+        else if (r.status === 401) hint += ' Authentication failed — regenerate your Application Password in WordPress → Users → Profile.';
+        else hint += ' Make sure REST API is enabled and the site URL has no extra path (e.g. use https://example.com not https://example.com/blog).';
         return new Response(
-          JSON.stringify({ ok: false, error: `WordPress returned a non-JSON response (HTTP ${r.status}). Make sure REST API is enabled and the URL has no extra path.` }),
+          JSON.stringify({ ok: false, error: hint }),
           { status: r.status || 502, headers: CORS }
         );
       }
