@@ -10,7 +10,16 @@
       "source": "/cruiseseo-connect.zip",
       "headers": [
         { "key": "Content-Type", "value": "application/zip" },
-        { "key": "Content-Disposition", "value": "attachment; filename=\"cruiseseo-connect.zip\"" }
+        { "key": "Content-Disposition", "value": "attachment; filename=\"cruiseseo-connect.zip\"" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/cruiseseo-connect.php",
+      "headers": [
+        { "key": "Content-Type", "value": "application/octet-stream" },
+        { "key": "Content-Disposition", "value": "attachment; filename=\"cruiseseo-connect.php\"" },
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
       ]
     }
   ]
