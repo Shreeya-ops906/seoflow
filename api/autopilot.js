@@ -105,7 +105,7 @@ CONTENT:
     if (!contentHtml) throw new Error('AI returned empty content.');
 
     // ── Step 3: Publish to WordPress ─────────────────────────────
-    const wpCreds = btoa(`${wpUser}:${wpPass}`);
+    // Uses custom CSK endpoint — wpPass is the API key, no WP username needed
 
     // Optionally inject internal links
     let finalContent = contentHtml;
@@ -122,9 +122,9 @@ CONTENT:
 
     let wpRes, wpResText;
     try {
-      wpRes = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
+      wpRes = await fetch(`${wpUrl}/wp-json/csk/v1/publish?_k=${encodeURIComponent(wpPass)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${wpCreds}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, content: finalContent, status: 'publish', excerpt })
       });
       wpResText = await wpRes.text();

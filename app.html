@@ -6317,10 +6317,10 @@ function initKeyboardShortcuts() {
 
 // ══ TRIAL / PLAN SYSTEM ════════════════════════════════════════════
 function initTrialSystem() {
-  // If Clerk metadata says pro, trust that over localStorage
+  // If Clerk metadata says pro or scale, trust that over localStorage
   const meta = window.Clerk?.user?.publicMetadata;
-  if (meta?.plan === 'pro') {
-    localStorage.setItem('cruise_plan', JSON.stringify({ type: 'pro', start: Date.now() }));
+  if (meta?.plan === 'pro' || meta?.plan === 'scale') {
+    localStorage.setItem('cruise_plan', JSON.stringify({ type: meta.plan, start: Date.now() }));
   }
 
   let plan = JSON.parse(localStorage.getItem('cruise_plan') || 'null');
@@ -6332,25 +6332,52 @@ function initTrialSystem() {
   renderOnboardingChecklist();
   setTimeout(maybeShowOnboarding, 1500);
 
-  // Handle post-trial-signup redirect (?trial_start=1)
+  // Handle post-payment redirect (?trial_start=1)
   if (window.location.search.includes('trial_start=1')) {
     setTimeout(function() {
-      toast('Your 3-day free trial has started! ✦ Your card is saved — cancel anytime before day 3.', true);
       history.replaceState({}, '', window.location.pathname);
-    }, 1200);
+      // Reload Clerk metadata (webhook may have just fired) then re-apply plan gates
+      var _reloadAndApply = function() {
+        var m = window.Clerk?.user?.publicMetadata || {};
+        var planType = m.plan || 'trial';
+        if (planType === 'pro' || planType === 'scale') {
+          var p = { type: planType, start: Date.now() };
+          localStorage.setItem('cruise_plan', JSON.stringify(p));
+          renderTrialBanner(p);
+          applyPlanGates(planType);
+          toast('Welcome! Your ' + planType + ' plan is now active. ✦', true);
+        } else {
+          toast('Your plan is now active! ✦ Your card is saved — cancel anytime.', true);
+        }
+      };
+      if (window.Clerk?.user?.reload) {
+        window.Clerk.user.reload().then(_reloadAndApply).catch(_reloadAndApply);
+      } else {
+        _reloadAndApply();
+      }
+    }, 2500);
   }
 
   // Handle upgrade success redirect (?upgrade=success)
   if (window.location.search.includes('upgrade=success')) {
     setTimeout(function() {
-      const m = window.Clerk?.user?.publicMetadata;
-      if (m?.plan === 'pro' || m?.plan === 'trial') {
-        const p = { type: 'pro', start: Date.now() };
-        localStorage.setItem('cruise_plan', JSON.stringify(p));
-        renderTrialBanner(p);
+      var _applyUpgrade = function() {
+        const m = window.Clerk?.user?.publicMetadata;
+        if (m?.plan === 'pro' || m?.plan === 'scale' || m?.plan === 'trial') {
+          const planType = m.plan === 'scale' ? 'scale' : 'pro';
+          const p = { type: planType, start: Date.now() };
+          localStorage.setItem('cruise_plan', JSON.stringify(p));
+          renderTrialBanner(p);
+          applyPlanGates(planType);
+        }
+        toast('Welcome! Your plan is now active. ✦', true);
+        history.replaceState({}, '', window.location.pathname);
+      };
+      if (window.Clerk?.user?.reload) {
+        window.Clerk.user.reload().then(_applyUpgrade).catch(_applyUpgrade);
+      } else {
+        _applyUpgrade();
       }
-      toast('Welcome to Pro! Your plan is now active. ✦', true);
-      history.replaceState({}, '', window.location.pathname);
     }, 2500);
   }
 }
@@ -6360,7 +6387,7 @@ function renderTrialBanner(plan) {
   const cta  = document.getElementById('dash-trial-cta');
   if (!plan || !wrap) return;
 
-  if (plan.type === 'pro') {
+  if (plan.type === 'pro' || plan.type === 'scale') {
     wrap.innerHTML = '';
     if (cta) cta.style.display = 'none';
     return;
@@ -7189,7 +7216,12 @@ function applyPlanGates(plan) {
       if (lock) lock.style.display = 'flex';
     }
   }
-  if (!isLocked) return;
+  if (!isLocked) {
+    // Remove any stale overlays/locks from a previous free/expired state
+    document.querySelectorAll('.plan-gate-overlay').forEach(function(el) { el.remove(); });
+    document.querySelectorAll('.nav-item.plan-locked').forEach(function(el) { el.classList.remove('plan-locked'); });
+    return;
+  }
   // Dim locked nav items
   document.querySelectorAll('.nav-item[onclick]').forEach(function(el) {
     const onclick = el.getAttribute('onclick') || '';
