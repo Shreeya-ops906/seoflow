@@ -1,17 +1,18 @@
-export const config = { runtime: 'edge' };
+export const config = { runtime: 'nodejs' };
 
-export default async function handler(req) {
-  const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
-  if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json');
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const body = await req.json();
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { action, url, username, password, title, content, status, excerpt, imageQuery } = body;
-    const creds = btoa(`${username}:${password}`);
+    const creds = Buffer.from(`${username}:${password}`).toString('base64');
     const headers = {
       'Content-Type': 'application/json',
       'Authorization': `Basic ${creds}`,
-      'User-Agent': 'CruiseSEO/1.0 (WordPress REST API client)'
+      'User-Agent': 'Mozilla/5.0 (compatible; CruiseSEO/1.0; +https://cruiseseo.site)'
     };
 
     if (action === 'test') {
@@ -20,10 +21,7 @@ export default async function handler(req) {
         r = await fetch(`${url}/wp-json/wp/v2/users/me`, { headers });
         text = await r.text();
       } catch(fetchErr) {
-        return new Response(
-          JSON.stringify({ ok: false, error: `Cannot reach ${url} — verify the URL is correct and the site is online. (${fetchErr.message})` }),
-          { status: 503, headers: CORS }
-        );
+        return res.status(503).json({ ok: false, error: `Cannot reach ${url} — verify the URL is correct and the site is online. (${fetchErr.message})` });
       }
       let d = {};
       try { d = JSON.parse(text); } catch(e) {
@@ -31,27 +29,20 @@ export default async function handler(req) {
         if (r.status === 403) hint += ' Your site is blocking REST API requests — fix: go to WordPress → Plugins and temporarily disable Wordfence / iThemes Security / All In One WP Security, then try again. If using Cloudflare, check WAF rules are not blocking /wp-json/.';
         else if (r.status === 401) hint += ' Authentication failed — regenerate your Application Password in WordPress → Users → Profile.';
         else hint += ' Make sure REST API is enabled and the site URL has no extra path (e.g. use https://example.com not https://example.com/blog).';
-        return new Response(
-          JSON.stringify({ ok: false, error: hint }),
-          { status: r.status || 502, headers: CORS }
-        );
+        return res.status(r.status || 502).json({ ok: false, error: hint });
       }
       if (!r.ok) {
         const msg = d.message || d.error || `WordPress error`;
-        return new Response(
-          JSON.stringify({ ok: false, error: `${msg} (HTTP ${r.status})` }),
-          { status: r.status, headers: CORS }
-        );
+        return res.status(r.status).json({ ok: false, error: `${msg} (HTTP ${r.status})` });
       }
-      return new Response(JSON.stringify({ ok: true, name: d.name || d.slug || username }), { headers: CORS });
+      return res.status(200).json({ ok: true, name: d.name || d.slug || username });
     }
 
     if (action === 'publish') {
-      // Step 1: Optionally fetch and upload a featured image from Unsplash
+      // Step 1: Optionally fetch and upload a featured image
       let featuredMediaId = null;
       if (imageQuery) {
         try {
-          // Use Lorem Picsum for featured image
           const imgSeed = encodeURIComponent(imageQuery.replace(/\s+/g, '-').slice(0, 30));
           const imgUrl = `https://picsum.photos/seed/${imgSeed}/1200/630`;
           const imgRes = await fetch(imgUrl);
@@ -78,15 +69,12 @@ export default async function handler(req) {
         }
       }
 
-      // Step 2: Publish the post
-      // Inject internal links into content
+      // Step 2: Inject internal links into content
       let finalContent = content;
       if (body.internalLinks) {
         const { posts, bookingUrl } = body.internalLinks;
         const usedUrls = new Set();
         let linksAdded = 0;
-
-        // Link to booking/contact page
         if (bookingUrl) {
           const phrases = ['book a','book your','get in touch','contact us','speak to a tutor','free consultation','get started','try a lesson','enquire now'];
           for (const phrase of phrases) {
@@ -97,14 +85,12 @@ export default async function handler(req) {
             }
           }
         }
-
-        // Link to related posts (max 3)
         for (const post of (posts || [])) {
           if (linksAdded >= 3 || !post.url || usedUrls.has(post.url)) continue;
           const words = (post.title || '').toLowerCase().split(' ').filter(w => w.length > 5);
           for (const word of words) {
             if (finalContent.toLowerCase().includes(word) && !finalContent.includes('href="' + post.url)) {
-              const regex = new RegExp('(?<!["\/])\b(' + word + 's?)\b(?![^<]*>)', 'gi');
+              const regex = new RegExp('(?<!["\/])\\b(' + word + 's?)\\b(?![^<]*>)', 'gi');
               finalContent = finalContent.replace(regex, '<a href="' + post.url + '" rel="noopener">$1</a>');
               usedUrls.add(post.url);
               linksAdded++;
@@ -114,7 +100,7 @@ export default async function handler(req) {
         }
       }
 
-      // Inject Article schema markup at end of content
+      // Step 3: Inject Article schema markup
       const brandName = body.brandName || '';
       const schemaMarkup = '<script type="application/ld+json">' + JSON.stringify({
         "@context": "https://schema.org",
@@ -128,12 +114,7 @@ export default async function handler(req) {
       }) + '</script>';
       finalContent = finalContent + '\n' + schemaMarkup;
 
-      const postBody = {
-        title,
-        content: finalContent,
-        status: status || 'publish',
-        excerpt: excerpt || ''
-      };
+      const postBody = { title, content: finalContent, status: status || 'publish', excerpt: excerpt || '' };
       if (featuredMediaId) postBody.featured_media = featuredMediaId;
 
       const r = await fetch(`${url}/wp-json/wp/v2/posts`, {
@@ -143,31 +124,24 @@ export default async function handler(req) {
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
-
-      return new Response(JSON.stringify({
-        ok: true,
-        id: d.id,
-        link: d.link,
-        title: d.title?.rendered,
-        featuredImage: featuredMediaId ? true : false
-      }), { headers: CORS });
+      return res.status(200).json({ ok: true, id: d.id, link: d.link, title: d.title?.rendered, featuredImage: featuredMediaId ? true : false });
     }
 
     if (action === 'posts') {
       const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=20&status=publish`, { headers });
       const d = await r.json();
-      return new Response(JSON.stringify({ ok: r.ok, posts: d }), { headers: CORS });
+      return res.status(200).json({ ok: r.ok, posts: d });
     }
 
     if (action === 'getpost') {
       const { postId } = body;
       const r = await fetch(`${url}/wp-json/wp/v2/posts/${postId}`, { headers });
       const d = await r.json();
-      return new Response(JSON.stringify({ ok: r.ok, content: d.content?.rendered || '', title: d.title?.rendered || '' }), { headers: CORS });
+      return res.status(200).json({ ok: r.ok, content: d.content?.rendered || '', title: d.title?.rendered || '' });
     }
 
     if (action === 'updatepost') {
-      const { postId, title, content } = body;
+      const { postId } = body;
       const r = await fetch(`${url}/wp-json/wp/v2/posts/${postId}`, {
         method: 'POST',
         headers,
@@ -175,12 +149,12 @@ export default async function handler(req) {
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.message || `WP error ${r.status}`);
-      return new Response(JSON.stringify({ ok: true, link: d.link, title: d.title?.rendered }), { headers: CORS });
+      return res.status(200).json({ ok: true, link: d.link, title: d.title?.rendered });
     }
 
-    return new Response(JSON.stringify({ error: 'Unknown action' }), { status: 400, headers: CORS });
+    return res.status(400).json({ error: 'Unknown action' });
 
   } catch(err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: CORS });
+    return res.status(500).json({ error: err.message });
   }
 }
