@@ -4966,7 +4966,7 @@ async function profConnectWP() {
     const r = await fetch('/api/wp-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'verify', url, username: user, password: pass })
+      body: JSON.stringify({ action: 'test', url, username: user, password: pass })
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || 'Connection failed');
