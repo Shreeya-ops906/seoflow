@@ -5117,7 +5117,7 @@ function loadRankTracker() {
 function initGraderRecent() {
   const el = document.getElementById('grader-recent-posts');
   if (!el) return;
-  const posts = getAllPublishedPosts().slice(0,6);
+  const posts = getAllPublishedPosts().filter(p => p.title && p.status === 'ok' && !p.title.includes('[object') && !p.title.includes('JSON') && !p.title.includes('password')).slice(0,6);
   if (!posts.length) return;
   el.innerHTML = '<div style="font-size:11px;color:var(--ink4);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Quick grade a recent post:</div>' +
     '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
@@ -6235,7 +6235,8 @@ function initKeyboardShortcuts() {
     if (['INPUT','TEXTAREA','SELECT'].includes(tag) || document.activeElement.isContentEditable) {
       _kbPrev = ''; return;
     }
-    const key = e.key.toLowerCase();
+    const key = (e.key || '').toLowerCase();
+    if (!key) return;
     if (key === '?' || (e.shiftKey && key === '/')) { e.preventDefault(); showShortcutsModal(); _kbPrev = ''; return; }
     if (e.shiftKey && key === 'd') { e.preventDefault(); toggleDarkMode(); _kbPrev = ''; return; }
     if (_kbPrev === 'g') {
