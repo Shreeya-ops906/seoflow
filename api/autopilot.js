@@ -3,158 +3,149 @@ export const config = { runtime: 'edge' };
 export default async function handler(req) {
   const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 
-  // Allow manual trigger from dashboard (POST) or Vercel cron (GET)
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return new Response(JSON.stringify({ status: 'error', error: 'ANTHROPIC_API_KEY not configured in Vercel environment variables.' }), { status: 503, headers: CORS });
+  }
 
   try {
     const body = req.method === 'POST' ? await req.json() : {};
-    const { wpUrl, wpUser, wpPass, brand, frequency, keywords, manualTrigger, bookingUrl, existingPosts } = body;
+    const { wpUrl, wpUser, wpPass, brand, keywords, manualTrigger, bookingUrl, existingPosts } = body;
 
-    // If called from cron (no body), we can't do anything without credentials
-    // The dashboard passes credentials on manual trigger
-    // For cron: we use Vercel KV or env-stored settings (future enhancement)
-    // For now: manual trigger only, cron signals the dashboard to run
     if (!wpUrl && !manualTrigger) {
-      return new Response(JSON.stringify({ 
-        status: 'cron_ping', 
+      return new Response(JSON.stringify({
+        status: 'cron_ping',
         message: 'Cron is alive. Dashboard should trigger autopilot run.',
         timestamp: new Date().toISOString()
       }), { status: 200, headers: CORS });
     }
 
-    // Step 1: Find trending topics using web search via Claude
-    const trendPrompt = `You are an SEO content strategist. I need you to identify the BEST trending topic to write a blog post about right now.
+    const callAnthropic = async (prompt, maxTokens) => {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: maxTokens,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const d = await r.json();
+      if (!r.ok) {
+        const msg = d.error?.message || (typeof d.error === 'string' ? d.error : JSON.stringify(d.error)) || `Anthropic error ${r.status}`;
+        throw new Error(msg);
+      }
+      return d.content?.map(c => c.text || '').join('') || '';
+    };
 
-Brand/Business context: ${brand || 'general business'}
-Industry keywords: ${(keywords || []).join(', ') || 'general'}
+    // ── Step 1: Pick the best topic ───────────────────────────────
+    const keywordList = (keywords || []).filter(Boolean).join(', ') || brand || 'general business';
+    let topic = keywords?.[0] || 'industry tips';
 
-Your task:
-1. Think about what topics are currently trending in this industry (consider seasonal trends, common questions, recent developments)
-2. Pick the single BEST topic that would:
-   - Attract organic search traffic
-   - Be relevant to the brand's audience  
-   - Not be too competitive for a smaller site
-   - Have clear search intent
-
-Return ONLY a JSON object (no markdown, no explanation):
-{
-  "topic": "The exact topic/keyword to write about",
-  "reason": "One sentence why this topic is trending and valuable now",
-  "search_intent": "informational|commercial|navigational"
-}`;
-
-    const trendRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 500,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: trendPrompt }]
-      })
-    });
-
-    const trendData = await trendRes.json();
-    const trendText = (trendRes.ok ? trendData.content?.filter(c => c.type === 'text').map(c => c.text).join('') : '') || '';
-
-    let trendResult;
     try {
-      const clean = trendText.replace(/```json[\s\S]*?```|```/g, '').trim();
-      const s = clean.search(/[{[]/), e = Math.max(clean.lastIndexOf('}'), clean.lastIndexOf(']'));
-      trendResult = JSON.parse(s >= 0 && e > s ? clean.slice(s, e + 1) : clean);
-    } catch(e) {
-      // Fallback topic based on keywords
-      trendResult = {
-        topic: keywords?.[0] || brand || 'industry tips and trends',
-        reason: 'Based on brand keywords',
-        search_intent: 'informational'
-      };
+      const trendText = await callAnthropic(
+        `You are an SEO content strategist. Pick the single best topic to write a blog post about for a business in this area: ${keywordList}
+
+Consider: what questions do their target customers search for? What would rank well for a small site?
+
+Respond with ONLY the topic/keyword phrase — nothing else. No explanation. Just the topic itself.
+Example response: "How to prepare for a maths GCSE exam"`, 150
+      );
+      if (trendText.trim()) topic = trendText.trim().replace(/^["']|["']$/g, '');
+    } catch (topicErr) {
+      // silently fall back to first keyword
     }
 
-    // Step 2: Generate full blog post
-    const postPrompt = `You are an expert SEO content writer. Write a comprehensive, SEO-optimised blog post.
+    // ── Step 2: Generate full blog post ──────────────────────────
+    // Use plain-text delimiters instead of JSON to avoid HTML-inside-JSON escaping issues
+    const postText = await callAnthropic(
+      `You are an expert SEO blog writer. Write a comprehensive, SEO-optimised blog post in UK English.
 
-Topic: "${trendResult.topic}"
-Brand context: ${brand || ''}
+Topic: "${topic}"
+Brand context: ${brand || 'a professional service business'}
+${bookingUrl ? `Booking/contact URL: ${bookingUrl}` : ''}
+Target length: 900–1,100 words
 Tone: authoritative and helpful
-Target length: 1,000–1,200 words
-Write in UK English.
 
 Requirements:
-- Compelling keyword-rich H1 title
+- Compelling keyword-rich title
+- Meta description 150-160 characters
 - Proper H2 and H3 subheadings
 - Include the keyword naturally 4-6 times
-- Engaging intro that hooks in first 2 sentences
 - Short paragraphs (2-4 sentences max)
 - At least one bulleted or numbered list
-- Strong call-to-action conclusion
+- Strong call-to-action conclusion${bookingUrl ? ' linking to the booking URL' : ''}
 
-Return ONLY a JSON object (no markdown, no code blocks):
-{
-  "title": "The full post title",
-  "meta_description": "A compelling meta description 150-160 characters",
-  "content_html": "Full post as HTML using only <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags"
-}`;
+Format your response EXACTLY like this (do not add any extra text before TITLE:):
 
-    const postRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content: postPrompt }]
-      })
-    });
+TITLE: [the post title]
+META: [the meta description]
+CONTENT:
+[full post as HTML using only <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags]`, 6000
+    );
 
-    const postData = await postRes.json();
-    if (!postRes.ok) throw new Error(postData.error || 'AI post generation failed (' + postRes.status + ')');
-    const postRaw = postData.content?.map(c => c.text || '').join('') || '';
-    const postClean = postRaw.replace(/```json[\s\S]*?```|```/g, '').trim();
-    const ps = postClean.search(/[{[]/), pe = Math.max(postClean.lastIndexOf('}'), postClean.lastIndexOf(']'));
-    const post = JSON.parse(ps >= 0 && pe > ps ? postClean.slice(ps, pe + 1) : postClean);
+    // Parse the delimiter-based response
+    const titleMatch = postText.match(/TITLE:\s*(.+)/);
+    const metaMatch  = postText.match(/META:\s*(.+)/);
+    const contentIdx = postText.indexOf('\nCONTENT:\n');
 
-    // Step 3: Publish to WordPress
+    if (!titleMatch || contentIdx === -1) {
+      throw new Error('AI response format invalid — could not find TITLE or CONTENT markers. Response: ' + postText.slice(0, 200));
+    }
+
+    const title   = titleMatch[1].trim();
+    const excerpt = metaMatch ? metaMatch[1].trim() : '';
+    const contentHtml = postText.slice(contentIdx + '\nCONTENT:\n'.length).trim();
+
+    if (!contentHtml) throw new Error('AI returned empty content.');
+
+    // ── Step 3: Publish to WordPress ─────────────────────────────
     const wpCreds = btoa(`${wpUser}:${wpPass}`);
+
+    // Optionally inject internal links
+    let finalContent = contentHtml;
+    if (bookingUrl) {
+      const phrases = ['book a','book your','get in touch','contact us','speak to','free consultation','get started','enquire'];
+      for (const phrase of phrases) {
+        if (finalContent.toLowerCase().includes(phrase) && !finalContent.includes('href="' + bookingUrl)) {
+          const regex = new RegExp('(' + phrase + '[^<.!?]{0,40})', 'gi');
+          finalContent = finalContent.replace(regex, '<a href="' + bookingUrl + '" rel="noopener">$1</a>');
+          break;
+        }
+      }
+    }
+
     const wpRes = await fetch(`${wpUrl}/wp-json/wp/v2/posts`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${wpCreds}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Basic ${wpCreds}` },
       body: JSON.stringify({
-        title: post.title,
-        content: post.content_html,
+        title,
+        content: finalContent,
         status: 'publish',
-        excerpt: post.meta_description,
-        imageQuery: trendResult.topic,
-        internalLinks: { posts: existingPosts || [], bookingUrl: bookingUrl || '' }
+        excerpt
       })
     });
 
     const wpPost = await wpRes.json();
-    if (!wpRes.ok) throw new Error(wpPost.message || `WP error ${wpRes.status}`);
+    if (!wpRes.ok) throw new Error(wpPost.message || `WordPress error ${wpRes.status}`);
 
     return new Response(JSON.stringify({
       status: 'success',
-      topic: trendResult.topic,
-      reason: trendResult.reason,
-      title: post.title,
+      topic,
+      title,
       postUrl: wpPost.link,
       postId: wpPost.id,
       timestamp: new Date().toISOString()
     }), { status: 200, headers: CORS });
 
   } catch(err) {
-    return new Response(JSON.stringify({ 
-      status: 'error', 
+    return new Response(JSON.stringify({
+      status: 'error',
       error: err.message,
       timestamp: new Date().toISOString()
     }), { status: 500, headers: CORS });
