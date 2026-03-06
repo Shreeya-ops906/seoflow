@@ -3028,8 +3028,10 @@ function useIdea(idea) {
 
 // ── Calendar ───────────────────────────────────
 function renderCalendar() {
+  const calTitleEl = document.getElementById('calTitle');
+  if (!calTitleEl) return;
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('calTitle').textContent = months[curMonth.getMonth()] + ' ' + curMonth.getFullYear();
+  calTitleEl.textContent = months[curMonth.getMonth()] + ' ' + curMonth.getFullYear();
 
   const first = new Date(curMonth.getFullYear(), curMonth.getMonth(), 1).getDay();
   const days  = new Date(curMonth.getFullYear(), curMonth.getMonth()+1, 0).getDate();
@@ -3058,13 +3060,16 @@ function renderCalendar() {
     </div>`;
   }
   const rem = (first+days)%7; if(rem) for(let d=1;d<=7-rem;d++) html+=`<div class="cal-day other"><div class="cal-day-num">${d}</div></div>`;
-  document.getElementById('calDays').innerHTML = html;
+  const calDaysEl = document.getElementById('calDays');
+  if (calDaysEl) calDaysEl.innerHTML = html;
 }
 
 function shiftMonth(d) { curMonth=new Date(curMonth.getFullYear(),curMonth.getMonth()+d,1); renderCalendar(); }
 
 function renderAutoPublish() {
-  document.getElementById('autoPublishList').innerHTML = platforms.slice(0,4).map(p=>`
+  const autoPublishListEl = document.getElementById('autoPublishList');
+  if (!autoPublishListEl) return;
+  autoPublishListEl.innerHTML = platforms.slice(0,4).map(p=>`
     <div class="pub-platform">
       <div class="pub-icon">${p.icon}</div>
       <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.connected?'weekly':'not connected'}</div></div>
@@ -3166,7 +3171,8 @@ function renderAnalytics() {
     {l:'Social Media',  s:12,c:'var(--amber)'},
     {l:'Referral',      s: 8,c:'var(--tx2)'},
   ];
-  document.getElementById('sourceList').innerHTML = sources.map(s=>`
+  const sourceListEl = document.getElementById('sourceList');
+  if (sourceListEl) sourceListEl.innerHTML = sources.map(s=>`
     <div class="source-row">
       <div class="source-dot" style="background:${s.c}"></div>
       <div class="source-label">${s.l}</div>
@@ -3181,7 +3187,8 @@ function renderAnalytics() {
     {t:'Why Blog Consistency Drives Traffic',    v:'654',  d:'+12%'},
     {t:'Content Calendar Template + Tips',       v:'412',  d:'+8%'},
   ];
-  document.getElementById('topPostList').innerHTML = posts.map((p,i)=>`
+  const topPostListEl = document.getElementById('topPostList');
+  if (topPostListEl) topPostListEl.innerHTML = posts.map((p,i)=>`
     <div class="top-post-row">
       <div class="tp-n">${i+1}</div>
       <div class="tp-info"><div class="tp-t">${p.t}</div><div class="tp-v">${p.v} sessions</div></div>
@@ -3189,7 +3196,8 @@ function renderAnalytics() {
     </div>`).join('');
 
   const pub = queue.filter(i=>i.status==='published').length;
-  document.getElementById('roiGrid').innerHTML = [
+  const roiGridEl = document.getElementById('roiGrid');
+  if (roiGridEl) roiGridEl.innerHTML = [
     {l:'Content Created',  v:String(pub)||'0',    s:'by AI engine'},
     {l:'Time per Post',    v:'4 min',    s:'vs 3hr manual'},
     {l:'Cost per Post',    v:'£0.08',    s:'vs £250 agency'},
@@ -3239,7 +3247,9 @@ function setChartTab(el) {
 
 // ── Publishing ─────────────────────────────────
 function renderPubPlatforms() {
-  document.getElementById('pubPlatformList').innerHTML = platforms.map(p=>`
+  const pubPlatformListEl = document.getElementById('pubPlatformList');
+  if (!pubPlatformListEl) return;
+  pubPlatformListEl.innerHTML = platforms.map(p=>`
     <div class="pub-platform" onclick="togglePlatform('${p.id}')">
       <div class="pub-icon">${p.icon}</div>
       <div><div class="pub-name">${p.name}</div><div class="pub-url">${p.url}</div></div>
@@ -3263,6 +3273,7 @@ function addPubLog(title, where, status) {
 
 function renderPubLog() {
   const el=document.getElementById('pubLogList');
+  if(!el) return;
   if(!pubLog.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">—</div><div class="empty-text">no activity yet</div></div>';return;}
   el.innerHTML=pubLog.map(l=>`
     <div class="log-row">
@@ -3278,10 +3289,12 @@ function renderProfile() {
   if(!brand) return;
   const pn = document.getElementById('profName'); if(pn) pn.textContent = brand.name;
   const pm = document.getElementById('profMeta'); if(pm) pm.textContent = brand.industry+' / '+(brand.type||'');
-  document.getElementById('voiceBox').textContent=brand.voiceSummary||'No voice statement yet.';
+  const voiceBoxEl = document.getElementById('voiceBox');
+  if (voiceBoxEl) voiceBoxEl.textContent=brand.voiceSummary||'No voice statement yet.';
 
   const chips=(arr,cls)=>(arr||[]).map(v=>`<span class="pchip ${cls}">${v}</span>`).join('');
-  document.getElementById('profileGrid').innerHTML=`
+  const profileGridEl = document.getElementById('profileGrid');
+  if (profileGridEl) profileGridEl.innerHTML=`
     <div class="profile-section"><div class="profile-sec-label">Voice & Tone</div><div class="profile-chips"><span class="pchip ac">${brand.tone||'conversational'}</span>${chips(brand.personalities,'ac')}</div></div>
     <div class="profile-section"><div class="profile-sec-label">Core Values</div><div class="profile-chips">${chips(brand.values,'gn')}</div></div>
     <div class="profile-section"><div class="profile-sec-label">Goals</div><div class="profile-chips">${chips(brand.goals,'am')}</div></div>
