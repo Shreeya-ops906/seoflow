@@ -1091,6 +1091,146 @@ input:focus, textarea:focus, select:focus {
 .connect-step-dot.active span { color: var(--amber); }
 </style>
 
+<style id="mobile-fixes">
+/* ═══════════════════════════════════════════════
+   MOBILE FIXES — phones (≤480px) & small tablets
+   ═══════════════════════════════════════════════ */
+
+/* ── Tables: horizontal scroll instead of overflow ── */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── Modals: full-width, scrollable, safe on phones ── */
+@media (max-width: 600px) {
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 32px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  /* Plan cards: single column on phones */
+  .plan-cards { grid-template-columns: 1fr !important; }
+
+  /* Edit post overlay */
+  .edit-post-overlay { padding: 0; align-items: flex-end; }
+  .edit-post-box {
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px 32px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* Upgrade modal inline styles override */
+  #upgrade-modal .modal-box { max-width: 100% !important; }
+}
+
+/* ── Small phones (≤480px): layout, inputs, spacing ── */
+@media (max-width: 480px) {
+  /* Content padding tighter */
+  .content { padding: 12px !important; }
+  .topbar { padding: 10px 14px !important; }
+
+  /* Page headers stack vertically */
+  .page-hd { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+  .page-hd .btn { width: 100%; justify-content: center; }
+
+  /* Section headings */
+  .section-hd { flex-direction: column; align-items: flex-start !important; gap: 8px; }
+  .section-hd > div { flex-wrap: wrap; }
+
+  /* Cards */
+  .stat-card { padding: 16px 18px; }
+  .card { border-radius: 12px; }
+
+  /* Grids: force single column */
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr !important; }
+  .pub-grid { grid-template-columns: 1fr !important; }
+
+  /* Fixed-width inputs: go full-width */
+  input[style*="width:380px"],
+  input[style*="width: 380px"] { width: 100% !important; }
+
+  /* Form rows: stack vertically */
+  .wp-form-row, .form-row { flex-direction: column !important; }
+
+  /* Buttons: easier to tap */
+  .btn { min-height: 40px; }
+
+  /* Table headers: allow wrapping */
+  .table-hd, .table-row { font-size: 9px; }
+
+  /* Topbar title: truncate if too long */
+  .topbar-title { font-size: 14px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 55vw; }
+
+  /* Trial banner: stack on narrow screens */
+  .trial-banner { flex-direction: column; align-items: flex-start; gap: 10px; }
+  #trial-banner-wrap > div { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+  #trial-banner-wrap button { width: 100% !important; }
+
+  /* Dashboard welcome bar already handles flex-direction:column at 768px */
+
+  /* Keyword input row */
+  .kw-row { flex-direction: column !important; gap: 8px !important; }
+  .kw-row .btn { width: 100%; }
+
+  /* Generate area */
+  #gen-controls { flex-direction: column; gap: 8px; }
+  #gen-controls .btn { width: 100%; justify-content: center; }
+
+  /* Post result action buttons */
+  #gen-actions { flex-wrap: wrap; gap: 8px; }
+  #gen-actions .btn { flex: 1 1 calc(50% - 4px); justify-content: center; font-size: 12px; }
+
+  /* WordPress connect form */
+  #wp-connect-form .btn { width: 100%; justify-content: center; }
+
+  /* Autopilot settings */
+  .ap-dow-chips { flex-wrap: wrap; }
+
+  /* Rank tracker / table rows */
+  .table-hd > div, .table-row > div { padding: 8px 10px; }
+
+  /* Plan gate overlay */
+  .plan-gate-overlay { padding: 24px 20px; }
+  .plan-gate-overlay h3 { font-size: 18px; }
+
+  /* Tour card */
+  .tour-card { width: calc(100vw - 48px) !important; max-width: 320px; }
+
+  /* Shortcuts modal */
+  .shortcuts-box { width: calc(100vw - 32px) !important; padding: 20px 16px; }
+
+  /* Onboarding box */
+  .ob-box { width: calc(100vw - 24px) !important; padding: 24px 16px; }
+
+  /* Content engine generation result */
+  #gen-result { font-size: 14px; }
+
+  /* Publish tab: action row */
+  #publish-actions, .publish-row { flex-direction: column !important; gap: 8px; }
+}
+
+/* ── Hamburger: bigger touch target ── */
+.hamburger { padding: 10px; margin: -10px; }
+
+/* ── Sidebar nav items: taller touch targets on mobile ── */
+@media (max-width: 768px) {
+  .nav-item { min-height: 42px; }
+  .nav-label { font-size: 11px !important; }
+  /* Social connect grid */
+  .social-grid { grid-template-columns: 1fr !important; }
+  /* Competitor / audit input rows */
+  .input-row { flex-direction: column !important; gap: 8px; }
+  .input-row .btn { width: 100%; }
+  /* Rank tracker add row */
+  .rank-add-row { flex-direction: column !important; gap: 8px; }
+  .rank-add-row .btn { width: 100%; }
+}
+</style>
+
 </head>
 <body>
 
