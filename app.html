@@ -3892,6 +3892,39 @@ function saveApSettings() {
   apSettings.seeds = document.getElementById('ap-seeds')?.value || apSettings.seeds;
   if (typeof apSelectedDays !== 'undefined') apSettings.selectedDays = apSelectedDays;
   localStorage.setItem('cruise_autopilot', JSON.stringify(apSettings));
+  // Persist to Clerk so the nightly cron can find these settings
+  persistApToClerk();
+}
+
+function persistApToClerk() {
+  const userId = window.Clerk?.user?.id;
+  if (!userId) return;
+  const wp = JSON.parse(localStorage.getItem('cruise_wp_connection') || '{}');
+  const b = JSON.parse(localStorage.getItem('cruise_brand') || localStorage.getItem('seoflow_brand') || '{}');
+  const social = JSON.parse(localStorage.getItem('cruise_social') || '{}');
+  const li = social.linkedin;
+  const keywords = apSettings.seeds
+    ? apSettings.seeds.split(',').map(function(s){ return s.trim(); }).filter(Boolean)
+    : (b.keywords || []);
+  fetch('/api/save-autopilot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userId: userId,
+      settings: {
+        enabled:       apSettings.enabled || false,
+        wpUrl:         wp.url || '',
+        wpPass:        wp.password ? atob(wp.password) : '',
+        brand:         (b.name || '') + (b.industry ? '. ' + b.industry : '') + (b.voice ? '. ' + b.voice : ''),
+        keywords:      keywords,
+        seeds:         apSettings.seeds || '',
+        tone:          apTone || 'authoritative',
+        frequency:     apFreq || '3x_week',
+        bookingUrl:    b.bookingUrl || b.booking_url || '',
+        linkedinToken: li?.accessToken ? { accessToken: li.accessToken, authorId: li.authorId } : null
+      }
+    })
+  }).catch(function(){});
 }
 
 function renderAutopilotUI() {
@@ -4003,6 +4036,7 @@ function toggleAutopilot() {
   saveApSettings();
   apSettings.enabled = !apSettings.enabled;
   localStorage.setItem('cruise_autopilot', JSON.stringify(apSettings));
+  persistApToClerk(); // sync enabled state to Clerk so cron picks it up
   renderAutopilotUI();
   if (apSettings.enabled) toast('Autopilot enabled! First post will run on schedule.', true);
   else toast('Autopilot paused.', false);
@@ -4017,29 +4051,34 @@ async function triggerNow() {
 
   saveApSettings();
   const seeds = apSettings.seeds || (brand.keywords || []).join(', ') || brand.industry || 'general business tips';
+  const li = JSON.parse(localStorage.getItem('cruise_social') || '{}').linkedin;
 
   try {
     const res = await fetch('/api/autopilot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        manualTrigger: true,
-        wpUrl: wp.url,
-        wpUser: wp.username,
-        wpPass: atob(wp.password),
-        brand: brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
-        frequency: apFreq,
-        keywords: seeds.split(',').map(s => s.trim()).filter(Boolean),
-        tone: apTone,
-        bookingUrl: brand.bookingUrl || brand.booking_url || '',
-        existingPosts: getAllPublishedPosts().slice(0,10).map(p=>({title:p.title,url:p.url}))
+        manualTrigger:      true,
+        wpUrl:              wp.url,
+        wpUser:             wp.username,
+        wpPass:             atob(wp.password),
+        brand:              brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
+        frequency:          apFreq,
+        keywords:           seeds.split(',').map(s => s.trim()).filter(Boolean),
+        tone:               apTone,
+        bookingUrl:         brand.bookingUrl || brand.booking_url || '',
+        existingPosts:      getAllPublishedPosts().slice(0,10).map(p=>({title:p.title,url:p.url})),
+        linkedinAccessToken: li?.accessToken || null,
+        linkedinAuthorId:    li?.authorId    || null
       })
     });
 
     const data = await res.json();
     if (data.status === 'success') {
-      addApLog({ topic: data.topic, title: data.title, url: data.postUrl, status: 'ok', ts: data.timestamp });
-      toast('Post published: ' + data.title.slice(0, 40) + '...', true);
+      const liPosted = data.linkedin && !data.linkedin.error;
+      addApLog({ topic: data.topic, title: data.title, url: data.postUrl, status: 'ok', ts: data.timestamp, linkedin: liPosted });
+      const liMsg = liPosted ? ' + LinkedIn' : (data.linkedin?.error ? ' (LinkedIn: ' + data.linkedin.error + ')' : '');
+      toast('Post published: ' + data.title.slice(0, 40) + '...' + liMsg, true);
       renderApLog();
     } else {
       addApLog({ topic: 'Error', title: data.error, url: '', status: 'err', ts: new Date().toISOString() });
@@ -4075,7 +4114,7 @@ function renderApLog() {
       <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4)">Time</th>
     </tr></thead>
     <tbody>${logs.map(l => `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:10px 16px"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${l.status==='ok'?'rgba(74,222,128,.12)':'rgba(192,48,79,.08)'};color:${l.status==='ok'?'#16a34a':'#C0304F'}">${l.status==='ok'?'Published':'Failed'}</span></td>
+      <td style="padding:10px 16px"><span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px;background:${l.status==='ok'?'rgba(74,222,128,.12)':'rgba(192,48,79,.08)'};color:${l.status==='ok'?'#16a34a':'#C0304F'}">${l.status==='ok'?'Published':'Failed'}</span>${l.linkedin?'<span style="font-size:10px;font-weight:700;padding:2px 6px;border-radius:100px;background:rgba(10,102,194,.1);color:#0a66c2;margin-left:5px">LinkedIn</span>':''}</td>
       <td style="padding:10px 16px;font-size:13px;color:var(--ink2);max-width:300px">${l.url?`<a href="${l.url}" target="_blank" style="color:var(--amber);font-weight:600">${l.title}</a>`:l.title}</td>
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${l.topic || '—'}</td>
       <td style="padding:10px 16px;font-size:12px;color:var(--ink4)">${new Date(l.ts).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>

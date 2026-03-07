@@ -9,41 +9,95 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ status: 'error', error: 'ANTHROPIC_API_KEY not configured in Vercel environment variables.' }), { status: 503, headers: CORS });
   }
 
-  try {
-    const body = req.method === 'POST' ? await req.json() : {};
-    const { wpUrl, wpUser, wpPass, brand, keywords, manualTrigger, bookingUrl, existingPosts } = body;
-
-    if (!wpUrl && !manualTrigger) {
-      return new Response(JSON.stringify({
-        status: 'cron_ping',
-        message: 'Cron is alive. Dashboard should trigger autopilot run.',
-        timestamp: new Date().toISOString()
-      }), { status: 200, headers: CORS });
+  // ── Shared: call Anthropic ──────────────────────────────────────
+  const callAnthropic = async (prompt, maxTokens) => {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const d = await r.json();
+    if (!r.ok) {
+      const msg = d.error?.message || (typeof d.error === 'string' ? d.error : JSON.stringify(d.error)) || `Anthropic error ${r.status}`;
+      throw new Error(msg);
     }
+    return d.content?.map(c => c.text || '').join('') || '';
+  };
 
-    const callAnthropic = async (prompt, maxTokens) => {
-      const r = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: maxTokens,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
+  // ── Shared: fetch a relevant image for the topic ────────────────
+  const fetchImage = async (topic) => {
+    if (!process.env.PEXELS_API_KEY) {
+      return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+    }
+    try {
+      const r = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(topic)}&per_page=1&orientation=landscape`,
+        { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
+      );
+      if (!r.ok) return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
       const d = await r.json();
-      if (!r.ok) {
-        const msg = d.error?.message || (typeof d.error === 'string' ? d.error : JSON.stringify(d.error)) || `Anthropic error ${r.status}`;
-        throw new Error(msg);
-      }
-      return d.content?.map(c => c.text || '').join('') || '';
+      const p = d.photos?.[0];
+      if (!p) return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+      return { url: p.src?.large || p.src?.medium, credit: p.photographer || null };
+    } catch (_) {
+      return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+    }
+  };
+
+  // ── Shared: post to LinkedIn with an AI-generated caption ───────
+  const postToLinkedInAutopilot = async (title, postUrl, accessToken, authorId) => {
+    const caption = await callAnthropic(
+      `Write a short LinkedIn post to share this blog article.
+Title: "${title}"
+- 2-3 sentences, engaging, professional UK English tone
+- Highlight why it's useful to read
+- Do NOT include the URL (it will be appended automatically)
+- No hashtags
+Respond with ONLY the post text, nothing else.`, 200
+    );
+
+    const postBody = {
+      author: authorId,
+      lifecycleState: 'PUBLISHED',
+      specificContent: {
+        'com.linkedin.ugc.ShareContent': {
+          shareCommentary: { text: caption.trim() + '\n\n' + postUrl },
+          shareMediaCategory: 'ARTICLE',
+          media: [{ status: 'READY', originalUrl: postUrl }]
+        }
+      },
+      visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' }
     };
 
-    // ── Step 1: Pick the best topic ───────────────────────────────
+    const res = await fetch('https://api.linkedin.com/v2/ugcPosts', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + accessToken,
+        'Content-Type': 'application/json',
+        'X-Restli-Protocol-Version': '2.0.0'
+      },
+      body: JSON.stringify(postBody)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `LinkedIn post failed (HTTP ${res.status})`);
+    }
+    const data = await res.json().catch(() => ({}));
+    return { id: data.id };
+  };
+
+  // ── Shared: generate blog post and publish to WordPress ─────────
+  const generateAndPublish = async (wpUrl, wpPass, brand, keywords, tone, bookingUrl) => {
+    // Step 1: Pick topic
     const keywordList = (keywords || []).filter(Boolean).join(', ') || brand || 'general business';
     let topic = keywords?.[0] || 'industry tips';
 
@@ -56,13 +110,15 @@ Consider: what questions do their target customers search for? What would rank w
 Respond with ONLY the topic/keyword phrase — nothing else. No explanation. Just the topic itself.
 Example response: "How to prepare for a maths GCSE exam"`, 150
       );
-      if (trendText.trim()) topic = trendText.trim().replace(/^["']|["']$/g, '');
-    } catch (topicErr) {
-      // silently fall back to first keyword
+      if (trendText.trim()) topic = trendText.trim().replace(/^[\"']|[\"']$/g, '');
+    } catch (_) {
+      // fall back to first keyword
     }
 
-    // ── Step 2: Generate full blog post ──────────────────────────
-    // Use plain-text delimiters instead of JSON to avoid HTML-inside-JSON escaping issues
+    // Step 1b: Fetch a hero image for this topic
+    const img = await fetchImage(topic);
+
+    // Step 2: Generate blog post
     const postText = await callAnthropic(
       `You are an expert SEO blog writer. Write a comprehensive, SEO-optimised blog post in UK English.
 
@@ -89,7 +145,6 @@ CONTENT:
 [full post as HTML using only <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags]`, 6000
     );
 
-    // Parse the delimiter-based response
     const titleMatch = postText.match(/TITLE:\s*(.+)/);
     const metaMatch  = postText.match(/META:\s*(.+)/);
     const contentIdx = postText.indexOf('\nCONTENT:\n');
@@ -98,63 +153,232 @@ CONTENT:
       throw new Error('AI response format invalid — could not find TITLE or CONTENT markers. Response: ' + postText.slice(0, 200));
     }
 
-    const title   = titleMatch[1].trim();
-    const excerpt = metaMatch ? metaMatch[1].trim() : '';
-    const contentHtml = postText.slice(contentIdx + '\nCONTENT:\n'.length).trim();
+    const title      = titleMatch[1].trim();
+    const excerpt    = metaMatch ? metaMatch[1].trim() : '';
+    let contentHtml  = postText.slice(contentIdx + '\nCONTENT:\n'.length).trim();
 
     if (!contentHtml) throw new Error('AI returned empty content.');
 
-    // ── Step 3: Publish to WordPress ─────────────────────────────
-    // Uses custom CSK endpoint — wpPass is the API key, no WP username needed
+    // Step 2b: Prepend hero image to content
+    if (img?.url) {
+      const creditHtml = img.credit
+        ? `<figcaption style="font-size:12px;color:#888;margin-top:6px">Photo by ${img.credit} on Pexels</figcaption>`
+        : '';
+      contentHtml = `<figure style="margin:0 0 28px"><img src="${img.url}" alt="${title}" style="width:100%;border-radius:8px;height:auto" loading="lazy"/>${creditHtml}</figure>\n` + contentHtml;
+    }
 
-    // Optionally inject internal links
-    let finalContent = contentHtml;
+    // Step 3: Optionally inject internal links
     if (bookingUrl) {
       const phrases = ['book a','book your','get in touch','contact us','speak to','free consultation','get started','enquire'];
       for (const phrase of phrases) {
-        if (finalContent.toLowerCase().includes(phrase) && !finalContent.includes('href="' + bookingUrl)) {
+        if (contentHtml.toLowerCase().includes(phrase) && !contentHtml.includes('href="' + bookingUrl)) {
           const regex = new RegExp('(' + phrase + '[^<.!?]{0,40})', 'gi');
-          finalContent = finalContent.replace(regex, '<a href="' + bookingUrl + '" rel="noopener">$1</a>');
+          contentHtml = contentHtml.replace(regex, '<a href="' + bookingUrl + '" rel="noopener">$1</a>');
           break;
         }
       }
     }
 
+    // Step 4: Publish to WordPress via CSK endpoint
     let wpRes, wpResText;
     try {
       wpRes = await fetch(`${wpUrl}/wp-json/csk/v1/publish?_k=${encodeURIComponent(wpPass)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content: finalContent, status: 'publish', excerpt })
+        body: JSON.stringify({ title, content: contentHtml, status: 'publish', excerpt })
       });
       wpResText = await wpRes.text();
-    } catch(wpFetchErr) {
+    } catch (wpFetchErr) {
       throw new Error(`Cannot reach WordPress at ${wpUrl}: ${wpFetchErr.message}`);
     }
 
     let wpPost = {};
-    try { wpPost = JSON.parse(wpResText); } catch(e) {
+    try { wpPost = JSON.parse(wpResText); } catch (_) {
       throw new Error(`WordPress returned non-JSON (HTTP ${wpRes.status}). Response: ${wpResText.slice(0, 200)}`);
     }
     if (!wpRes.ok) {
-      const errMsg = wpPost.message || wpPost.error || `WordPress error`;
+      const errMsg = wpPost.message || wpPost.error || 'WordPress error';
       throw new Error(`${errMsg} (HTTP ${wpRes.status})`);
     }
 
+    return { topic, title, postUrl: wpPost.link, postId: wpPost.id, imageUrl: img?.url || null };
+  };
+
+  // ── Cron handler (GET — called by Vercel cron at 0 8 * * *) ────
+  if (req.method === 'GET') {
+    if (!process.env.CLERK_SECRET_KEY) {
+      return new Response(JSON.stringify({ error: 'CLERK_SECRET_KEY not configured' }), { status: 503, headers: CORS });
+    }
+
+    const now = new Date();
+
+    // Fetch all Clerk users (paginated)
+    let allUsers = [];
+    let offset = 0;
+    while (true) {
+      const usersRes = await fetch(`https://api.clerk.com/v1/users?limit=100&offset=${offset}`, {
+        headers: { 'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}` }
+      });
+      if (!usersRes.ok) break;
+      const page = await usersRes.json();
+      if (!Array.isArray(page) || page.length === 0) break;
+      allUsers = allUsers.concat(page);
+      if (page.length < 100) break;
+      offset += 100;
+    }
+
+    const results = [];
+
+    for (const user of allUsers) {
+      const ap = user.private_metadata?.autopilot;
+      if (!ap?.enabled || !ap?.wpUrl || !ap?.wpPass) continue;
+      if (!shouldPostToday(ap.frequency, ap.lastRun, now)) continue;
+
+      const keywords = ap.keywords?.length
+        ? ap.keywords
+        : (ap.seeds ? ap.seeds.split(',').map(s => s.trim()).filter(Boolean) : []);
+
+      let result, linkedinResult = null;
+
+      try {
+        result = await generateAndPublish(
+          ap.wpUrl,
+          ap.wpPass,
+          ap.brand || '',
+          keywords,
+          ap.tone || 'authoritative',
+          ap.bookingUrl || ''
+        );
+
+        // Attempt LinkedIn if connected
+        const li = ap.linkedinToken;
+        if (li?.accessToken && li?.authorId && result.postUrl) {
+          try {
+            linkedinResult = await postToLinkedInAutopilot(result.title, result.postUrl, li.accessToken, li.authorId);
+          } catch (liErr) {
+            linkedinResult = { error: liErr.message };
+          }
+        }
+
+        // Update lastRun in Clerk (preserve all other autopilot fields)
+        await fetch(`https://api.clerk.com/v1/users/${user.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${process.env.CLERK_SECRET_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            private_metadata: { autopilot: { ...ap, lastRun: now.toISOString() } }
+          })
+        });
+
+        results.push({
+          userId:   user.id,
+          status:   'success',
+          topic:    result.topic,
+          title:    result.title,
+          postUrl:  result.postUrl,
+          imageUrl: result.imageUrl,
+          linkedin: linkedinResult
+        });
+      } catch (err) {
+        results.push({ userId: user.id, status: 'error', error: err.message });
+      }
+    }
+
     return new Response(JSON.stringify({
-      status: 'success',
-      topic,
-      title,
-      postUrl: wpPost.link,
-      postId: wpPost.id,
+      status:    'done',
+      checked:   allUsers.length,
+      published: results.filter(r => r.status === 'success').length,
+      results,
+      timestamp: now.toISOString()
+    }), { status: 200, headers: CORS });
+  }
+
+  // ── Manual trigger (POST — from browser dashboard) ──────────────
+  if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
+
+  try {
+    const body = await req.json();
+    const { wpUrl, wpPass, brand, keywords, manualTrigger, bookingUrl, tone,
+            linkedinAccessToken, linkedinAuthorId } = body;
+
+    if (!wpUrl && !manualTrigger) {
+      return new Response(JSON.stringify({
+        status: 'cron_ping',
+        message: 'No wpUrl provided. Cron now reads settings from Clerk — ensure autopilot is saved via /api/save-autopilot.',
+        timestamp: new Date().toISOString()
+      }), { status: 200, headers: CORS });
+    }
+
+    const result = await generateAndPublish(
+      wpUrl,
+      wpPass,
+      brand,
+      keywords || [],
+      tone || 'authoritative',
+      bookingUrl || ''
+    );
+
+    // Attempt LinkedIn if credentials were passed
+    let linkedinResult = null;
+    if (linkedinAccessToken && linkedinAuthorId && result.postUrl) {
+      try {
+        linkedinResult = await postToLinkedInAutopilot(result.title, result.postUrl, linkedinAccessToken, linkedinAuthorId);
+      } catch (liErr) {
+        linkedinResult = { error: liErr.message };
+      }
+    }
+
+    return new Response(JSON.stringify({
+      status:   'success',
+      ...result,
+      linkedin: linkedinResult,
       timestamp: new Date().toISOString()
     }), { status: 200, headers: CORS });
 
-  } catch(err) {
+  } catch (err) {
     return new Response(JSON.stringify({
-      status: 'error',
-      error: err.message,
+      status:    'error',
+      error:     err.message,
       timestamp: new Date().toISOString()
     }), { status: 500, headers: CORS });
   }
+}
+
+// ── Frequency check ──────────────────────────────────────────────
+function shouldPostToday(frequency, lastRun, now) {
+  const dayOfWeek  = now.getUTCDay();  // 0=Sun,1=Mon,...,6=Sat
+  const dateOfMonth = now.getUTCDate();
+
+  if (lastRun) {
+    const last = new Date(lastRun);
+    const hoursSince = (now - last) / 3600000;
+    if (hoursSince < 20) return false; // avoid double-posting on same day
+  }
+
+  if (frequency === 'daily')    return true;
+  if (frequency === '3x_week')  return [1, 3, 5].includes(dayOfWeek); // Mon, Wed, Fri
+  if (frequency === 'weekly')   return dayOfWeek === 1; // Monday
+  if (frequency === 'monthly')  return dateOfMonth === 1;
+
+  if (frequency === 'biweekly') {
+    if (dayOfWeek !== 1) return false;
+    if (!lastRun) return true;
+    const daysSince = (now - new Date(lastRun)) / 86400000;
+    return daysSince >= 14;
+  }
+
+  if (frequency?.startsWith('custom_')) {
+    const parts = frequency.split('_');
+    const n     = parseInt(parts[1]) || 1;
+    const period = parts[2] || 'week';
+    if (!lastRun) return true;
+    const daysSince = (now - new Date(lastRun)) / 86400000;
+    if (period === 'day')   return daysSince >= n;
+    if (period === 'week')  return daysSince >= n * 7;
+    if (period === 'month') return daysSince >= n * 30;
+  }
+
+  return false;
 }
