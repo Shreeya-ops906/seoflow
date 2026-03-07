@@ -171,6 +171,15 @@ CONTENT:
 
     if (!contentHtml) throw new Error('AI returned empty content.');
 
+    // Step 2b: Prepend hero image directly into post HTML (always visible, no WP config required)
+    if (img?.url) {
+      const altText = title.replace(/"/g, '&quot;');
+      const creditHtml = img.credit
+        ? `<figcaption style="font-size:12px;color:#888;margin-top:4px">Photo: ${img.credit}</figcaption>`
+        : '';
+      contentHtml = `<figure style="margin:0 0 2em 0"><img src="${img.url}" alt="${altText}" style="width:100%;height:auto;border-radius:6px;display:block">${creditHtml}</figure>\n${contentHtml}`;
+    }
+
     // Step 3: Optionally inject internal links
     if (bookingUrl) {
       const phrases = ['book a','book your','get in touch','contact us','speak to','free consultation','get started','enquire'];
