@@ -234,7 +234,7 @@ CONTENT:
       throw new Error(`${errMsg} (HTTP ${wpRes.status})`);
     }
 
-    return { topic, title, postUrl: wpPost.link, postId: wpPost.id, imageUrl: img?.url || null };
+    return { topic, title, postUrl: wpPost.link, postId: wpPost.id, imageUrl: img?.url || null, imgDebug: wpPost.img_debug || null };
   };
 
   // ── Cron handler (GET — called by Vercel cron at 0 8 * * *) ────
