@@ -2363,7 +2363,7 @@ input:focus, textarea:focus, select:focus {
             <button class="btn btn-ghost" style="font-size:11px;width:100%;justify-content:center" onclick="document.getElementById('wp-snippet-panel').style.display=document.getElementById('wp-snippet-panel').style.display==='none'?'':'none'">View / update WordPress snippet ↓</button>
             <div id="wp-snippet-panel" style="display:none;margin-top:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--ink3)">
               <div style="font-weight:700;color:#92400e;margin-bottom:4px">Replace your existing CruiseSEO snippet with this — keep your same API key</div>
-              <div style="font-size:11px;color:var(--ink4);margin-bottom:8px">Only 2 lines added to the publish route. Your connection and API key stay the same.</div>
+              <div style="font-size:11px;color:var(--ink4);margin-bottom:8px">Replace the image line with the new <code>$b64</code> block. Your API key and connection stay the same.</div>
               <button class="btn btn-ghost" style="font-size:11px;margin-bottom:8px" onclick="navigator.clipboard.writeText(document.getElementById('wp-snippet-code').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy snippet',2000)">Copy snippet</button>
               <pre id="wp-snippet-code" style="background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:6px;font-size:10px;overflow-x:auto;margin:0;white-space:pre-wrap;user-select:all">// ← Keep your existing API key here (no spaces):
 define('CSK_KEY', 'YOUR_EXISTING_KEY');
@@ -2375,8 +2375,8 @@ add_action('rest_api_init', function() {
   register_rest_route('csk/v1','/publish',['methods'=>['GET','POST'],'permission_callback'=>'csk_auth','callback'=>function($r){
     $id=wp_insert_post(['post_title'=>sanitize_text_field($r->get_param('title')),'post_content'=>wp_kses_post($r->get_param('content')),'post_excerpt'=>sanitize_text_field($r->get_param('excerpt')?:''),'post_status'=>'publish','post_type'=>'post']);
     if(is_wp_error($id)) return new WP_REST_Response(['error'=>$id->get_error_message()],500);
-    $img=esc_url_raw($r->get_param('image_url')?:'');
-    if($img){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$a=media_sideload_image($img,$id,sanitize_text_field($r->get_param('title')),'id');if(!is_wp_error($a))set_post_thumbnail($id,$a);}
+    $b64=$r->get_param('image_b64')?:'';
+    if($b64){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$ext=strpos($r->get_param('image_type')?:'','png')!==false?'png':'jpg';$tmp=wp_tempnam("hero.$ext");if($tmp&&file_put_contents($tmp,base64_decode($b64))){$att=media_handle_sideload(['name'=>"hero.$ext",'tmp_name'=>$tmp],$id,sanitize_text_field($r->get_param('title')));@unlink($tmp);if(!is_wp_error($att))set_post_thumbnail($id,$att);}}
     return ['ok'=>true,'id'=>$id,'link'=>get_permalink($id),'title'=>get_the_title($id)];
   }]);
   register_rest_route('csk/v1','/posts',['methods'=>'GET','permission_callback'=>'csk_auth','callback'=>function(){
@@ -2403,8 +2403,8 @@ add_action('rest_api_init', function() {
   register_rest_route('csk/v1','/publish',['methods'=>['GET','POST'],'permission_callback'=>'csk_auth','callback'=>function($r){
     $id=wp_insert_post(['post_title'=>sanitize_text_field($r->get_param('title')),'post_content'=>wp_kses_post($r->get_param('content')),'post_excerpt'=>sanitize_text_field($r->get_param('excerpt')?:''),'post_status'=>'publish','post_type'=>'post']);
     if(is_wp_error($id)) return new WP_REST_Response(['error'=>$id->get_error_message()],500);
-    $img=esc_url_raw($r->get_param('image_url')?:'');
-    if($img){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$a=media_sideload_image($img,$id,sanitize_text_field($r->get_param('title')),'id');if(!is_wp_error($a))set_post_thumbnail($id,$a);}
+    $b64=$r->get_param('image_b64')?:'';
+    if($b64){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$ext=strpos($r->get_param('image_type')?:'','png')!==false?'png':'jpg';$tmp=wp_tempnam("hero.$ext");if($tmp&&file_put_contents($tmp,base64_decode($b64))){$att=media_handle_sideload(['name'=>"hero.$ext",'tmp_name'=>$tmp],$id,sanitize_text_field($r->get_param('title')));@unlink($tmp);if(!is_wp_error($att))set_post_thumbnail($id,$att);}}
     return ['ok'=>true,'id'=>$id,'link'=>get_permalink($id),'title'=>get_the_title($id)];
   }]);
   register_rest_route('csk/v1','/posts',['methods'=>'GET','permission_callback'=>'csk_auth','callback'=>function(){

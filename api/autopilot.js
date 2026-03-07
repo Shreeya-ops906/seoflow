@@ -124,14 +124,11 @@ Example response: "How to prepare for a maths GCSE exam"${avoidSection}`, 150
       // fall back to first keyword
     }
 
-    // Step 1b: Fetch a relevant image using the core business keyword (not the topic sentence)
-    // e.g. keywords[0] = "plumber London" gives much better Pexels results than
-    // "How to choose the right plumber for your bathroom renovation"
+    // Step 1b: Fetch image URL + generate blog post in parallel (saves ~2s)
     const imageQuery = (keywords || []).filter(Boolean)[0] || topic.split(/\s+/).slice(0, 3).join(' ');
-    const img = await fetchImage(imageQuery);
-
-    // Step 2: Generate the blog post
-    const postText = await callAnthropic(
+    const [img, postText] = await Promise.all([
+      fetchImage(imageQuery),
+      callAnthropic(
       `You are an expert SEO blog writer. Write a comprehensive, SEO-optimised blog post in UK English.
 
 Topic: "${topic}"
@@ -155,7 +152,8 @@ TITLE: [the post title]
 META: [the meta description]
 CONTENT:
 [full post as HTML using only <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags]`, 6000
-    );
+      )
+    ]);
 
     const titleMatch = postText.match(/TITLE:\s*(.+)/);
     const metaMatch  = postText.match(/META:\s*(.+)/);
@@ -171,11 +169,25 @@ CONTENT:
 
     if (!contentHtml) throw new Error('AI returned empty content.');
 
-    // Step 2b: Prepend hero image directly into post HTML (always visible, no WP config required)
-    // Use <p><img> not <figure> — older WordPress wp_kses_post may strip <figure> children
+    // Step 2b: Download image bytes in Edge Function (reliable internet) and encode as base64.
+    // PHP receives raw bytes and saves locally — no server-side URL download required,
+    // which bypasses firewall/allow_url_fopen issues that break media_sideload_image.
+    let imgB64 = '', imgMime = 'image/jpeg';
     if (img?.url) {
-      const altText = title.replace(/"/g, '&quot;');
-      contentHtml = `<p><img src="${img.url}" alt="${altText}" width="1200" height="675" style="width:100%;height:auto;display:block;border-radius:6px;margin-bottom:1.5em" /></p>\n${contentHtml}`;
+      try {
+        const ir = await fetch(img.url);
+        if (ir.ok) {
+          const buf = await ir.arrayBuffer();
+          if (buf.byteLength <= 700000) { // skip if >700KB to keep payload manageable
+            imgMime = ir.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
+            const bytes = new Uint8Array(buf);
+            let bin = '';
+            for (let i = 0; i < bytes.byteLength; i += 8192)
+              bin += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.byteLength)));
+            imgB64 = btoa(bin);
+          }
+        }
+      } catch (_) { /* silent — post still publishes without featured image */ }
     }
 
     // Step 3: Optionally inject internal links
@@ -203,7 +215,9 @@ CONTENT:
           content: contentHtml,
           status: 'publish',
           excerpt,
-          image_url: img?.url || ''   // CSK snippet v2 sets this as featured image
+          image_b64:  imgB64,           // raw image bytes (base64) — PHP saves without URL download
+          image_type: imgMime,          // e.g. "image/jpeg"
+          image_url:  img?.url || ''    // fallback reference
         })
       });
       wpResText = await wpRes.text();
