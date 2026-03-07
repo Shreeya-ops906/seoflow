@@ -32,23 +32,26 @@ export default async function handler(req) {
     return d.content?.map(c => c.text || '').join('') || '';
   };
 
-  // ── Shared: fetch a relevant image for the topic ────────────────
-  const fetchImage = async (topic) => {
+  // ── Shared: fetch a relevant image using the core keyword ───────
+  // Uses keywords[0] (e.g. "plumber" / "solicitor") not the topic sentence,
+  // so Pexels returns on-brand professional photos.
+  const fetchImage = async (imageQuery) => {
+    const safeQuery = (imageQuery || 'business professional').split(/\s+/).slice(0, 4).join(' ');
     if (!process.env.PEXELS_API_KEY) {
-      return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+      return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
     }
     try {
       const r = await fetch(
-        `https://api.pexels.com/v1/search?query=${encodeURIComponent(topic)}&per_page=1&orientation=landscape`,
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=1&orientation=landscape`,
         { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
       );
-      if (!r.ok) return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+      if (!r.ok) return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
       const d = await r.json();
       const p = d.photos?.[0];
-      if (!p) return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
-      return { url: p.src?.large || p.src?.medium, credit: p.photographer || null };
+      if (!p?.src) return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
+      return { url: p.src.large || p.src.large2x || p.src.medium, credit: p.photographer || null };
     } catch (_) {
-      return { url: `https://picsum.photos/seed/${encodeURIComponent(topic)}/1200/675`, credit: null };
+      return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
     }
   };
 
@@ -96,29 +99,38 @@ Respond with ONLY the post text, nothing else.`, 200
   };
 
   // ── Shared: generate blog post and publish to WordPress ─────────
-  const generateAndPublish = async (wpUrl, wpPass, brand, keywords, tone, bookingUrl) => {
-    // Step 1: Pick topic
+  // lastTopics: array of recent post titles to avoid repeating
+  const generateAndPublish = async (wpUrl, wpPass, brand, keywords, tone, bookingUrl, lastTopics = []) => {
     const keywordList = (keywords || []).filter(Boolean).join(', ') || brand || 'general business';
     let topic = keywords?.[0] || 'industry tips';
+
+    // Step 1: Pick a topic — explicitly avoid recently published ones
+    const avoidSection = lastTopics.length > 0
+      ? `\n\nIMPORTANT — these topics have been covered recently. Pick something genuinely different:\n${lastTopics.slice(0, 15).map(t => '- ' + t).join('\n')}`
+      : '';
 
     try {
       const trendText = await callAnthropic(
         `You are an SEO content strategist. Pick the single best topic to write a blog post about for a business in this area: ${keywordList}
 
 Consider: what questions do their target customers search for? What would rank well for a small site?
+Choose a specific angle — avoid generic titles.
 
-Respond with ONLY the topic/keyword phrase — nothing else. No explanation. Just the topic itself.
-Example response: "How to prepare for a maths GCSE exam"`, 150
+Respond with ONLY the topic/keyword phrase — nothing else. No explanation.
+Example response: "How to prepare for a maths GCSE exam"${avoidSection}`, 150
       );
       if (trendText.trim()) topic = trendText.trim().replace(/^[\"']|[\"']$/g, '');
     } catch (_) {
       // fall back to first keyword
     }
 
-    // Step 1b: Fetch a hero image for this topic
-    const img = await fetchImage(topic);
+    // Step 1b: Fetch a relevant image using the core business keyword (not the topic sentence)
+    // e.g. keywords[0] = "plumber London" gives much better Pexels results than
+    // "How to choose the right plumber for your bathroom renovation"
+    const imageQuery = (keywords || []).filter(Boolean)[0] || topic.split(/\s+/).slice(0, 3).join(' ');
+    const img = await fetchImage(imageQuery);
 
-    // Step 2: Generate blog post
+    // Step 2: Generate the blog post
     const postText = await callAnthropic(
       `You are an expert SEO blog writer. Write a comprehensive, SEO-optimised blog post in UK English.
 
@@ -159,14 +171,6 @@ CONTENT:
 
     if (!contentHtml) throw new Error('AI returned empty content.');
 
-    // Step 2b: Prepend hero image to content
-    if (img?.url) {
-      const creditHtml = img.credit
-        ? `<figcaption style="font-size:12px;color:#888;margin-top:6px">Photo by ${img.credit} on Pexels</figcaption>`
-        : '';
-      contentHtml = `<figure style="margin:0 0 28px"><img src="${img.url}" alt="${title}" style="width:100%;border-radius:8px;height:auto" loading="lazy"/>${creditHtml}</figure>\n` + contentHtml;
-    }
-
     // Step 3: Optionally inject internal links
     if (bookingUrl) {
       const phrases = ['book a','book your','get in touch','contact us','speak to','free consultation','get started','enquire'];
@@ -180,12 +184,20 @@ CONTENT:
     }
 
     // Step 4: Publish to WordPress via CSK endpoint
+    // image_url is passed separately so the PHP snippet can set it as the WordPress
+    // featured image via media_sideload_image (requires updated CSK snippet v2).
     let wpRes, wpResText;
     try {
       wpRes = await fetch(`${wpUrl}/wp-json/csk/v1/publish?_k=${encodeURIComponent(wpPass)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content: contentHtml, status: 'publish', excerpt })
+        body: JSON.stringify({
+          title,
+          content: contentHtml,
+          status: 'publish',
+          excerpt,
+          image_url: img?.url || ''   // CSK snippet v2 sets this as featured image
+        })
       });
       wpResText = await wpRes.text();
     } catch (wpFetchErr) {
@@ -247,7 +259,8 @@ CONTENT:
           ap.brand || '',
           keywords,
           ap.tone || 'authoritative',
-          ap.bookingUrl || ''
+          ap.bookingUrl || '',
+          ap.lastTopics || []
         );
 
         // Attempt LinkedIn if connected
@@ -260,7 +273,8 @@ CONTENT:
           }
         }
 
-        // Update lastRun in Clerk (preserve all other autopilot fields)
+        // Update Clerk: lastRun + prepend to lastTopics (keep 20 max)
+        const updatedLastTopics = [result.title, ...(ap.lastTopics || [])].slice(0, 20);
         await fetch(`https://api.clerk.com/v1/users/${user.id}`, {
           method: 'PATCH',
           headers: {
@@ -268,7 +282,9 @@ CONTENT:
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            private_metadata: { autopilot: { ...ap, lastRun: now.toISOString() } }
+            private_metadata: {
+              autopilot: { ...ap, lastRun: now.toISOString(), lastTopics: updatedLastTopics }
+            }
           })
         });
 
@@ -301,7 +317,7 @@ CONTENT:
   try {
     const body = await req.json();
     const { wpUrl, wpPass, brand, keywords, manualTrigger, bookingUrl, tone,
-            linkedinAccessToken, linkedinAuthorId } = body;
+            linkedinAccessToken, linkedinAuthorId, recentTopics } = body;
 
     if (!wpUrl && !manualTrigger) {
       return new Response(JSON.stringify({
@@ -317,7 +333,8 @@ CONTENT:
       brand,
       keywords || [],
       tone || 'authoritative',
-      bookingUrl || ''
+      bookingUrl || '',
+      recentTopics || []
     );
 
     // Attempt LinkedIn if credentials were passed
@@ -331,9 +348,9 @@ CONTENT:
     }
 
     return new Response(JSON.stringify({
-      status:   'success',
+      status:    'success',
       ...result,
-      linkedin: linkedinResult,
+      linkedin:  linkedinResult,
       timestamp: new Date().toISOString()
     }), { status: 200, headers: CORS });
 
@@ -348,30 +365,28 @@ CONTENT:
 
 // ── Frequency check ──────────────────────────────────────────────
 function shouldPostToday(frequency, lastRun, now) {
-  const dayOfWeek  = now.getUTCDay();  // 0=Sun,1=Mon,...,6=Sat
+  const dayOfWeek   = now.getUTCDay();
   const dateOfMonth = now.getUTCDate();
 
   if (lastRun) {
-    const last = new Date(lastRun);
-    const hoursSince = (now - last) / 3600000;
-    if (hoursSince < 20) return false; // avoid double-posting on same day
+    const hoursSince = (now - new Date(lastRun)) / 3600000;
+    if (hoursSince < 20) return false;
   }
 
   if (frequency === 'daily')    return true;
-  if (frequency === '3x_week')  return [1, 3, 5].includes(dayOfWeek); // Mon, Wed, Fri
-  if (frequency === 'weekly')   return dayOfWeek === 1; // Monday
+  if (frequency === '3x_week')  return [1, 3, 5].includes(dayOfWeek);
+  if (frequency === 'weekly')   return dayOfWeek === 1;
   if (frequency === 'monthly')  return dateOfMonth === 1;
 
   if (frequency === 'biweekly') {
     if (dayOfWeek !== 1) return false;
     if (!lastRun) return true;
-    const daysSince = (now - new Date(lastRun)) / 86400000;
-    return daysSince >= 14;
+    return (now - new Date(lastRun)) / 86400000 >= 14;
   }
 
   if (frequency?.startsWith('custom_')) {
-    const parts = frequency.split('_');
-    const n     = parseInt(parts[1]) || 1;
+    const parts  = frequency.split('_');
+    const n      = parseInt(parts[1]) || 1;
     const period = parts[2] || 'week';
     if (!lastRun) return true;
     const daysSince = (now - new Date(lastRun)) / 86400000;

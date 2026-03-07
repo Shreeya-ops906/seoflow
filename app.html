@@ -2382,6 +2382,8 @@ add_action('rest_api_init', function() {
     register_rest_route('csk/v1','/publish',array('methods'=>array('GET','POST'),'permission_callback'=>'csk_auth','callback'=>function($r){
         $id=wp_insert_post(array('post_title'=>sanitize_text_field($r->get_param('title')),'post_content'=>wp_kses_post($r->get_param('content')),'post_excerpt'=>sanitize_text_field($r->get_param('excerpt')?:''),'post_status'=>'publish','post_type'=>'post'));
         if(is_wp_error($id)) return new WP_REST_Response(array('error'=>$id->get_error_message()),500);
+        $img=esc_url_raw($r->get_param('image_url')?:'');
+        if($img){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$a=media_sideload_image($img,$id,sanitize_text_field($r->get_param('title')),'id');if(!is_wp_error($a))set_post_thumbnail($id,$a);}
         return array('ok'=>true,'id'=>$id,'link'=>get_permalink($id));
     }));
     register_rest_route('csk/v1','/posts',array('methods'=>'GET','permission_callback'=>'csk_auth','callback'=>function(){
@@ -4052,22 +4054,27 @@ async function triggerNow() {
   saveApSettings();
   const seeds = apSettings.seeds || (brand.keywords || []).join(', ') || brand.industry || 'general business tips';
   const li = JSON.parse(localStorage.getItem('cruise_social') || '{}').linkedin;
+  // Pass recent topic titles so the AI avoids repeating them
+  const recentTopics = JSON.parse(localStorage.getItem('cruise_ap_log') || '[]')
+    .filter(function(l){ return l.status === 'ok' && l.title; })
+    .map(function(l){ return l.title; })
+    .slice(0, 15);
 
   try {
     const res = await fetch('/api/autopilot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        manualTrigger:      true,
-        wpUrl:              wp.url,
-        wpUser:             wp.username,
-        wpPass:             atob(wp.password),
-        brand:              brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
-        frequency:          apFreq,
-        keywords:           seeds.split(',').map(s => s.trim()).filter(Boolean),
-        tone:               apTone,
-        bookingUrl:         brand.bookingUrl || brand.booking_url || '',
-        existingPosts:      getAllPublishedPosts().slice(0,10).map(p=>({title:p.title,url:p.url})),
+        manualTrigger:       true,
+        wpUrl:               wp.url,
+        wpUser:              wp.username,
+        wpPass:              atob(wp.password),
+        brand:               brand.name + '. ' + (brand.industry || '') + '. ' + (brand.voice || ''),
+        frequency:           apFreq,
+        keywords:            seeds.split(',').map(s => s.trim()).filter(Boolean),
+        tone:                apTone,
+        bookingUrl:          brand.bookingUrl || brand.booking_url || '',
+        recentTopics:        recentTopics,
         linkedinAccessToken: li?.accessToken || null,
         linkedinAuthorId:    li?.authorId    || null
       })
