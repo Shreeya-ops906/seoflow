@@ -2358,6 +2358,44 @@ input:focus, textarea:focus, select:focus {
             </div>
             <div id="wp-publish-result" style="display:none;margin-top:12px;padding:12px 14px;border-radius:9px;font-size:13px;font-weight:500"></div>
           </div>
+          <!-- View/update snippet -->
+          <div style="margin-top:14px">
+            <button class="btn btn-ghost" style="font-size:11px;width:100%;justify-content:center" onclick="document.getElementById('wp-snippet-panel').style.display=document.getElementById('wp-snippet-panel').style.display==='none'?'':'none'">View / update WordPress snippet ↓</button>
+            <div id="wp-snippet-panel" style="display:none;margin-top:10px;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;font-size:12px;color:var(--ink3)">
+              <div style="font-weight:700;color:#92400e;margin-bottom:6px">Updated snippet — paste this into Code Snippets to replace your existing CruiseSEO snippet</div>
+              <button class="btn btn-ghost" style="font-size:11px;margin-bottom:8px" onclick="navigator.clipboard.writeText(document.getElementById('wp-snippet-code').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy snippet',2000)">Copy snippet</button>
+              <pre id="wp-snippet-code" style="background:#1e1e1e;color:#d4d4d4;padding:10px;border-radius:6px;font-size:10px;overflow-x:auto;margin:0;white-space:pre-wrap;user-select:all">add_action('init', function() {
+    if (!get_option('csk_api_key')) update_option('csk_api_key', 'csk_' . wp_generate_password(32, false));
+    $o = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+    if (strpos($o, 'cruiseseo.site') !== false) {
+        header('Access-Control-Allow-Origin: ' . $o);
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { status_header(200); exit; }
+    }
+}, 1);
+function csk_auth($r) { return !empty($r->get_param('_k')) && $r->get_param('_k') === get_option('csk_api_key'); }
+add_action('rest_api_init', function() {
+    register_rest_route('csk/v1','/test',array('methods'=>'GET','permission_callback'=>'csk_auth','callback'=>function(){ return array('ok'=>true,'name'=>get_bloginfo('name')); }));
+    register_rest_route('csk/v1','/publish',array('methods'=>array('GET','POST'),'permission_callback'=>'csk_auth','callback'=>function($r){
+        $id=wp_insert_post(array('post_title'=>sanitize_text_field($r->get_param('title')),'post_content'=>wp_kses_post($r->get_param('content')),'post_excerpt'=>sanitize_text_field($r->get_param('excerpt')?:''),'post_status'=>'publish','post_type'=>'post'));
+        if(is_wp_error($id)) return new WP_REST_Response(array('error'=>$id->get_error_message()),500);
+        $img=esc_url_raw($r->get_param('image_url')?:'');
+        if($img){require_once(ABSPATH.'wp-admin/includes/media.php');require_once(ABSPATH.'wp-admin/includes/file.php');require_once(ABSPATH.'wp-admin/includes/image.php');$a=media_sideload_image($img,$id,sanitize_text_field($r->get_param('title')),'id');if(!is_wp_error($a))set_post_thumbnail($id,$a);}
+        return array('ok'=>true,'id'=>$id,'link'=>get_permalink($id));
+    }));
+    register_rest_route('csk/v1','/posts',array('methods'=>'GET','permission_callback'=>'csk_auth','callback'=>function(){
+        return array_map(function($p){ return array('id'=>$p->ID,'title'=>array('rendered'=>$p->post_title),'link'=>get_permalink($p->ID),'excerpt'=>array('rendered'=>$p->post_excerpt),'featured_media'=>(int)get_post_thumbnail_id($p->ID)); },get_posts(array('numberposts'=>20,'post_status'=>'publish')));
+    }));
+});
+add_action('admin_menu', function() {
+    add_options_page('CruiseSEO','CruiseSEO Connect','manage_options','csk-key',function(){
+        $k=get_option('csk_api_key','');
+        echo '&lt;div class="wrap"&gt;&lt;h1&gt;CruiseSEO Connect&lt;/h1&gt;&lt;p&gt;Your API Key:&lt;/p&gt;&lt;input type="text" value="'.esc_attr($k).'" style="width:380px;font-family:monospace;padding:8px" readonly onclick="this.select()"&gt;&lt;p&gt;&lt;button class="button" onclick="navigator.clipboard.writeText(this.previousElementSibling.value);this.textContent=\'Copied!\'"&gt;Copy Key&lt;/button&gt;&lt;/p&gt;&lt;/div&gt;';
+    });
+});</pre>
+            </div>
+          </div>
         </div>
 
         <!-- Connect form -->
