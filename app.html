@@ -3796,6 +3796,15 @@ function onEditorChange() {
   generatedPostData.wordCount = wordCount;
 }
 
+async function fetchImageB64(topic) {
+  try {
+    const r = await fetch('/api/image-search?q=' + encodeURIComponent(topic) + '&count=1&download=1');
+    if (!r.ok) return null;
+    const d = await r.json();
+    return d.b64 ? { b64: d.b64, mime: d.mime || 'image/jpeg' } : null;
+  } catch(_) { return null; }
+}
+
 async function publishToWP() {
   if (!generatedPostData) return;
 
@@ -3814,6 +3823,7 @@ async function publishToWP() {
   resultEl.style.display = 'none';
 
   try {
+    const imgData = await fetchImageB64(generatedPostData.keyword || generatedPostData.title).catch(() => null);
     const post = await wpDirect({
       action: 'publish',
       url: wp.url,
@@ -3822,7 +3832,9 @@ async function publishToWP() {
       title: generatedPostData.title,
       content: generatedPostData.content_html,
       status: 'publish',
-      excerpt: generatedPostData.meta_description || ''
+      excerpt: generatedPostData.meta_description || '',
+      image_b64: imgData?.b64 || '',
+      image_type: imgData?.mime || ''
     });
 
     resultEl.style.display = 'block';
@@ -4975,6 +4987,7 @@ async function wpDirect(params) {
     // URLSearchParams = form-encoded, no CORS preflight needed
     const body = new URLSearchParams({ _k:apiKey, title:title||'', content:(content||'')+'\n'+schema, excerpt:excerpt||'', status:status||'publish' });
     if (date) body.set('date', date);
+    if (params.image_b64) { body.set('image_b64', params.image_b64); body.set('image_type', params.image_type || 'image/jpeg'); }
     let r, d;
     try { r = await fetch(base + '/publish', { method:'POST', body }); d = await r.json(); }
     catch(e) { throw new Error('Publish request failed — check URL and snippet.'); }
@@ -5861,6 +5874,7 @@ ${cta ? '- CTA suggestion: ' + cta : ''}
 Return ONLY JSON: { "title": "...", "meta_description": "...", "content_html": "..." }`;
     const raw = await callAI(prompt, 3000);
     _clusterGenData = JSON.parse(raw);
+    _clusterGenData.keyword = keyword;
     if (preview) {
       preview.innerHTML = `<h3 style="font-size:16px;font-weight:700;margin-bottom:12px">${_clusterGenData.title}</h3>` + _clusterGenData.content_html;
     }
@@ -5889,7 +5903,8 @@ async function publishClusterPostNow() {
   const resultEl = document.getElementById('cluster-gen-result');
   if (resultEl) resultEl.textContent = 'Publishing...';
   try {
-    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'publish', excerpt: _clusterGenData.meta_description });
+    const imgData = await fetchImageB64(_clusterGenData.keyword || _clusterGenData.title).catch(() => null);
+    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'publish', excerpt: _clusterGenData.meta_description, image_b64: imgData?.b64 || '', image_type: imgData?.mime || '' });
     if (resultEl) resultEl.innerHTML = `<span style="color:var(--sage)">✓ Published! <a href="${d.url}" target="_blank" style="color:var(--amber)">View post ↗</a></span>`;
     const log = JSON.parse(localStorage.getItem('cruise_wp_log') || '[]');
     log.unshift({ title: _clusterGenData.title, url: d.url, status: 'ok', ts: new Date().toISOString(), topic: 'cluster' });
@@ -5910,7 +5925,8 @@ async function scheduleClusterPost() {
   const resultEl = document.getElementById('cluster-gen-result');
   if (resultEl) resultEl.textContent = 'Scheduling...';
   try {
-    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'future', date: schedDate, excerpt: _clusterGenData.meta_description });
+    const imgData = await fetchImageB64(_clusterGenData.keyword || _clusterGenData.title).catch(() => null);
+    const d = await wpDirect({ action: 'publish', url: wp.url, username: wp.username, password: atob(wp.password), title: _clusterGenData.title, content: _clusterGenData.content_html, status: 'future', date: schedDate, excerpt: _clusterGenData.meta_description, image_b64: imgData?.b64 || '', image_type: imgData?.mime || '' });
     if (resultEl) resultEl.innerHTML = `<span style="color:var(--sage)">✓ Scheduled for ${new Date(dtVal).toLocaleString('en-GB', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</span>`;
     toast('Post scheduled!', true);
   } catch(e) {

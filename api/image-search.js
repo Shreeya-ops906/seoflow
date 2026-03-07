@@ -20,10 +20,43 @@ export default async function handler(req) {
   }
 
   const url = new URL(req.url);
-  const q     = url.searchParams.get('q') || 'business';
-  const count = Math.min(parseInt(url.searchParams.get('count') || '6', 10), 12);
+  const q        = url.searchParams.get('q') || 'business';
+  const count    = Math.min(parseInt(url.searchParams.get('count') || '6', 10), 12);
+  const download = url.searchParams.get('download') === '1';
 
   const CORS = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
+
+  // Download mode: fetch first image and return as base64 for WordPress featured image
+  if (download) {
+    let imgUrl = null;
+    if (process.env.PEXELS_API_KEY) {
+      try {
+        const sr = await fetch(
+          `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=1&orientation=landscape`,
+          { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
+        );
+        if (sr.ok) {
+          const sd = await sr.json();
+          imgUrl = sd.photos?.[0]?.src?.large || null;
+        }
+      } catch (_) {}
+    }
+    if (!imgUrl) imgUrl = `https://picsum.photos/seed/${encodeURIComponent(q)}/1200/675`;
+    try {
+      const ir = await fetch(imgUrl);
+      if (!ir.ok) return new Response(JSON.stringify({ error: 'fetch_failed' }), { headers: CORS });
+      const buf = await ir.arrayBuffer();
+      if (buf.byteLength > 700000) return new Response(JSON.stringify({ error: 'too_large' }), { headers: CORS });
+      const mime = ir.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
+      const bytes = new Uint8Array(buf);
+      let bin = '';
+      for (let i = 0; i < bytes.byteLength; i += 8192)
+        bin += String.fromCharCode(...bytes.subarray(i, Math.min(i + 8192, bytes.byteLength)));
+      return new Response(JSON.stringify({ b64: btoa(bin), mime }), { headers: CORS });
+    } catch (e) {
+      return new Response(JSON.stringify({ error: e.message }), { headers: CORS });
+    }
+  }
 
   // Fallback: picsum if no API key configured yet
   if (!process.env.PEXELS_API_KEY) {
