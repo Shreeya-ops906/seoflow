@@ -29,19 +29,24 @@ export default async function handler(req) {
   // Download mode: fetch first image and return as base64 for WordPress featured image
   if (download) {
     let imgUrl = null;
+    const rand = Math.floor(Math.random() * 100);
     if (process.env.PEXELS_API_KEY) {
       try {
         const sr = await fetch(
-          `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=1&orientation=landscape`,
+          `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=5&orientation=landscape`,
           { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
         );
         if (sr.ok) {
           const sd = await sr.json();
-          imgUrl = sd.photos?.[0]?.src?.large || null;
+          const photos = sd.photos || [];
+          if (photos.length) {
+            const p = photos[Math.floor(Math.random() * photos.length)];
+            imgUrl = p?.src?.large || null;
+          }
         }
       } catch (_) {}
     }
-    if (!imgUrl) imgUrl = `https://picsum.photos/seed/${encodeURIComponent(q)}/1200/675`;
+    if (!imgUrl) imgUrl = `https://picsum.photos/seed/${encodeURIComponent(q)}${rand}/1200/675`;
     try {
       const ir = await fetch(imgUrl);
       if (!ir.ok) return new Response(JSON.stringify({ error: 'fetch_failed' }), { headers: CORS });

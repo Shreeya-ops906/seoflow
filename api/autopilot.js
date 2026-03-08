@@ -37,21 +37,23 @@ export default async function handler(req) {
   // so Pexels returns on-brand professional photos.
   const fetchImage = async (imageQuery) => {
     const safeQuery = (imageQuery || 'business professional').split(/\s+/).slice(0, 4).join(' ');
-    if (!process.env.PEXELS_API_KEY) {
-      return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
-    }
+    const rand = Math.floor(Math.random() * 100);
+    const picsumFallback = { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}${rand}/1200/675`, credit: null };
+    if (!process.env.PEXELS_API_KEY) return picsumFallback;
     try {
       const r = await fetch(
-        `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=1&orientation=landscape`,
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=5&orientation=landscape`,
         { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
       );
-      if (!r.ok) return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
+      if (!r.ok) return picsumFallback;
       const d = await r.json();
-      const p = d.photos?.[0];
-      if (!p?.src) return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
+      const photos = d.photos || [];
+      if (!photos.length) return picsumFallback;
+      const p = photos[Math.floor(Math.random() * photos.length)];
+      if (!p?.src) return picsumFallback;
       return { url: p.src.large || p.src.large2x || p.src.medium, credit: p.photographer || null };
     } catch (_) {
-      return { url: `https://picsum.photos/seed/${encodeURIComponent(safeQuery)}/1200/675`, credit: null };
+      return picsumFallback;
     }
   };
 
