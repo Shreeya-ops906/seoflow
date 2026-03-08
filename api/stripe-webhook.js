@@ -94,6 +94,11 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
+  if (!process.env.STRIPE_WEBHOOK_SECRET) {
+    console.error('STRIPE_WEBHOOK_SECRET is not configured in Vercel environment variables.');
+    return new Response('Webhook configuration error: missing secret', { status: 500 });
+  }
+
   const rawBody = await req.text();
   const sig     = req.headers.get('stripe-signature');
 
