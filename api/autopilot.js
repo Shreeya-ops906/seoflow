@@ -265,7 +265,7 @@ CONTENT:
     for (const user of allUsers) {
       const ap = user.private_metadata?.autopilot;
       if (!ap?.enabled || !ap?.wpUrl || !ap?.wpPass) continue;
-      if (!shouldPostToday(ap.frequency, ap.lastRun, now)) continue;
+      if (!shouldPostToday(ap.frequency, ap.lastRun, now, ap.selectedDays)) continue;
 
       const keywords = ap.keywords?.length
         ? ap.keywords
@@ -385,22 +385,25 @@ CONTENT:
 }
 
 // ── Frequency check ──────────────────────────────────────────────
-function shouldPostToday(frequency, lastRun, now) {
+// selectedDays: array of day-of-week numbers (0=Sun … 6=Sat) chosen by the user
+function shouldPostToday(frequency, lastRun, now, selectedDays) {
   const dayOfWeek   = now.getUTCDay();
   const dateOfMonth = now.getUTCDate();
+  // User's chosen days (fall back to Mon/Wed/Fri if never saved)
+  const days = (Array.isArray(selectedDays) && selectedDays.length > 0) ? selectedDays : [1, 3, 5];
 
   if (lastRun) {
     const hoursSince = (now - new Date(lastRun)) / 3600000;
     if (hoursSince < 20) return false;
   }
 
-  if (frequency === 'daily')    return true;
-  if (frequency === '3x_week')  return [1, 3, 5].includes(dayOfWeek);
-  if (frequency === 'weekly')   return dayOfWeek === 1;
-  if (frequency === 'monthly')  return dateOfMonth === 1;
+  if (frequency === 'daily')   return true;
+  if (frequency === '3x_week') return days.includes(dayOfWeek);
+  if (frequency === 'weekly')  return days.includes(dayOfWeek);
+  if (frequency === 'monthly') return dateOfMonth === 1;
 
   if (frequency === 'biweekly') {
-    if (dayOfWeek !== 1) return false;
+    if (!days.includes(dayOfWeek)) return false;
     if (!lastRun) return true;
     return (now - new Date(lastRun)) / 86400000 >= 14;
   }
@@ -412,7 +415,7 @@ function shouldPostToday(frequency, lastRun, now) {
     if (!lastRun) return true;
     const daysSince = (now - new Date(lastRun)) / 86400000;
     if (period === 'day')   return daysSince >= n;
-    if (period === 'week')  return daysSince >= n * 7;
+    if (period === 'week')  return days.includes(dayOfWeek) && daysSince >= n * 7;
     if (period === 'month') return daysSince >= n * 30;
   }
 

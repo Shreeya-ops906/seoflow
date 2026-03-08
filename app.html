@@ -3948,6 +3948,7 @@ function persistApToClerk() {
         seeds:         apSettings.seeds || '',
         tone:          apTone || 'authoritative',
         frequency:     apFreq || '3x_week',
+        selectedDays:  apSettings.selectedDays || [],
         bookingUrl:    b.bookingUrl || b.booking_url || '',
         linkedinToken: li?.accessToken ? { accessToken: li.accessToken, authorId: li.authorId } : null
       }
