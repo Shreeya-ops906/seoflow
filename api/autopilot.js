@@ -152,6 +152,7 @@ Format your response EXACTLY like this (do not add any extra text before TITLE:)
 
 TITLE: [the post title]
 META: [the meta description]
+CTA: [3-7 word call-to-action button label for this business, e.g. "Book a Free Consultation" or "Get Your Free Quote Today"]
 CONTENT:
 [full post as HTML using only <h2>, <h3>, <p>, <ul>, <li>, <ol>, <strong> tags]`, 6000
       )
@@ -159,6 +160,7 @@ CONTENT:
 
     const titleMatch = postText.match(/TITLE:\s*(.+)/);
     const metaMatch  = postText.match(/META:\s*(.+)/);
+    const ctaMatch   = postText.match(/CTA:\s*(.+)/);
     const contentIdx = postText.indexOf('\nCONTENT:\n');
 
     if (!titleMatch || contentIdx === -1) {
@@ -167,6 +169,7 @@ CONTENT:
 
     const title      = titleMatch[1].trim();
     const excerpt    = metaMatch ? metaMatch[1].trim() : '';
+    const ctaLabel   = ctaMatch ? ctaMatch[1].trim().replace(/^[\"']|[\"']$/g, '') : 'Get in Touch Today';
     let contentHtml  = postText.slice(contentIdx + '\nCONTENT:\n'.length).trim();
 
     if (!contentHtml) throw new Error('AI returned empty content.');
@@ -203,6 +206,14 @@ CONTENT:
         }
       }
     }
+
+    // Step 3b: Append CTA button block
+    const ctaHref = bookingUrl || '#contact';
+    contentHtml += `\n<div style="background:linear-gradient(135deg,#1a3c5e 0%,#2563eb 100%);border-radius:12px;padding:36px 32px;margin:48px 0 0;text-align:center">` +
+      `<p style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 10px 0">Ready to get started?</p>` +
+      `<p style="color:rgba(255,255,255,.8);font-size:15px;margin:0 0 24px 0">Take the next step and speak to our team today.</p>` +
+      `<a href="${ctaHref}" rel="noopener" style="display:inline-block;background:#ffffff;color:#1a3c5e;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:16px">${ctaLabel} →</a>` +
+      `</div>`;
 
     // Step 4: Publish to WordPress via CSK endpoint
     // image_url is passed separately so the PHP snippet can set it as the WordPress
