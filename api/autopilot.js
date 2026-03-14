@@ -208,14 +208,14 @@ CONTENT:
     }
 
     // Step 3b: Append CTA button block
-    // Uses <table> layout so inline styles survive wp_kses_post (which strips styles on <div>)
-    const ctaHref = bookingUrl || '#contact';
-    contentHtml += `\n<table style="background:linear-gradient(135deg,#1a3c5e 0%,#2563eb 100%);border-radius:12px;width:100%;margin:48px 0 0;border-collapse:collapse" cellpadding="0" cellspacing="0"><tbody><tr>` +
-      `<td style="padding:36px 32px;text-align:center">` +
+    // Wrapped in <!-- wp:html --> so Gutenberg renders it verbatim without wpautop mangling
+    const ctaHref = bookingUrl || wpUrl || '#contact';
+    contentHtml += `\n<!-- wp:html -->\n` +
+      `<div style="background:linear-gradient(135deg,#1a3c5e 0%,#2563eb 100%);border-radius:12px;padding:36px 32px;margin:48px 0 0;text-align:center">` +
       `<p style="font-size:20px;font-weight:700;color:#ffffff;margin:0 0 10px 0">Ready to get started?</p>` +
       `<p style="color:rgba(255,255,255,.8);font-size:15px;margin:0 0 24px 0">Take the next step and speak to our team today.</p>` +
-      `<a href="${ctaHref}" rel="noopener" style="display:inline-block;background:#ffffff;color:#1a3c5e;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:16px">${ctaLabel} &#8594;</a>` +
-      `</td></tr></tbody></table>`;
+      `<a href="${ctaHref}" rel="noopener" style="display:inline-block;background:#ffffff;color:#1a3c5e;text-decoration:none;padding:14px 36px;border-radius:8px;font-weight:700;font-size:16px">${ctaLabel} \u2192</a>` +
+      `</div>\n<!-- /wp:html -->`;
 
     // Step 4: Publish to WordPress via CSK endpoint
     // image_url is passed separately so the PHP snippet can set it as the WordPress
