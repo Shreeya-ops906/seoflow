@@ -42,7 +42,7 @@ export default async function handler(req) {
     if (!process.env.PEXELS_API_KEY) return picsumFallback;
     try {
       const r = await fetch(
-        `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=5&orientation=landscape`,
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(safeQuery)}&per_page=15&orientation=landscape`,
         { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
       );
       if (!r.ok) return picsumFallback;
@@ -399,10 +399,11 @@ function shouldPostToday(frequency, lastRun, now, selectedDays) {
     if (hoursSince < 20) return false;
   }
 
-  if (frequency === 'daily')   return true;
-  if (frequency === '3x_week') return days.includes(dayOfWeek);
-  if (frequency === 'weekly')  return days.includes(dayOfWeek);
-  if (frequency === 'monthly') return dateOfMonth === 1;
+  if (frequency === 'daily')      return true;
+  if (frequency === '3x_week')   return days.includes(dayOfWeek);
+  if (frequency === 'custom_dow') return days.includes(dayOfWeek); // user-picked days, no min gap beyond 20h
+  if (frequency === 'weekly')    return days.includes(dayOfWeek);
+  if (frequency === 'monthly')   return dateOfMonth === 1;
 
   if (frequency === 'biweekly') {
     if (!days.includes(dayOfWeek)) return false;

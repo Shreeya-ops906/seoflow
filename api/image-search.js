@@ -33,7 +33,7 @@ export default async function handler(req) {
     if (process.env.PEXELS_API_KEY) {
       try {
         const sr = await fetch(
-          `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=5&orientation=landscape`,
+          `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=15&orientation=landscape`,
           { headers: { 'Authorization': process.env.PEXELS_API_KEY } }
         );
         if (sr.ok) {
