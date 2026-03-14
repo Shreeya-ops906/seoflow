@@ -67,7 +67,7 @@ add_action('rest_api_init', function() {
             }
             $args = [
                 'post_title'   => sanitize_text_field($p['title']),
-                'post_content' => wp_kses_post($p['content']),
+                'post_content' => wp_slash($p['content']),
                 'post_status'  => sanitize_text_field($p['status'] ?? 'publish'),
                 'post_excerpt' => sanitize_text_field($p['excerpt'] ?? ''),
             ];
@@ -110,7 +110,7 @@ add_action('rest_api_init', function() {
             $p = $req->get_json_params();
             $args = ['ID' => (int)$req['id']];
             if (!empty($p['title']))   $args['post_title']   = sanitize_text_field($p['title']);
-            if (!empty($p['content'])) $args['post_content'] = wp_kses_post($p['content']);
+            if (!empty($p['content'])) $args['post_content'] = wp_slash($p['content']);
             $id = wp_update_post($args, true);
             if (is_wp_error($id)) return new WP_Error('update_failed', $id->get_error_message(), ['status' => 500]);
             return new WP_REST_Response(['ok' => true, 'link' => get_permalink($id)]);
